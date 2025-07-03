@@ -1,4 +1,5 @@
 import asyncio
+import re
 import json
 from collections import defaultdict
 from contextlib import asynccontextmanager
@@ -27,7 +28,7 @@ def clean_items(items, keys_to_keep={"name", "quantity"}):
 
 
 def normalize_name(name):
-    return name.lower().replace(" ", "_")
+    return re.sub(r'\s+', '_', re.sub(r"[^\w\s]", "", name.strip().lower()))
 
 
 def add_item_id(item):
