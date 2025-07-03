@@ -141,32 +141,31 @@ async def alldata(request: Request):
 @app.get("/gear", summary="Lấy dữ liệu Gear Stock", description="Trả về danh sách các Gears hiện có trong stock.")
 @limiter.limit("5/minute")
 async def get_gear(request: Request):
-    return latest_data.get("gear", [])
+    return latest_data.get("gearStock", [])
 
 
 @app.get("/seeds", summary="Lấy dữ liệu Seed Stock", description="Trả về danh sách các Seeds hiện có trong stock.")
 @limiter.limit("5/minute")
 async def get_seeds(request: Request):
-    return latest_data.get("seeds", [])
+    return latest_data.get("seedsStock", [])
 
 
 @app.get("/cosmetics", summary="Lấy dữ liệu Cosmetics Stock", description="Trả về danh sách các cosmetics hiện có trong stock.")
 @limiter.limit("5/minute")
 async def get_cosmetics(request: Request):
-    return latest_data.get("cosmetics", [])
+    return latest_data.get("cosmeticsStock", [])
 
 
 @app.get("/eventshop", summary="Lấy dữ liệu Event Shop Stock", description="Trả về danh sách mặt hàng event shop hiện có trong stock.")
 @limiter.limit("5/minute")
 async def get_eventshop(request: Request):
-    return latest_data.get("honey", [])
+    return latest_data.get("eventStock", [])
 
 
 @app.get("/eggs", summary="Lấy dữ liệu Eggs Stock", description="Trả về danh sách trứng có sẵn và số lượng của chúng.")
 @limiter.limit("5/minute")
 async def get_eggs(request: Request):
-    return latest_data.get("eggs", [])
-
+    return latest_data.get("eggStock", [])
 
 @app.get("/weather", summary="Lấy dữ liệu thời tiết hiện tại", description="Trả về thông tin thời tiết hiện tại trong trò chơi và các hiệu ứng của nó.")
 @limiter.limit("5/minute")
