@@ -2,12 +2,10 @@ import asyncio
 import json
 from collections import defaultdict
 from contextlib import asynccontextmanager
-from typing import Union
 
 import websockets
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.staticfiles import StaticFiles
 from starlette.requests import Request
@@ -17,23 +15,24 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 
-# ----------------------------
-# Utility Functions
-# ----------------------------
-
 def combine_items_by_name(items):
-    """Combine items with the same name by summing their quantities."""
     combined = defaultdict(int)
     for item in items:
         combined[item["name"]] += item.get("quantity", 0)
-    return [{"name": name, "quantity": qty} for name, qty in combined.items()]
+    return [{"name": name, "quantity": qty, "item_id": normalize_name(name)} for name, qty in combined.items()]
 
 
 def clean_items(items, keys_to_keep={"name", "quantity"}):
-    """Strip extraneous keys from items, retaining only those in keys_to_keep."""
-    return [{k: item[k] for k in keys_to_keep if k in item} for item in items]
+    return [add_item_id({k: item[k] for k in keys_to_keep if k in item}) for item in items]
 
 
+def normalize_name(name):
+    return name.lower().replace(" ", "_")
+
+
+def add_item_id(item):
+    item["item_id"] = normalize_name(item.get("name", ""))
+    return item
 # ----------------------------
 # Global Data Store
 # ----------------------------
