@@ -40,11 +40,11 @@ def clean_items(items, keys_to_keep={"name", "quantity"}):
 
 latest_data = {
     "weather": {},
-    "gear": [],
-    "seeds": [],
-    "eggs": [],
-    "honey": [],
-    "cosmetics": [],
+    "gearStock": [],
+    "seedsStock": [],
+    "eggStock": [],
+    "eventStock": [],
+    "cosmeticsStock": [],
     "timestamp": 0,
 }
 
@@ -89,8 +89,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Grow a Garden API",
-    description="An API that provides live stock and weather data from Grow a Garden.",
-    version="1.0.0",
+    description="Một API cung cấp dữ liệu Seeds Gear Egg và Weather từ Grow a Garden Roblox.",
+    version="3.5.9",
     lifespan=lifespan,
     license_info={"name": "MIT", "url": "https://opensource.org/licenses/MIT"},
     docs_url=None,
@@ -126,49 +126,49 @@ async def swagger_ui_html():
     )
 
 
-@app.get("/", summary="Health Check", description="Returns a simple status to verify the API is online.")
+@app.get("/", summary="Kiểm tra sức khỏe", description="Trả về trạng thái đơn giản để xác minh API đang trực tuyến.")
 @limiter.limit("5/minute")
 async def root(request: Request):
     return {"status": "200"}
 
 
-@app.get("/alldata", summary="Get All Stock Data", description="Returns the complete currently collected data, including gear, seeds, eggs, cosmetics, event, and weather.")
+@app.get("/alldata", summary="Nhận tất cả dữ liệu về Stock", description="Trả về toàn bộ dữ liệu hiện đang được thu thập, bao gồm gear, seeds, eggs, cosmetics, event, và weather.")
 @limiter.limit("5/minute")
 async def alldata(request: Request):
     return latest_data
 
 
-@app.get("/gear", summary="Get Gear Stock", description="Returns the list of gear currently in stock.")
+@app.get("/gear", summary="Lấy dữ liệu Gear Stock", description="Trả về danh sách các Gears hiện có trong stock.")
 @limiter.limit("5/minute")
 async def get_gear(request: Request):
     return latest_data.get("gear", [])
 
 
-@app.get("/seeds", summary="Get Seed Stock", description="Returns the list of seeds currently in stock.")
+@app.get("/seeds", summary="Lấy dữ liệu Seed Stock", description="Trả về danh sách các Seeds hiện có trong stock.")
 @limiter.limit("5/minute")
 async def get_seeds(request: Request):
     return latest_data.get("seeds", [])
 
 
-@app.get("/cosmetics", summary="Get Cosmetics Stock", description="Returns the list of cosmetic items currently in stock.")
+@app.get("/cosmetics", summary="Lấy dữ liệu Cosmetics Stock", description="Trả về danh sách các cosmetics hiện có trong stock.")
 @limiter.limit("5/minute")
 async def get_cosmetics(request: Request):
     return latest_data.get("cosmetics", [])
 
 
-@app.get("/eventshop", summary="Get Event Shop Stock", description="Returns the list of event shop items currently in stock.")
+@app.get("/eventshop", summary="Lấy dữ liệu Event Shop Stock", description="Trả về danh sách mặt hàng event shop hiện có trong stock.")
 @limiter.limit("5/minute")
 async def get_eventshop(request: Request):
     return latest_data.get("honey", [])
 
 
-@app.get("/eggs", summary="Get Eggs Stock", description="Returns the list of available eggs and their quantities.")
+@app.get("/eggs", summary="Lấy dữ liệu Eggs Stock", description="Trả về danh sách trứng có sẵn và số lượng của chúng.")
 @limiter.limit("5/minute")
 async def get_eggs(request: Request):
     return latest_data.get("eggs", [])
 
 
-@app.get("/weather", summary="Get Current Weather", description="Returns the current in-game weather and its effects.")
+@app.get("/weather", summary="Lấy dữ liệu thời tiết hiện tại", description="Trả về thông tin thời tiết hiện tại trong trò chơi và các hiệu ứng của nó.")
 @limiter.limit("5/minute")
 async def get_weather(request: Request):
     return latest_data.get("weather", {})
