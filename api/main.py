@@ -67,11 +67,11 @@ async def websocket_listener():
                         latest_data.update(data["data"])
                         latest_data["timestamp"] = int(asyncio.get_event_loop().time())
 
-                        for category in ["gear", "seeds", "cosmetics", "honey"]:
+                        for category in ["gearStock", "seedsStock", "cosmeticsStock", "eventStock"]:
                             if category in latest_data:
                                 latest_data[category] = clean_items(latest_data[category])
-                        if "eggs" in latest_data:
-                            latest_data["eggs"] = combine_items_by_name(latest_data["eggs"])
+                        if "eggStock" in latest_data:
+                            latest_data["eggStock"] = combine_items_by_name(latest_data["eggStock"])
         except Exception as e:
             print(f"WebSocket error: {e}. Retrying in 5s...")
             await asyncio.sleep(5)
