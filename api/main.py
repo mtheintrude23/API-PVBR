@@ -54,7 +54,6 @@ latest_data = {
 # ----------------------------
 
 async def websocket_listener():
-    """Connects to the live stock WebSocket and updates global data."""
     uri = "wss://ws.growagardenpro.com/"
 
     while True:
@@ -64,14 +63,21 @@ async def websocket_listener():
                 async for message in websocket:
                     data = json.loads(message)
                     if data.get("type"):
-                        latest_data.update(data["data"])
+                        raw_data = data["data"]
                         latest_data["timestamp"] = int(asyncio.get_event_loop().time())
 
-                        for category in ["gearStock", "seedsStock", "cosmeticsStock", "eventStock"]:
-                            if category in latest_data:
-                                latest_data[category] = clean_items(latest_data[category])
-                        if "eggStock" in latest_data:
-                            latest_data["eggStock"] = combine_items_by_name(latest_data["eggStock"])
+                        if "weather" in raw_data:
+                            latest_data["weather"] = raw_data["weather"]
+                        if "gear" in raw_data:
+                            latest_data["gearStock"] = clean_items(raw_data["gear"])
+                        if "seeds" in raw_data:
+                            latest_data["seedsStock"] = clean_items(raw_data["seeds"])
+                        if "cosmetics" in raw_data:
+                            latest_data["cosmeticsStock"] = clean_items(raw_data["cosmetics"])
+                        if "honey" in raw_data:
+                            latest_data["eventStock"] = clean_items(raw_data["honey"])
+                        if "eggs" in raw_data:
+                            latest_data["eggStock"] = combine_items_by_name(raw_data["eggs"])
         except Exception as e:
             print(f"WebSocket error: {e}. Retrying in 5s...")
             await asyncio.sleep(5)
