@@ -126,7 +126,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 @app.get("/docs", include_in_schema=False)
 async def custom_docs():
-    return FileResponse("./index.html")
+    return FileResponse("index.html")
 
 
 @app.get("/", summary="Kiểm tra sức khỏe", description="Trả về trạng thái đơn giản để xác minh API đang trực tuyến.")
