@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from starlette.requests import Request
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -124,12 +125,8 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # ----------------------------
 
 @app.get("/docs", include_in_schema=False)
-async def swagger_ui_html():
-    return get_swagger_ui_html(
-        openapi_url="/openapi.json",
-        title="Grow a Garden API",
-        swagger_favicon_url="/assets/Logo.ico"
-    )
+async def custom_docs():
+    return FileResponse("/index.html")
 
 
 @app.get("/", summary="Kiểm tra sức khỏe", description="Trả về trạng thái đơn giản để xác minh API đang trực tuyến.")
