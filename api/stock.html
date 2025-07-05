@@ -7,13 +7,86 @@
   <title>Grow Garden Warehouse</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+  <style>
+    .theme-switch-wrapper {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      align-items: center;
+      z-index: 50;
+    }
+    .theme-switch {
+      display: inline-block;
+      height: 34px;
+      position: relative;
+      width: 60px;
+    }
+    .theme-switch input {
+      display: none;
+    }
+    .slider {
+      background-color: #ccc;
+      bottom: 0;
+      cursor: pointer;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+      transition: 0.4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      background-color: white;
+      bottom: 4px;
+      content: "";
+      height: 26px;
+      left: 4px;
+      position: absolute;
+      transition: 0.4s;
+      width: 26px;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #66bb6a;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+  </style>
   <script>
+    // Load saved theme
     if (localStorage.getItem("theme") === "dark") {
       document.documentElement.classList.add("dark");
     }
   </script>
 </head>
+<body class="bg-green-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen">
+  <!-- Toggle Switch -->
+  <div class="theme-switch-wrapper">
+    <span id="toggle-icon">
+      <i class="fas fa-sun mr-1 text-yellow-400 dark:text-yellow-200"></i>
+    </span>
+    <label class="theme-switch">
+      <input type="checkbox" id="toggle-mode" />
+      <div class="slider round"></div>
+    </label>
+  </div>
+
+    <div class="container mx-auto px-4 py-8">
+      <header class="mb-10 text-center">
+        <h1 class="text-4xl font-bold text-green-800 dark:text-green-300 mb-2">
+          <i class="fas fa-leaf text-green-600 dark:text-green-400 mr-2"></i> Grow Garden Warehouse
+        </h1>
+        <p class="text-lg text-green-600 dark:text-green-400">Inventory management dashboard</p>
+      </header>
+
+      <!-- Your cards and tables go here... (same structure as before) -->
+      <footer class="text-center text-gray-600 text-sm mt-10 dark:text-gray-300">
+        <p>© 2025 Grow Garden Stock Trackers. All rights reserved.</p>
+        <p class="mt-1">Last updated: <span id="last-updated">Never</span></p>
+      </footer>
+    </div>
 <body class="bg-green-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen">
   <div class="container mx-auto px-4 py-8">
     <header class="mb-10 text-center">
@@ -176,16 +249,17 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    fetchData(); // load lần đầu
-    setInterval(fetchData, 30000); // luôn cập nhật mỗi 30 giây
-  });
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchData();
+      setInterval(fetchData, 30000);
+      const toggle = document.getElementById('toggle-mode');
+      if (localStorage.getItem("theme") === "dark") toggle.checked = true;
 
-  function toggleTheme() {
-    const html = document.documentElement;
-    const isDark = html.classList.toggle("dark");
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-  }
+      toggle.addEventListener('change', () => {
+        document.documentElement.classList.toggle("dark");
+        localStorage.setItem("theme", document.documentElement.classList.contains("dark") ? "dark" : "light");
+      });
+    });
 </script>
 </body>
 </html>
