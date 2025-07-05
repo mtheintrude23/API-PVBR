@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Grow Garden Warehouse</title>
+  <link rel="icon" href="https://growagardenstock.com/grow-a-garden-stock.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -97,19 +98,25 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', fetchData);
+    let lastTimestamp = null;
 
-    async function fetchData() {
+    async function fetchData(force = false) {
       try {
         const res = await fetch('https://api-yvj3.onrender.com/alldata');
         const data = await res.json();
-        updateTable('seed', data.seedsStock);
-        updateTable('gear', data.gearStock);
-        updateTable('egg', data.eggStock);
-        updateTable('event', data.eventStock);
-        document.getElementById('last-updated').textContent = new Date().toLocaleString();
+
+        if (force || data.timestamp !== lastTimestamp) {
+          lastTimestamp = data.timestamp;
+
+          updateTable('seed', data.seedsStock);
+          updateTable('gear', data.gearStock);
+          updateTable('egg', data.eggStock);
+          updateTable('event', data.eventStock);
+
+          document.getElementById('last-updated').textContent = new Date().toLocaleString();
+        }
       } catch (e) {
-        console.error(e);
+        console.error("❌ Lỗi khi fetch dữ liệu:", e);
       }
     }
 
@@ -117,15 +124,30 @@
       const total = items.reduce((a, b) => a + (b.quantity || 0), 0);
       document.getElementById(`${type}-count`).textContent = total;
       document.getElementById(`${type}-progress`).style.width = `${Math.min(100, total / 1000 * 100)}%`;
-      document.getElementById(`${type}-${type === 'event' ? 'upcoming' : type === 'gear' ? 'categories' : 'varieties'}`).textContent = `Items: ${items.length}`;
+
+      const labelMap = {
+        seed: 'seed-varieties',
+        gear: 'gear-categories',
+        egg: 'egg-types',
+        event: 'event-upcoming'
+      };
+      if (labelMap[type]) {
+        document.getElementById(labelMap[type]).textContent = `Items: ${items.length}`;
+      }
+
       const body = document.getElementById(`${type}-table-body`);
       body.innerHTML = '';
-      items.slice(0, 5).forEach(item => {
+      items.forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `<td class="p-2">${item.name}</td><td class="p-2">${item.quantity}</td>`;
         body.appendChild(tr);
       });
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchData(true); // initial load
+      setInterval(() => fetchData(false), 30000); // check every 30s
+    });
   </script>
 </body>
 </html>
