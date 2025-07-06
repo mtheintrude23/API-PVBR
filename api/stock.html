@@ -62,23 +62,13 @@
       </div>
 
       <div id="event-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Events</h3>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Cosmetics</h3>
         <p id="event-count" class="text-2xl font-bold text-purple-600">Loading...</p>
         <p id="event-upcoming" class="text-sm text-gray-500">Items: ...</p>
         <div class="h-2 bg-gray-200 rounded-full mt-2">
           <div id="event-progress" class="h-2 bg-purple-500 rounded-full" style="width: 0%"></div>
         </div>
       </div>
-
-      <div id="merchant-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Merchant</h3>
-        <p id="merchant-count" class="text-2xl font-bold text-pink-600">This event has been ended</p>
-        <p id="merchant-upcoming" class="text-sm text-gray-500">This event has been ended.</p>
-        <div class="h-2 bg-gray-200 rounded-full mt-2">
-          <div id="merchant-progress" class="h-2 bg-pink-500 rounded-full" style="width: 0%"></div>
-        </div>
-      </div>
-    </div>
 
     <!-- Tables -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
@@ -107,22 +97,12 @@
       </div>
 
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-        <div class="p-4 font-semibold text-purple-700 dark:text-purple-300">Event Inventory</div>
+        <div class="p-4 font-semibold text-purple-700 dark:text-purple-300">Cosmetics Inventory</div>
         <table class="min-w-full text-sm">
           <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
           <tbody id="event-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
         </table>
       </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-        <div class="p-4 font-semibold text-pink-700 dark:text-pink-300">Merchant Inventory</div>
-        <table class="min-w-full text-sm">
-          
-          <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
-          <tbody id="merchant-table-body"><tr><td colspan="2" class="p-4 text-center">This event has been ended</td></tr></tbody>
-        </table>
-      </div>
-    </div>
 
     <footer class="text-center text-gray-600 dark:text-gray-300 text-sm mt-10">
       <p>© 2025 Grow Garden Stock Trackers. All rights reserved.</p>
@@ -263,7 +243,7 @@
       const data = await res.json();
 
       const newEgg = JSON.stringify(data.egg_stock);
-      const newEvent = JSON.stringify(data.eventshop_stock);
+      const newEvent = JSON.stringify(data.cosmetic_stock);
 
       if (newEgg !== previousEggStock) {
         updateTable('egg', data.egg_stock);
@@ -273,7 +253,7 @@
       }
 
       if (newEvent !== previousEventStock) {
-        updateTable('event', data.eventshop_stock);
+        updateTable('event', data.cosmetic_stock);
         previousEventStock = newEvent;
         lastRestockTime.event = Date.now();
         localStorage.setItem('lastRestock_event', lastRestockTime.event);
