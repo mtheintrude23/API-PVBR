@@ -72,8 +72,8 @@
 
       <div id="merchant-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Merchant</h3>
-        <p id="merchant-count" class="text-2xl font-bold text-pink-600">Loading...</p>
-        <p id="merchant-upcoming" class="text-sm text-gray-500">Items: ...</p>
+        <p id="merchant-count" class="text-2xl font-bold text-pink-600">This event has been ended</p>
+        <p id="merchant-upcoming" class="text-sm text-gray-500">This event has been ended.</p>
         <div class="h-2 bg-gray-200 rounded-full mt-2">
           <div id="merchant-progress" class="h-2 bg-pink-500 rounded-full" style="width: 0%"></div>
         </div>
@@ -118,7 +118,7 @@
         <div class="p-4 font-semibold text-pink-700 dark:text-pink-300">Merchant Inventory</div>
         <table class="min-w-full text-sm">
           <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
-          <tbody id="merchant-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
+          <tbody id="merchant-table-body"><tr><td colspan="2" class="p-4 text-center">This event has been ended</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -140,7 +140,6 @@
       updateTable('gear', data.gear_stock);
       updateTable('egg', data.egg_stock);
       updateTable('event', data.eventshop_stock);
-      updateTable('merchant', data.travelingmerchant_stock);
 
       document.getElementById('last-updated').textContent = new Date().toLocaleString();
     } catch (e) {
@@ -162,7 +161,6 @@
       gear: 'gear-categories',
       egg: 'egg-types',
       event: 'event-upcoming',
-      merchant: 'merchant-upcoming'
     };
 
     if (labelMap[type]) {
