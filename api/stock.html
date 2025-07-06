@@ -33,82 +33,88 @@
     </header>
 
     <!-- Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-      <div id="seed-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Seeds</h3>
-        <p id="seed-count" class="text-2xl font-bold text-green-600">Loading...</p>
-        <p id="seed-varieties" class="text-sm text-gray-500">Items: ...</p>
-        <div class="h-2 bg-gray-200 rounded-full mt-2">
-          <div id="seed-progress" class="h-2 bg-green-500 rounded-full" style="width: 0%"></div>
-        </div>
+<!-- Cards Section -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+  <!-- Seed Card -->
+    <div id="seed-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 w-full">
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Seeds</h3>
+      <p id="seed-count" class="text-2xl font-bold text-green-600">Loading...</p>
+      <p id="seed-varieties" class="text-sm text-gray-500">Items: ...</p>
+      <div class="h-2 bg-gray-200 rounded-full mt-2">
+        <div id="seed-progress" class="h-2 bg-green-500 rounded-full" style="width: 0%"></div>
       </div>
+    </div>
 
-      <div id="gear-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Gear</h3>
-        <p id="gear-count" class="text-2xl font-bold text-blue-600">Loading...</p>
-        <p id="gear-categories" class="text-sm text-gray-500">Items: ...</p>
-        <div class="h-2 bg-gray-200 rounded-full mt-2">
-          <div id="gear-progress" class="h-2 bg-blue-500 rounded-full" style="width: 0%"></div>
-        </div>
+  <!-- Gear Card -->
+    <div id="gear-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 w-full">
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Gear</h3>
+      <p id="gear-count" class="text-2xl font-bold text-blue-600">Loading...</p>
+      <p id="gear-categories" class="text-sm text-gray-500">Items: ...</p>
+      <div class="h-2 bg-gray-200 rounded-full mt-2">
+        <div id="gear-progress" class="h-2 bg-blue-500 rounded-full" style="width: 0%"></div>
       </div>
+    </div>
 
-      <div id="egg-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Eggs</h3>
-        <p id="egg-count" class="text-2xl font-bold text-yellow-600">Loading...</p>
-        <p id="egg-types" class="text-sm text-gray-500">Items: ...</p>
-        <div class="h-2 bg-gray-200 rounded-full mt-2">
-          <div id="egg-progress" class="h-2 bg-yellow-500 rounded-full" style="width: 0%"></div>
-        </div>
+  <!-- Egg Card -->
+    <div id="egg-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 w-full">
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Eggs</h3>
+      <p id="egg-count" class="text-2xl font-bold text-yellow-600">Loading...</p>
+      <p id="egg-types" class="text-sm text-gray-500">Items: ...</p>
+      <div class="h-2 bg-gray-200 rounded-full mt-2">
+        <div id="egg-progress" class="h-2 bg-yellow-500 rounded-full" style="width: 0%"></div>
       </div>
-      <div id="event-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Cosmetics</h3>
-        <p id="event-count" class="text-2xl font-bold text-purple-600">Loading...</p>
-        <p id="event-upcoming" class="text-sm text-gray-500">Items: ...</p>
-        <div class="h-2 bg-gray-200 rounded-full mt-2">
-          <div id="event-progress" class="h-2 bg-purple-500 rounded-full" style="width: 0%"></div>
-        </div>
-      </div>
-      <div id="summer-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Summer Harvest</h3>
-        <p id="event-count" class="text-2xl font-bold text-purple-600">The summer harvest season is over.</p>
-        <div class="h-2 bg-gray-200 rounded-full mt-2">
-          <div id="event-progress" class="h-2 bg-purple-500 rounded-full" style="width: 0%"></div>
-        </div>
-      </div>
+    </div>
 
-    <!-- Tables -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10 max-w-6xl mx-auto">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-        <div class="p-4 font-semibold text-green-700 dark:text-green-300">Seed Inventory</div>
-        <table class="min-w-full text-sm">
-          <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
-          <tbody id="seed-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
-        </table>
+  <!-- Event Card -->
+    <div id="event-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 w-full">
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Cosmetics</h3>
+      <p id="event-count" class="text-2xl font-bold text-purple-600">Loading...</p>
+      <p id="event-upcoming" class="text-sm text-gray-500">Items: ...</p>
+      <div class="h-2 bg-gray-200 rounded-full mt-2">
+        <div id="event-progress" class="h-2 bg-purple-500 rounded-full" style="width: 0%"></div>
       </div>
+    </div>
+  </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-        <div class="p-4 font-semibold text-blue-700 dark:text-blue-300">Gear Inventory</div>
-        <table class="min-w-full text-sm">
-          <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
-          <tbody id="gear-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
-        </table>
-      </div>
+<!-- Tables Section -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+  <!-- Seed Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden w-full">
+      <div class="p-4 font-semibold text-green-700 dark:text-green-300">Seed Inventory</div>
+      <table class="min-w-full text-sm">
+        <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
+        <tbody id="seed-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
+      </table>
+    </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-        <div class="p-4 font-semibold text-yellow-700 dark:text-yellow-300">Egg Inventory</div>
-        <table class="min-w-full text-sm">
-          <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
-          <tbody id="egg-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
-        </table>
-      </div>
+  <!-- Gear Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden w-full">
+      <div class="p-4 font-semibold text-blue-700 dark:text-blue-300">Gear Inventory</div>
+      <table class="min-w-full text-sm">
+        <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
+        <tbody id="gear-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
+      </table>
+    </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-        <div class="p-4 font-semibold text-purple-700 dark:text-purple-300">Cosmetics Inventory</div>
-        <table class="min-w-full text-sm">
-          <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
-          <tbody id="event-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
-        </table>
-      </div>
+  <!-- Egg Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden w-full">
+      <div class="p-4 font-semibold text-yellow-700 dark:text-yellow-300">Egg Inventory</div>
+      <table class="min-w-full text-sm">
+        <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
+        <tbody id="egg-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+  <!-- Event Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden w-full">
+      <div class="p-4 font-semibold text-purple-700 dark:text-purple-300">Cosmetics Inventory</div>
+      <table class="min-w-full text-sm">
+        <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
+        <tbody id="event-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
 
     <footer class="text-center text-gray-600 dark:text-gray-300 text-sm mt-10">
       <p>© 2025 Grow Garden Stock Trackers. All rights reserved.</p>
