@@ -251,8 +251,8 @@
     try {
       const res = await fetch('https://api.joshlei.com/v2/growagarden/stock');
       const data = await res.json();
-      updateTable('seed', data.egg_stock);
-      updateTable('gear', data.eventshop_stock);
+      updateTable('egg', data.egg_stock);
+      updateTable('event', data.eventshop_stock);
       document.getElementById('last-updated').textContent = new Date().toLocaleString();
       lastRestockTime.egg = Date.now();
       lastRestockTime.event = Date.now();
