@@ -105,7 +105,7 @@ app = FastAPI(
 
 # Static & CORS
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
-app.mount("/", StaticFiles(directory=".", html=True), name="static-root")
+app.mount("/", StaticFiles(directory="."), name="static-root")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
