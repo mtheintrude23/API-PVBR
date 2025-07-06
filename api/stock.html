@@ -23,7 +23,7 @@
       <div class="slider round"></div>
     </label>
   </div>
-<body class="bg-green-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen">
+
   <div class="container mx-auto px-4 py-8">
     <header class="mb-10 text-center">
       <h1 class="text-4xl font-bold text-green-800 dark:text-green-300 mb-2">
@@ -164,10 +164,11 @@
     }, 1000);
   }
 
-  let previousSeedStock = null;
-  let previousGearStock = null;
-  let previousEggStock = null;
-  let previousEventStock = null;
+  let previousSeedHash = localStorage.getItem('lastSeedHash');
+  let previousGearHash = localStorage.getItem('lastGearHash');
+  let previousEggHash = localStorage.getItem('lastEggHash');
+  let previousEventHash = localStorage.getItem('lastEventHash');
+
   const toggleIcon = document.getElementById('toggle-icon');
   const toggleSwitch = document.querySelector('input[type="checkbox"]');
 
@@ -218,14 +219,14 @@
       const newSeed = JSON.stringify(data.seed_stock);
       const newGear = JSON.stringify(data.gear_stock);
 
-      if (newSeed !== previousSeedStock) {
+      if (newSeed !== previousSeedHash) {
         updateTable('seed', data.seed_stock);
         previousSeedStock = newSeed;
         lastRestockTime.seed = Date.now();
         localStorage.setItem('lastRestock_seed', lastRestockTime.seed);
       }
 
-      if (newGear !== previousGearStock) {
+      if (newGear !== previousGearHash) {
         updateTable('gear', data.gear_stock);
         previousGearStock = newGear;
         lastRestockTime.gear = Date.now();
@@ -245,14 +246,14 @@
       const newEgg = JSON.stringify(data.egg_stock);
       const newEvent = JSON.stringify(data.cosmetic_stock);
 
-      if (newEgg !== previousEggStock) {
+      if (newEgg !== previousEggHash) {
         updateTable('egg', data.egg_stock);
         previousEggStock = newEgg;
         lastRestockTime.egg = Date.now();
         localStorage.setItem('lastRestock_egg', lastRestockTime.egg);
       }
 
-      if (newEvent !== previousEventStock) {
+      if (newEvent !== previousEventHash) {
         updateTable('event', data.cosmetic_stock);
         previousEventStock = newEvent;
         lastRestockTime.event = Date.now();
