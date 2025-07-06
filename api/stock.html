@@ -151,10 +151,6 @@
   const DARK_THEME = 'dark';
   const LIGHT_THEME = 'light';
   function toggleDarkLightMode(mode) {
-    nav.style.backgroundColor =
-      mode === DARK_THEME ? 'rgb(0 0 0 / 50%)' : 'rgb(255 255 255 / 50%)';
-    textBox.style.backgroundColor =
-      mode === DARK_THEME ? 'rgb(255 255 255 / 50%)' : 'rgb(0 0 0 / 50%)';
   // Icon text
     toggleIcon.children[0].textContent =
       mode === DARK_THEME ? 'Dark Mode' : 'Light Mode';
@@ -177,9 +173,6 @@
       toggleDarkLightMode(LIGHT_THEME);
     }
   }
-
-// Event Listeners
-  toggleSwitch.addEventListener('change', switchTheme);
 
 // Check Local Storage For Theme
   const currentTheme = localStorage.getItem('theme');
