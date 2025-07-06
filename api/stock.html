@@ -144,12 +144,11 @@
     egg: 30 * 60 * 1000,
     event: 30 * 60 * 1000
   };
-
-  const lastRestockTime = {
-    seed: Date.now(),
-    gear: Date.now(),
-    egg: Date.now(),
-    event: Date.now()
+  let lastRestockTime = {
+    seed: parseInt(localStorage.getItem('lastRestock_seed')) || Date.now(),
+    gear: parseInt(localStorage.getItem('lastRestock_gear')) || Date.now(),
+    egg: parseInt(localStorage.getItem('lastRestock_egg')) || Date.now(),
+    event: parseInt(localStorage.getItem('lastRestock_event')) || Date.now()
   };
 
   function formatTime(ms) {
@@ -184,6 +183,11 @@
       });
     }, 1000);
   }
+
+  let previousSeedStock = null;
+  let previousGearStock = null;
+  let previousEggStock = null;
+  let previousEventStock = null;
   const toggleIcon = document.getElementById('toggle-icon');
   const toggleSwitch = document.querySelector('input[type="checkbox"]');
 
@@ -230,13 +234,25 @@
     try {
       const res = await fetch('https://api.joshlei.com/v2/growagarden/stock');
       const data = await res.json();
-      updateTable('seed', data.seed_stock);
-      updateTable('gear', data.gear_stock);
+
+      const newSeed = JSON.stringify(data.seed_stock);
+      const newGear = JSON.stringify(data.gear_stock);
+
+      if (newSeed !== previousSeedStock) {
+        updateTable('seed', data.seed_stock);
+        previousSeedStock = newSeed;
+        lastRestockTime.seed = Date.now();
+        localStorage.setItem('lastRestock_seed', lastRestockTime.seed);
+      }
+
+      if (newGear !== previousGearStock) {
+        updateTable('gear', data.gear_stock);
+        previousGearStock = newGear;
+        lastRestockTime.gear = Date.now();
+        localStorage.setItem('lastRestock_gear', lastRestockTime.gear);
+      }
+
       document.getElementById('last-updated').textContent = new Date().toLocaleString();
-      lastRestockTime.seed = Date.now();
-      lastRestockTime.gear = Date.now();
-      localStorage.setItem('lastRestock_seed', Date.now());
-      localStorage.setItem('lastRestock_gear', Date.now());
     } catch (e) {
       console.error("❌ Lỗi khi fetch dữ liệu:", e);
     }
@@ -245,18 +261,29 @@
     try {
       const res = await fetch('https://api.joshlei.com/v2/growagarden/stock');
       const data = await res.json();
-      updateTable('egg', data.egg_stock);
-      updateTable('event', data.eventshop_stock);
+
+      const newEgg = JSON.stringify(data.egg_stock);
+      const newEvent = JSON.stringify(data.eventshop_stock);
+
+      if (newEgg !== previousEggStock) {
+        updateTable('egg', data.egg_stock);
+        previousEggStock = newEgg;
+        lastRestockTime.egg = Date.now();
+        localStorage.setItem('lastRestock_egg', lastRestockTime.egg);
+      }
+
+      if (newEvent !== previousEventStock) {
+        updateTable('event', data.eventshop_stock);
+        previousEventStock = newEvent;
+        lastRestockTime.event = Date.now();
+        localStorage.setItem('lastRestock_event', lastRestockTime.event);
+      }
+
       document.getElementById('last-updated').textContent = new Date().toLocaleString();
-      lastRestockTime.egg = Date.now();
-      lastRestockTime.event = Date.now();
-      localStorage.setItem('lastRestock_egg', Date.now());
-      localStorage.setItem('lastRestock_event', Date.now());
     } catch (e) {
       console.error("❌ Lỗi khi fetch dữ liệu:", e);
     }
   }
-  
   function updateTable(type, items) {
     const total = items.reduce((a, b) => a + (b.quantity || 0), 0);
     const countEl = document.getElementById(`${type}-count`);
@@ -289,11 +316,8 @@
       body.appendChild(tr);
     });
   }
-  // Seed và Gear: mỗi 5 phút
-  setInterval(fetchSeedGear, 5 * 60 * 1000);
-
-// Egg và Event: mỗi 10 phút
-  setInterval(fetchEggEvent, 30 * 60 * 1000);
+  setInterval(fetchSeedGear, 30 * 1000); // gọi mỗi 30s
+  setInterval(fetchEggEvent, 30 * 1000);
 
 // Khi trang vừa load, gọi luôn
   document.addEventListener('DOMContentLoaded', () => {
