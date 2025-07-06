@@ -117,6 +117,7 @@
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
         <div class="p-4 font-semibold text-pink-700 dark:text-pink-300">Merchant Inventory</div>
         <table class="min-w-full text-sm">
+          
           <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
           <tbody id="merchant-table-body"><tr><td colspan="2" class="p-4 text-center">This event has been ended</td></tr></tbody>
         </table>
@@ -137,6 +138,52 @@
 </script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
+  const refreshRates = {
+    seed: 5 * 60 * 1000,
+    gear: 5 * 60 * 1000,
+    egg: 30 * 60 * 1000,
+    event: 30 * 60 * 1000
+  };
+
+  const lastRestockTime = {
+    seed: Date.now(),
+    gear: Date.now(),
+    egg: Date.now(),
+    event: Date.now()
+  };
+
+  function formatTime(ms) {
+    const min = Math.floor(ms / 60000);
+    const sec = Math.floor((ms % 60000) / 1000);
+    return `${min}:${sec.toString().padStart(2, '0')}`;
+  }
+
+  function createOrUpdateTimer(type, remaining) {
+    let timerEl = document.getElementById(`${type}-timer`);
+    if (!timerEl) {
+      timerEl = document.createElement('p');
+      timerEl.id = `${type}-timer`;
+      timerEl.className = "text-sm mt-1";
+      document.getElementById(`${type}-card`).appendChild(timerEl);
+    }
+
+    const seconds = Math.floor(remaining / 1000);
+    timerEl.textContent = `Restock in: ${formatTime(remaining)}`;
+    timerEl.className = seconds <= 10
+      ? "text-sm mt-1 text-yellow-400 animate-pulse"
+      : "text-sm mt-1 text-gray-500";
+  }
+
+  function startCountdown() {
+    setInterval(() => {
+      ['seed', 'gear', 'egg', 'event'].forEach(type => {
+        const interval = refreshRates[type];
+        const elapsed = Date.now() - lastRestockTime[type];
+        const remaining = interval - elapsed;
+        createOrUpdateTimer(type, remaining > 0 ? remaining : 0);
+      });
+    }, 1000);
+  }
   const toggleIcon = document.getElementById('toggle-icon');
   const toggleSwitch = document.querySelector('input[type="checkbox"]');
 
@@ -191,6 +238,10 @@
       updateTable('event', data.eventshop_stock);
 
       document.getElementById('last-updated').textContent = new Date().toLocaleString();
+      lastRestockTime.seed = Date.now();
+      lastRestockTime.gear = Date.now();
+      lastRestockTime.egg = Date.now();
+      lastRestockTime.event = Date.now();
     } catch (e) {
       console.error("❌ Lỗi khi fetch dữ liệu:", e);
     }
@@ -232,6 +283,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     fetchData();
     setInterval(fetchData, 30000);
+    startCountdown();
   });
 </script>
 </body>
