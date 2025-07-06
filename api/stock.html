@@ -166,6 +166,12 @@
       timerEl.className = "text-sm mt-1";
       document.getElementById(`${type}-card`).appendChild(timerEl);
     }
+    const lastRestockTime = {
+      seed: parseInt(localStorage.getItem('lastRestock_seed')) || Date.now(),
+      gear: parseInt(localStorage.getItem('lastRestock_gear')) || Date.now(),
+      egg: parseInt(localStorage.getItem('lastRestock_egg')) || Date.now(),
+      event: parseInt(localStorage.getItem('lastRestock_event')) || Date.now()
+    };
 
     const seconds = Math.floor(remaining / 1000);
     timerEl.textContent = `Restock in: ${formatTime(remaining)}`;
@@ -226,27 +232,37 @@
   }
 
   toggleSwitch.addEventListener('change', switchTheme);
-
-  async function fetchData() {
+  async function fetchSeedGear() {
     try {
       const res = await fetch('https://api.joshlei.com/v2/growagarden/stock');
       const data = await res.json();
-
       updateTable('seed', data.seed_stock);
       updateTable('gear', data.gear_stock);
-      updateTable('egg', data.egg_stock);
-      updateTable('event', data.eventshop_stock);
-
       document.getElementById('last-updated').textContent = new Date().toLocaleString();
       lastRestockTime.seed = Date.now();
       lastRestockTime.gear = Date.now();
-      lastRestockTime.egg = Date.now();
-      lastRestockTime.event = Date.now();
+      localStorage.setItem('lastRestock_seed', Date.now());
+      localStorage.setItem('lastRestock_gear', Date.now());
     } catch (e) {
       console.error("❌ Lỗi khi fetch dữ liệu:", e);
     }
   }
-
+  async function fetchEggEvent() {
+    try {
+      const res = await fetch('https://api.joshlei.com/v2/growagarden/stock');
+      const data = await res.json();
+      updateTable('seed', data.egg_stock);
+      updateTable('gear', data.eventshop_stock);
+      document.getElementById('last-updated').textContent = new Date().toLocaleString();
+      lastRestockTime.egg = Date.now();
+      lastRestockTime.event = Date.now();
+      localStorage.setItem('lastRestock_egg', Date.now());
+      localStorage.setItem('lastRestock_event', Date.now());
+    } catch (e) {
+      console.error("❌ Lỗi khi fetch dữ liệu:", e);
+    }
+  }
+  
   function updateTable(type, items) {
     const total = items.reduce((a, b) => a + (b.quantity || 0), 0);
     const countEl = document.getElementById(`${type}-count`);
@@ -279,10 +295,16 @@
       body.appendChild(tr);
     });
   }
+  // Seed và Gear: mỗi 5 phút
+  setInterval(fetchSeedGear, 5 * 60 * 1000);
 
+// Egg và Event: mỗi 10 phút
+  setInterval(fetchEggAndEvent, 30 * 60 * 1000);
+
+// Khi trang vừa load, gọi luôn
   document.addEventListener('DOMContentLoaded', () => {
-    fetchData();
-    setInterval(fetchData, 30000);
+    fetchSeedGear();
+    fetchEggEvent();
     startCountdown();
   });
 </script>
