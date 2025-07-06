@@ -166,12 +166,6 @@
       timerEl.className = "text-sm mt-1";
       document.getElementById(`${type}-card`).appendChild(timerEl);
     }
-    const lastRestockTime = {
-      seed: parseInt(localStorage.getItem('lastRestock_seed')) || Date.now(),
-      gear: parseInt(localStorage.getItem('lastRestock_gear')) || Date.now(),
-      egg: parseInt(localStorage.getItem('lastRestock_egg')) || Date.now(),
-      event: parseInt(localStorage.getItem('lastRestock_event')) || Date.now()
-    };
 
     const seconds = Math.floor(remaining / 1000);
     timerEl.textContent = `Restock in: ${formatTime(remaining)}`;
