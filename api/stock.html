@@ -7,72 +7,22 @@
   <title>Grow Garden Warehouse</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    .theme-switch-wrapper {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      display: flex;
-      align-items: center;
-      z-index: 50;
-    }
-    .theme-switch {
-      display: inline-block;
-      height: 34px;
-      position: relative;
-      width: 60px;
-    }
-    .theme-switch input {
-      display: none;
-    }
-    .slider {
-      background-color: #ccc;
-      bottom: 0;
-      cursor: pointer;
-      left: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
-      transition: 0.4s;
-      border-radius: 34px;
-    }
-    .slider:before {
-      background-color: white;
-      bottom: 4px;
-      content: "";
-      height: 26px;
-      left: 4px;
-      position: absolute;
-      transition: 0.4s;
-      width: 26px;
-      border-radius: 50%;
-    }
-    input:checked + .slider {
-      background-color: #66bb6a;
-    }
-    input:checked + .slider:before {
-      transform: translateX(26px);
-    }
-  </style>
-  <script>
-    // Load saved theme
-    if (localStorage.getItem("theme") === "dark") {
-      document.documentElement.classList.add("dark");
-    }
-  </script>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body class="bg-green-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen">
-  <!-- Toggle Switch -->
+  <!-- Dark Mode Switcher -->
   <div class="theme-switch-wrapper">
+    <!-- Text and icon -->
     <span id="toggle-icon">
-      <i class="fas fa-sun mr-1 text-yellow-400 dark:text-yellow-200"></i>
+      <span class="toggle-text">Light Mode</span>
+      <i class="fas fa-sun"></i>
     </span>
+      <!-- Switcher -->
     <label class="theme-switch">
-      <input type="checkbox" id="toggle-mode" />
+      <input type="checkbox" />
       <div class="slider round"></div>
     </label>
   </div>
-
 <body class="bg-green-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen">
   <div class="container mx-auto px-4 py-8">
     <header class="mb-10 text-center">
