@@ -130,22 +130,25 @@
 </script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-  const refreshRates = {
-    seed: 5 * 60 * 1000,
-    gear: 5 * 60 * 1000,
-    egg: 30 * 60 * 1000,
-    event: 30 * 60 * 1000
+  const durations = {
+    seed: 300,       // 5 phút
+    gear: 300,       // 5 phút
+    egg: 1800,       // 30 phút
+    event: 3600      // 1 giờ
   };
-  function getSavedTime(key, fallback) {
-    const saved = localStorage.getItem(key);
-    return saved !== null ? parseInt(saved) : fallback;
-  }
+
+  const refreshRates = {
+    seed: 300000,
+    gear: 300000,
+    egg: 1800000,
+    event: 3600000
+  };
 
   let lastRestockTime = {
-    seed: getSavedTime('lastRestock_seed', Date.now()),
-    gear: getSavedTime('lastRestock_gear', Date.now()),
-    egg: getSavedTime('lastRestock_egg', Date.now()),
-    event: getSavedTime('lastRestock_event', Date.now())
+    seed: parseInt(localStorage.getItem('lastRestock_seed')) || 0,
+    gear: parseInt(localStorage.getItem('lastRestock_gear')) || 0,
+    egg: parseInt(localStorage.getItem('lastRestock_egg')) || 0,
+    event: parseInt(localStorage.getItem('lastRestock_event')) || 0,
   };
 
   function formatTime(ms) {
@@ -181,10 +184,10 @@
     }, 1000);
   }
 
-  let previousSeedHash = localStorage.getItem('lastSeedHash');
-  let previousGearHash = localStorage.getItem('lastGearHash');
-  let previousEggHash = localStorage.getItem('lastEggHash');
-  let previousEventHash = localStorage.getItem('lastEventHash');
+  let previousSeedStock = localStorage.getItem('lastSeedHash');
+  let previousGearStock = localStorage.getItem('lastGearHash');
+  let previousEggStock = localStorage.getItem('lastEggHash');
+  let previousEventStock = localStorage.getItem('lastEventHash');
 
   const toggleIcon = document.getElementById('toggle-icon');
   const toggleSwitch = document.querySelector('input[type="checkbox"]');
@@ -236,16 +239,18 @@
       const newSeed = JSON.stringify(data.seed_stock);
       const newGear = JSON.stringify(data.gear_stock);
 
-      if (newSeed !== previousSeedHash) {
+      if (newSeed !== previousSeedStock) {
         updateTable('seed', data.seed_stock);
         previousSeedStock = newSeed;
+        localStorage.setItem('lastSeedHash', newSeed);
         lastRestockTime.seed = Date.now();
         localStorage.setItem('lastRestock_seed', lastRestockTime.seed);
       }
 
-      if (newGear !== previousGearHash) {
+      if (newGear !== previousGearStock) {
         updateTable('gear', data.gear_stock);
         previousGearStock = newGear;
+        localStorage.setItem('lastGearHash', newGear);
         lastRestockTime.gear = Date.now();
         localStorage.setItem('lastRestock_gear', lastRestockTime.gear);
       }
@@ -255,13 +260,12 @@
       console.error("❌ Lỗi khi fetch dữ liệu:", e);
     }
   }
-  async function fetchEggEvent() {
+  async function fetchEgg() {
     try {
       const res = await fetch('https://api.joshlei.com/v2/growagarden/stock');
       const data = await res.json();
 
       const newEgg = JSON.stringify(data.egg_stock);
-      const newEvent = JSON.stringify(data.cosmetic_stock);
 
       if (newEgg !== previousEggHash) {
         updateTable('egg', data.egg_stock);
@@ -270,9 +274,21 @@
         localStorage.setItem('lastRestock_egg', lastRestockTime.egg);
       }
 
-      if (newEvent !== previousEventHash) {
+      document.getElementById('last-updated').textContent = new Date().toLocaleString();
+    } catch (e) {
+      console.error("❌ Lỗi khi fetch dữ liệu:", e);
+    }
+  }
+  async function fetchEvent() {
+    try {
+      const res = await fetch('https://api.joshlei.com/v2/growagarden/stock');
+      const data = await res.json();
+
+      const newEvent = JSON.stringify(data.cosmetic_stock);
+      if (newEvent !== previousEventStock) {
         updateTable('event', data.cosmetic_stock);
         previousEventStock = newEvent;
+        localStorage.setItem('lastEventHash', newEvent);
         lastRestockTime.event = Date.now();
         localStorage.setItem('lastRestock_event', lastRestockTime.event);
       }
@@ -282,6 +298,7 @@
       console.error("❌ Lỗi khi fetch dữ liệu:", e);
     }
   }
+
   function updateTable(type, items) {
     const total = items.reduce((a, b) => a + (b.quantity || 0), 0);
     const countEl = document.getElementById(`${type}-count`);
@@ -314,13 +331,15 @@
       body.appendChild(tr);
     });
   }
-  setInterval(fetchSeedGear, 20 * 1000); // gọi mỗi 30s
-  setInterval(fetchEggEvent, 20 * 1000);
 
-// Khi trang vừa load, gọi luôn
+  setInterval(fetchSeedGear, 30 * 1000);
+  setInterval(fetchEgg, 30 * 1000);
+  setInterval(fetchEvent, 30 * 1000);
+
   document.addEventListener('DOMContentLoaded', () => {
     fetchSeedGear();
-    fetchEggEvent();
+    fetchEgg();
+    fetchEvent();
     startCountdown();
   });
 </script>
