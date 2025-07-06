@@ -267,7 +267,7 @@
 
       const newEgg = JSON.stringify(data.egg_stock);
 
-      if (newEgg !== previousEggHash) {
+      if (newEgg !== previousEggStock) {
         updateTable('egg', data.egg_stock);
         previousEggStock = newEgg;
         lastRestockTime.egg = Date.now();
