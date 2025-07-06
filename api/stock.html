@@ -136,11 +136,16 @@
     egg: 30 * 60 * 1000,
     event: 30 * 60 * 1000
   };
+  function getSavedTime(key, fallback) {
+    const saved = localStorage.getItem(key);
+    return saved !== null ? parseInt(saved) : fallback;
+  }
+
   let lastRestockTime = {
-    seed: parseInt(localStorage.getItem('lastRestock_seed')) || Date.now(),
-    gear: parseInt(localStorage.getItem('lastRestock_gear')) || Date.now(),
-    egg: parseInt(localStorage.getItem('lastRestock_egg')) || Date.now(),
-    event: parseInt(localStorage.getItem('lastRestock_event')) || Date.now()
+    seed: getSavedTime('lastRestock_seed', Date.now()),
+    gear: getSavedTime('lastRestock_gear', Date.now()),
+    egg: getSavedTime('lastRestock_egg', Date.now()),
+    event: getSavedTime('lastRestock_event', Date.now())
   };
 
   function formatTime(ms) {
