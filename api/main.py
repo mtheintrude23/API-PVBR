@@ -73,53 +73,7 @@ async def websocket_listener():
                         if "honey" in raw_data:
                             latest_data["eventStock"] = clean_items(raw_data["honey"])
                         if "eggs" in raw_data:
-                            latest_data["eggStock"] = async def websocket_listener():
-    uri = "wss://ws.growagardenpro.com/"
-    while True:
-        try:
-            async with websockets.connect(uri) as websocket:
-                print("✅ API WebSocket Connected.")
-                async for message in websocket:
-                    data = json.loads(message)
-                    if data.get("type"):
-                        raw_data = data["data"]
-
-                        if "weather" in raw_data:
-                            latest_data["weather"] = raw_data["weather"]
-                        if "gear" in raw_data:
-                            latest_data["gearStock"] = clean_items(raw_data["gear"])
-                        if "seeds" in raw_data:
-                            latest_data["seedsStock"] = clean_items(raw_data["seeds"])
-                        if "cosmetics" in raw_data:
-                            latest_data["cosmeticsStock"] = clean_items(raw_data["cosmetics"])
-                        if "honey" in raw_data:
-                            latest_data["eventStock"] = clean_items(raw_data["honey"])
-                        if "eggs" in raw_data:
-                            latest_data["eggStock"] = combine_items_by_name(raw_data["eggs"])
-                        if "lastGlobalUpdate" in raw_data:
-                            latest_data["lastGlobalUpdate"] = async def websocket_listener():
-    uri = "wss://ws.growagardenpro.com/"
-    while True:
-        try:
-            async with websockets.connect(uri) as websocket:
-                print("✅ API WebSocket Connected.")
-                async for message in websocket:
-                    data = json.loads(message)
-                    if data.get("type"):
-                        raw_data = data["data"]
-
-                        if "weather" in raw_data:
-                            latest_data["weather"] = raw_data["weather"]
-                        if "gear" in raw_data:
-                            latest_data["gearStock"] = clean_items(raw_data["gear"])
-                        if "seeds" in raw_data:
-                            latest_data["seedsStock"] = clean_items(raw_data["seeds"])
-                        if "cosmetics" in raw_data:
-                            latest_data["cosmeticsStock"] = clean_items(raw_data["cosmetics"])
-                        if "honey" in raw_data:
-                            latest_data["eventStock"] = clean_items(raw_data["honey"])
-                        if "eggs" in raw_data:
-                            latest_data["eggStock"] = combine_items_by_name(raw_data["eggs"])
+                            latest_data["eggStock"] = clean_items(raw_data["eggs"])
                         if "lastGlobalUpdate" in raw_data:
                             latest_data["lastGlobalUpdate"] = raw_data["lastGlobalUpdate"]
                             
