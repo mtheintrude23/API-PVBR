@@ -44,7 +44,7 @@ latest_data = {
     "eggStock": [],
     "eventStock": [],
     "cosmeticsStock": [],
-    "timestamp": 0,
+    "lastGlobalUpdate": [],
 }
 
 # ----------------------------
@@ -75,6 +75,9 @@ async def websocket_listener():
                             latest_data["eventStock"] = clean_items(raw_data["honey"])
                         if "eggs" in raw_data:
                             latest_data["eggStock"] = combine_items_by_name(raw_data["eggs"])
+                        if "lastGlobalUpdate" in raw_data:
+                            latest_data["lastGlobalUpdate"] = combine-items_by_name(raw_data["lastGlobalUpdate"])
+                            
         except Exception as e:
             print(f"❌ WebSocket error: {e}. Retrying in 5s...")
             await asyncio.sleep(5)
