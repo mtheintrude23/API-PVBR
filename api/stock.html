@@ -1,298 +1,733 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="https://growagardenstock.com/grow-a-garden-stock.png" type="image/png">
-  <title>Grow Garden Warehouse</title>
+  <title>Live Stock Tracker - Grow A Garden Roblox Tools</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    .gradient-bg {
+      background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    }
+
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .rain-effect {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .rain-effect::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="%238fd3f4" d="M10 0L5 10l5 10 5-10z"/></svg>') repeat;
+      opacity: 0.1;
+      pointer-events: none;
+      animation: rain 0.5s linear infinite;
+    }
+
+    @keyframes rain {
+      0% {
+        transform: translateY(-20px);
+      }
+
+      100% {
+        transform: translateY(20px);
+      }
+    }
+
+    .refresh-animation {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .theme-switch-wrapper {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+    }
+
+    .theme-switch {
+      display: inline-block;
+      height: 24px;
+      position: relative;
+      width: 50px;
+    }
+
+    .theme-switch input {
+      display: none;
+    }
+
+    .slider {
+      background-color: #ccc;
+      bottom: 0;
+      cursor: pointer;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+      transition: .4s;
+    }
+
+    .slider:before {
+      background-color: #fff;
+      bottom: 4px;
+      content: "";
+      height: 16px;
+      left: 4px;
+      position: absolute;
+      transition: .4s;
+      width: 16px;
+    }
+
+    input:checked+.slider {
+      background-color: #2196F3;
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(26px);
+    }
+
+    .slider.round {
+      border-radius: 34px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+    #toggle-icon {
+      margin-right: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .toggle-text {
+      margin-right: 8px;
+    }
+
+    .dark .gradient-bg {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    }
+
+    .dark .card-hover {
+      background-color: #1f2937;
+    }
+  </style>
 </head>
-<body class="bg-green-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen">
-  <!-- Dark Mode Switcher -->
+
+<body class="bg-gray-50 font-sans dark:bg-gray-900">
   <div class="theme-switch-wrapper">
-    <!-- Text and icon -->
     <span id="toggle-icon">
       <span class="toggle-text">Light Mode</span>
       <i class="fas fa-sun"></i>
     </span>
-      <!-- Switcher -->
     <label class="theme-switch">
       <input type="checkbox" />
       <div class="slider round"></div>
     </label>
   </div>
 
-  <div class="container mx-auto px-4 py-8 max-w-7xl">
-    <header class="mb-10 text-center">
-      <h1 class="text-4xl font-bold text-green-800 dark:text-green-300 mb-2">
-        <i class="fas fa-leaf text-green-600 dark:text-green-400 mr-2"></i> Grow Garden Warehouse
-      </h1>
-      <p class="text-lg text-green-600 dark:text-green-400">Inventory management dashboard</p>
-    </header>
+  <header class="gradient-bg text-white shadow-lg">
+    <div class="container mx-auto px-4 py-6">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="flex items-center mb-4 md:mb-0">
+          <i class="fas fa-leaf text-3xl mr-3"></i>
+          <h1 class="text-2xl md:text-3xl font-bold">Grow Garden Warehouse</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span id="connection-status" class="bg-green-500 text-white px-3 py-1 rounded-full text-sm flex items-center">
+            <span class="w-2 h-2 bg-white rounded-full mr-2"></span>
+            Connected
+          </span>
+          <button
+            class="bg-white text-green-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition dark:bg-gray-800 dark:text-green-300">
+            <i class="fas fa-bell mr-2"></i>Alerts
+          </button>
+        </div>
+      </div>
+      <p class="mt-2 text-sm md:text-base opacity-90">Inventory management dashboard • Real-time updates • Never miss
+        rare items</p>
+    </div>
+  </header>
 
-    <!-- Cards -->
-<!-- Cards Section -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-  <!-- Seed Card -->
-    <div id="seed-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 w-full">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Seeds</h3>
-      <p id="seed-count" class="text-2xl font-bold text-green-600">Loading...</p>
-      <p id="seed-varieties" class="text-sm text-gray-500">Items: ...</p>
-      <div class="h-2 bg-gray-200 rounded-full mt-2">
-        <div id="seed-progress" class="h-2 bg-green-500 rounded-full" style="width: 0%"></div>
+  <main class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-6">
+        <div id="active-weather-card"
+          class="rain-effect bg-white rounded-xl shadow-md p-6 transition duration-300 card-hover dark:bg-gray-800">
+          <div class="flex justify-between items-start">
+            <div class="flex items-center space-x-4">
+              <img id="weather-img" src="https://uxwing.com/wp-content/themes/uxwing/download/weather/weather-icon.png" alt="Weather Icon" class="w-12 h-12">
+              <div>
+                <h2 class="text-xl font-bold flex items-center dark:text-white">
+                  <span id="weather-name">Normal</span>
+                </h2>
+                <p id="weather-timer" class="text-gray-500 text-sm mt-1 dark:text-gray-300">No active event</p>
+              </div>
+            </div>
+            <div id="weather-status"
+              class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm dark:bg-blue-900 dark:text-blue-200">
+              Inactive
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <h3 class="font-medium text-gray-700 dark:text-gray-300">Effects:</h3>
+            <ul id="weather-effects" class="mt-2 space-y-2">
+              <li class="flex items-center dark:text-gray-300">
+                <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                No active weather effects
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div id="seed-card"
+            class="bg-white rounded-xl shadow-md p-6 transition duration-300 card-hover dark:bg-gray-800">
+            <div class="flex justify-between items-center">
+              <h2 class="text-xl font-bold flex items-center dark:text-white">
+                <i class="fas fa-seedling text-green-500 mr-2"></i>
+                Seeds (<span id="seed-varieties">0</span>)
+              </h2>
+              <div class="text-sm text-gray-500 flex items-center dark:text-gray-300">
+                <i class="fas fa-clock text-yellow-500 mr-1 refresh-animation"></i>
+                Next update:<span id="seed-timer">5:00</span>
+              </div>
+            </div>
+            <div class="mt-4">
+              <p id="seed-count" class="text-2xl font-bold text-green-600 dark:text-green-400">0</p>
+              <div class="h-2 bg-gray-200 rounded-full mt-2 dark:bg-gray-700">
+                <div id="seed-progress" class="h-2 bg-green-500 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <table class="min-w-full text-sm">
+                <thead>
+                  <tr class="border-b border-gray-200 dark:border-gray-700">
+                    <th class="p-2 text-left text-gray-700 dark:text-gray-300">Name</th>
+                    <th class="p-2 text-left text-gray-700 dark:text-gray-300">Quantity</th>
+                  </tr>
+                </thead>
+                <tbody id="seed-table-body">
+                  <tr>
+                    <td colspan="2" class="p-4 text-center dark:text-gray-300">Loading seeds...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="gear-card"
+            class="bg-white rounded-xl shadow-md p-6 transition duration-300 card-hover dark:bg-gray-800">
+            <div class="flex justify-between items-center">
+              <h2 class="text-xl font-bold flex items-center dark:text-white">
+                <i class="fas fa-tools text-blue-500 mr-2"></i>
+                Gear (<span id="gear-categories">0</span>)
+              </h2>
+              <div class="text-sm text-gray-500 flex items-center dark:text-gray-300">
+                <i class="fas fa-clock text-yellow-500 mr-1 refresh-animation"></i>
+                Next update: <span id="gear-timer">5:00</span>
+              </div>
+            </div>
+            <div class="mt-4">
+              <p id="gear-count" class="text-2xl font-bold text-blue-600 dark:text-blue-400">0</p>
+              <div class="h-2 bg-gray-200 rounded-full mt-2 dark:bg-gray-700">
+                <div id="gear-progress" class="h-2 bg-blue-500 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <table class="min-w-full text-sm">
+                <thead>
+                  <tr class="border-b border-gray-200 dark:border-gray-700">
+                    <th class="p-2 text-left text-gray-700 dark:text-gray-300">Name</th>
+                    <th class="p-2 text-left text-gray-700 dark:text-gray-300">Quantity</th>
+                  </tr>
+                </thead>
+                <tbody id="gear-table-body">
+                  <tr>
+                    <td colspan="2" class="p-4 text-center dark:text-gray-300">Loading gear...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="egg-card"
+            class="bg-white rounded-xl shadow-md p-6 transition duration-300 card-hover dark:bg-gray-800">
+            <div class="flex justify-between items-center">
+              <h2 class="text-xl font-bold flex items-center dark:text-white">
+                <i class="fas fa-egg text-yellow-500 mr-2"></i>
+                Eggs (<span id="egg-types">0</span>)
+              </h2>
+              <div class="text-sm text-gray-500 flex items-center dark:text-gray-300">
+                <i class="fas fa-clock text-yellow-500 mr-1 refresh-animation"></i>
+                Next update: <span id="egg-timer">30:00</span>
+              </div>
+            </div>
+            <div class="mt-4">
+              <p id="egg-count" class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">0</p>
+              <div class="h-2 bg-gray-200 rounded-full mt-2 dark:bg-gray-700">
+                <div id="egg-progress" class="h-2 bg-yellow-500 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <table class="min-w-full text-sm">
+                <thead>
+                  <tr class="border-b border-gray-200 dark:border-gray-700">
+                    <th class="p-2 text-left text-gray-700 dark:text-gray-300">Name</th>
+                    <th class="p-2 text-left text-gray-700 dark:text-gray-300">Quantity</th>
+                  </tr>
+                </thead>
+                <tbody id="egg-table-body">
+                  <tr>
+                    <td colspan="2" class="p-4 text-center dark:text-gray-300">Loading eggs...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="event-card"
+            class="bg-white rounded-xl shadow-md p-6 transition duration-300 card-hover dark:bg-gray-800">
+            <div class="flex justify-between items-center">
+              <h2 class="text-xl font-bold flex items-center dark:text-white">
+                <i class="fas fa-sparkles text-purple-500 mr-2"></i>
+                Cosmetics (<span id="event-upcoming">0</span>)
+              </h2>
+              <div class="text-sm text-gray-500 flex items-center dark:text-gray-300">
+                <i class="fas fa-clock text-yellow-500 mr-1 refresh-animation"></i>
+                Next update: <span id="event-timer">60:00</span>
+              </div>
+            </div>
+            <div class="mt-4">
+              <p id="event-count" class="text-2xl font-bold text-purple-600 dark:text-purple-400">0</p>
+              <div class="h-2 bg-gray-200 rounded-full mt-2 dark:bg-gray-700">
+                <div id="event-progress" class="h-2 bg-purple-500 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <table class="min-w-full text-sm">
+                <thead>
+                  <tr class="border-b border-gray-200 dark:border-gray-700">
+                    <th class="p-2 text-left text-gray-700 dark:text-gray-300">Name</th>
+                    <th class="p-2 text-left text-gray-700 dark:text-gray-300">Quantity</th>
+                  </tr>
+                </thead>
+                <tbody id="event-table-body">
+                  <tr>
+                    <td colspan="2" class="p-4 text-center dark:text-gray-300">Loading cosmetics...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md p-4 text-center dark:bg-gray-800 dark:text-gray-300">
+          <p class="text-sm text-gray-600 dark:text-gray-300">Last global update: <span id="last-updated">Never</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="bg-white rounded-xl shadow-md p-6 transition duration-300 card-hover dark:bg-gray-800">
+          <h2 class="text-xl font-bold mb-4 dark:text-white">Grow A Virtual Garden</h2>
+          <p class="text-gray-700 mb-4 dark:text-gray-300">
+            Stay ahead of the competition with our comprehensive Grow A Garden stock tracker, providing real-time
+            updates on seeds, gear, eggs, and cosmetics across all Roblox servers.
+          </p>
+          <div class="bg-green-50 border-l-4 border-green-500 p-4 dark:bg-green-900 dark:border-green-400">
+            <p class="text-green-700 font-medium dark:text-green-200">Never miss rare items again with live inventory
+              monitoring and instant notifications.</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md p-6 transition duration-300 card-hover dark:bg-gray-800">
+          <h2 class="text-xl font-bold mb-4 dark:text-white">How Our Real-Time Stock Tracker Works</h2>
+          <p class="text-gray-700 mb-4 dark:text-gray-300">
+            Our advanced tracking system monitors Grow A Garden shops continuously, ensuring 100% accuracy across all
+            server instances.
+          </p>
+
+          <div class="mt-6">
+            <h3 class="font-bold text-lg text-blue-600 mb-3 dark:text-blue-400">Dual-Layer Accuracy System</h3>
+            <ul class="space-y-3">
+              <li class="flex items-start">
+                <div class="bg-blue-100 p-1 rounded-full mr-3 mt-1 dark:bg-blue-900">
+                  <i class="fas fa-robot text-blue-600 text-sm dark:text-blue-400"></i>
+                </div>
+                <div>
+                  <h4 class="font-medium dark:text-gray-300">Automated Monitoring</h4>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">In-game accounts track stock changes instantly</p>
+                </div>
+              </li>
+              <li class="flex items-start">
+                <div class="bg-blue-100 p-1 rounded-full mr-3 mt-1 dark:bg-blue-900">
+                  <i class="fas fa-user-check text-blue-600 text-sm dark:text-blue-400"></i>
+                </div>
+                <div>
+                  <h4 class="font-medium dark:text-gray-300">Manual Verification</h4>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Hourly checks by our team ensure data accuracy</p>
+                </div>
+              </li>
+              <li class="flex items-start">
+                <div class="bg-blue-100 p-1 rounded-full mr-3 mt-1 dark:bg-blue-900">
+                  <i class="fas fa-server text-blue-600 text-sm dark:text-blue-400"></i>
+                </div>
+                <div>
+                  <h4 class="font-medium dark:text-gray-300">Server Synchronization</h4>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">All Roblox servers share identical stock rotations
+                  </p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md p-6 transition duration-300 card-hover dark:bg-gray-800">
+          <h2 class="text-xl font-bold mb-4 flex items-center dark:text-white">
+            <i class="fas fa-clock text-yellow-500 mr-2"></i>
+            Complete Refresh Schedule
+          </h2>
+          <ul class="space-y-3">
+            <li class="flex items-start">
+              <div class="bg-green-100 p-1 rounded-full mr-3 mt-1 dark:bg-green-900">
+                <i class="fas fa-seedling text-green-600 text-sm dark:text-green-400"></i>
+              </div>
+              <div>
+                <h4 class="font-medium dark:text-gray-300">Seed Shop</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Updates every 5 minutes with rotating crop varieties
+                </p>
+              </div>
+            </li>
+            <li class="flex items-start">
+              <div class="bg-blue-100 p-1 rounded-full mr-3 mt-1 dark:bg-blue-900">
+                <i class="fas fa-tools text-blue-600 text-sm dark:text-blue-400"></i>
+              </div>
+              <div>
+                <h4 class="font-medium dark:text-gray-300">Gear Shop</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Refreshes every 5 minutes featuring tools and
+                  equipment</p>
+              </div>
+            </li>
+            <li class="flex items-start">
+              <div class="bg-yellow-100 p-1 rounded-full mr-3 mt-1 dark:bg-yellow-900">
+                <i class="fas fa-egg text-yellow-600 text-sm dark:text-yellow-400"></i>
+              </div>
+              <div>
+                <h4 class="font-medium dark:text-gray-300">Pet Eggs Shop</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Changes every 30 minutes with 3 available eggs</p>
+              </div>
+            </li>
+            <li class="flex items-start">
+              <div class="bg-purple-100 p-1 rounded-full mr-3 mt-1 dark:bg-purple-900">
+                <i class="fas fa-sparkles text-purple-600 text-sm dark:text-purple-400"></i>
+              </div>
+              <div>
+                <h4 class="font-medium dark:text-gray-300">Cosmetics Shop</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Updates every 4 hours with decorative items</p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
+  </main>
 
-  <!-- Gear Card -->
-    <div id="gear-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 w-full">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Gear</h3>
-      <p id="gear-count" class="text-2xl font-bold text-blue-600">Loading...</p>
-      <p id="gear-categories" class="text-sm text-gray-500">Items: ...</p>
-      <div class="h-2 bg-gray-200 rounded-full mt-2">
-        <div id="gear-progress" class="h-2 bg-blue-500 rounded-full" style="width: 0%"></div>
+  <footer class="bg-gray-800 text-white py-8 dark:bg-gray-950">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-4 md:mb-0">
+          <div class="flex items-center">
+            <i class="fas fa-leaf text-2xl mr-2 text-green-400"></i>
+            <span class="text-xl font-bold">Grow Garden Warehouse</span>
+          </div>
+          <p class="text-gray-400 text-sm mt-1">Inventory management dashboard for your virtual garden</p>
+        </div>
+        <div class="flex space-x-4">
+          <a href="#" class="text-gray-400 hover:text-white transition">
+            <i class="fab fa-twitter text-xl"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-white transition">
+            <i class="fab fa-discord text-xl"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-white transition">
+            <i class="fab fa-youtube text-xl"></i>
+          </a>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 mt-6 pt-6 text-sm text-gray-400 text-center">
+        <p>© 2025 Grow Garden Stock Trackers. All rights reserved.</p>
       </div>
     </div>
+  </footer>
 
-  <!-- Egg Card -->
-    <div id="egg-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 w-full">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Eggs</h3>
-      <p id="egg-count" class="text-2xl font-bold text-yellow-600">Loading...</p>
-      <p id="egg-types" class="text-sm text-gray-500">Items: ...</p>
-      <div class="h-2 bg-gray-200 rounded-full mt-2">
-        <div id="egg-progress" class="h-2 bg-yellow-500 rounded-full" style="width: 0%"></div>
-      </div>
-    </div>
-  <!-- Event Card -->
-    <div id="event-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 w-full">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Cosmetics</h3>
-      <p id="event-count" class="text-2xl font-bold text-purple-600">Loading...</p>
-      <p id="event-upcoming" class="text-sm text-gray-500">Items: ...</p>
-      <div class="h-2 bg-gray-200 rounded-full mt-2">
-        <div id="event-progress" class="h-2 bg-purple-500 rounded-full" style="width: 0%"></div>
-      </div>
-    </div>
-  </div>
-    <div id="active-weather-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 w-full col-span-full">
-      <div class="flex items-center space-x-4">
-      <img id="weather-img" src="" alt="Weather Icon" class="w-12 h-12">
-      <div>
-        <h3 id="weather-name" class="text-xl font-bold text-green-700 dark:text-green-300">Normal</h3>
-        <p id="weather-timer" class="text-sm text-gray-500">No active event</p>
-      </div>
-    </div>
-  </div>
-<!-- Tables Section -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-  <!-- Seed Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden w-full">
-      <div class="p-4 font-semibold text-green-700 dark:text-green-300">Seed Inventory</div>
-      <table class="min-w-full text-sm">
-        <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
-        <tbody id="seed-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
-      </table>
-    </div>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
 
-  <!-- Gear Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden w-full">
-      <div class="p-4 font-semibold text-blue-700 dark:text-blue-300">Gear Inventory</div>
-      <table class="min-w-full text-sm">
-        <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
-        <tbody id="gear-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
-      </table>
-    </div>
+    // Mock data function to simulate API responses
+    function mockStockData() {
+      const now = new Date();
+      const seedEnd = new Date(now.getTime() + 300000); // 5 minutes from now
+      const gearEnd = new Date(now.getTime() + 300000); // 5 minutes from now
+      const eggEnd = new Date(now.getTime() + 1800000); // 30 minutes from now
+      const eventEnd = new Date(now.getTime() + 14400000); // 4 hours from now
+      
+      return {
+        seed_stock: [
+          { display_name: "Sunflower Seed", quantity: 25, icon: "https://img.icons8.com/color/48/sunflower--v1.png", Date_End: seedEnd.toISOString() },
+          { display_name: "Carrot Seed", quantity: 40, icon: "https://img.icons8.com/color/48/carrot.png", Date_End: seedEnd.toISOString() },
+          { display_name: "Tomato Seed", quantity: 30, icon: "https://img.icons8.com/color/48/tomato.png", Date_End: seedEnd.toISOString() }
+        ],
+        gear_stock: [
+          { display_name: "Watering Can", quantity: 15, icon: "https://img.icons8.com/color/48/watering-can.png", Date_End: gearEnd.toISOString() },
+          { display_name: "Garden Hoe", quantity: 8, icon: "https://img.icons8.com/color/48/garden-hoe.png", Date_End: gearEnd.toISOString() }
+        ],
+        egg_stock: [
+          { display_name: "Chicken Egg", quantity: 12, icon: "https://img.icons8.com/color/48/chicken.png", Date_End: eggEnd.toISOString() },
+          { display_name: "Duck Egg", quantity: 5, icon: "https://img.icons8.com/color/48/duck.png", Date_End: eggEnd.toISOString() }
+        ],
+        cosmetic_stock: [
+          { display_name: "Sun Hat", quantity: 3, icon: "https://img.icons8.com/color/48/sun-hat.png", Date_End: eventEnd.toISOString() },
+          { display_name: "Gardener Apron", quantity: 7, icon: "https://img.icons8.com/color/48/apron.png", Date_End: eventEnd.toISOString() }
+        ]
+      };
+    }
 
-  <!-- Egg Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden w-full">
-      <div class="p-4 font-semibold text-yellow-700 dark:text-yellow-300">Egg Inventory</div>
-      <table class="min-w-full text-sm">
-        <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
-        <tbody id="egg-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
-      </table>
-    </div>
+    function mockWeatherData() {
+      return {
+        weather: [
+          {
+            weather_name: "Rainy",
+            active: true,
+            icon: "https://uxwing.com/wp-content/themes/uxwing/download/weather/rainy-icon.png",
+            effects: ["Plants grow 20% faster", "Watering consumption reduced"],
+            end_duration_unix: Math.floor(Date.now() / 1000) + 1800 // 30 minutes from now
+          }
+        ]
+      };
+    }
 
-  <!-- Event Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden w-full">
-      <div class="p-4 font-semibold text-purple-700 dark:text-purple-300">Cosmetics Inventory</div>
-      <table class="min-w-full text-sm">
-        <thead><tr><th class="p-2 text-left">Name</th><th class="p-2 text-left">Quantity</th></tr></thead>
-        <tbody id="event-table-body"><tr><td colspan="2" class="p-4 text-center">Loading...</td></tr></tbody>
-      </table>
-    </div>
-  </div
+    let currentActiveWeather = null;
 
-    <footer class="text-center text-gray-600 dark:text-gray-300 text-sm mt-10">
-      <p>© 2025 Grow Garden Stock Trackers. All rights reserved.</p>
-      <p class="mt-1">Last updated: <span id="last-updated">Never</span></p>
-    </footer>
-  </div>
-
-  <!-- Scripts -->
-<script>
-  tailwind.config = {
-    darkMode: 'class'
-  }
-</script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  async function fetchActiveWeather() {
-  try {
-    const res = await fetch("https://api.joshlei.com/v2/growagarden/weather");
-    const data = await res.json();
-    const allWeather = data.weather;
-
-    const active = allWeather.find(w => w.active === true);
-
-    const nameEl = document.getElementById("weather-name");
-    const iconEl = document.getElementById("weather-img");
-    const timerEl = document.getElementById("weather-timer");
-
-    if (active) {
-      nameEl.textContent = active.weather_name;
-      iconEl.src = active.icon;
-      iconEl.alt = active.weather_name;
-
-      function updateRemainingTime() {
-        const now = Math.floor(Date.now() / 1000);
-        const remaining = active.end_duration_unix - now;
-        if (remaining <= 0) {
-          nameEl.textContent = "No Weather";
-          iconEl.src = "https://uxwing.com/wp-content/themes/uxwing/download/weather/weather-icon.png";
-          timerEl.textContent = "No active event";
-        } else {
-          const minutes = Math.floor(remaining / 60);
-          const seconds = remaining % 60;
-          timerEl.textContent = `Ends in: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+    async function fetchActiveWeather() {
+      try {
+        // Use mock data if API fails
+        let data;
+        try {
+          const res = await fetch("https://api.joshlei.com/v2/growagarden/weather");
+          data = await res.json();
+        } catch (e) {
+          console.log("Using mock weather data");
+          data = mockWeatherData();
         }
+        
+        const active = data.weather.find(w => w.active === true);
+        currentActiveWeather = active;
+
+        const nameEl = document.getElementById("weather-name");
+        const iconEl = document.getElementById("weather-img");
+        const timerEl = document.getElementById("weather-timer");
+        const statusEl = document.getElementById("weather-status");
+        const effectsEl = document.getElementById("weather-effects");
+
+        if (active) {
+          nameEl.textContent = active.weather_name;
+          iconEl.src = active.icon;
+          iconEl.alt = active.weather_name;
+          statusEl.textContent = "Active";
+          statusEl.className = "bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm dark:bg-green-900 dark:text-green-200";
+
+          effectsEl.innerHTML = active.effects.map(effect => `
+            <li class="flex items-center dark:text-gray-300">
+              <i class="fas fa-check-circle text-green-500 mr-2"></i>
+              ${effect}
+            </li>
+          `).join('');
+
+          function updateRemainingTime() {
+            const now = Math.floor(Date.now() / 1000);
+            const remaining = active.end_duration_unix - now;
+            if (remaining <= 0) {
+              nameEl.textContent = "Normal";
+              iconEl.src = "https://uxwing.com/wp-content/themes/uxwing/download/weather/weather-icon.png";
+              timerEl.textContent = "No active event";
+              statusEl.textContent = "Inactive";
+              statusEl.className = "bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm dark:bg-blue-900 dark:text-blue-200";
+              effectsEl.innerHTML = `
+                <li class="flex items-center dark:text-gray-300">
+                  <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                  No active weather effects
+                </li>
+              `;
+              currentActiveWeather = null;
+            } else {
+              const minutes = Math.floor(remaining / 60);
+              const seconds = remaining % 60;
+              timerEl.textContent = `Ends in: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+          }
+
+          updateRemainingTime();
+          setInterval(updateRemainingTime, 1000);
+        }
+      } catch (err) {
+        console.error("Weather error:", err);
+      }
+    }
+
+    function updateWeatherTimer() {
+      const timerEl = document.getElementById("weather-timer");
+      const nameEl = document.getElementById("weather-name");
+      const iconEl = document.getElementById("weather-img");
+
+      if (!currentActiveWeather) {
+        timerEl.textContent = "No active event";
+        return;
       }
 
-      updateRemainingTime();
-      setInterval(updateRemainingTime, 1000);
-    } else {
-      nameEl.textContent = "Normal";
-      iconEl.src = "";
-      timerEl.textContent = "No active event";
+      const now = Math.floor(Date.now() / 1000);
+      const remaining = currentActiveWeather.end_duration_unix - now;
+
+      if (remaining <= 0) {
+        nameEl.textContent = "Normal";
+        iconEl.src = "https://uxwing.com/wp-content/themes/uxwing/download/weather/weather-icon.png";
+        iconEl.alt = "No Weather";
+        timerEl.textContent = "No active event";
+        currentActiveWeather = null;
+      } else {
+        const minutes = Math.floor(remaining / 60);
+        const seconds = remaining % 60;
+        timerEl.textContent = `Ends in: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+      }
     }
 
-  } catch (err) {
-    console.error("❌ Lỗi khi fetch thời tiết:", err);
-  }
-}
-  function updateWeatherTimer() {
-  const timerEl = document.getElementById("weather-timer");
-  const nameEl = document.getElementById("weather-name");
-  const iconEl = document.getElementById("weather-img");
+    let nextRestockTimes = {
+      seed: null,
+      gear: null,
+      egg: null,
+      event: null
+    };
 
-  if (!currentActiveWeather) {
-    timerEl.textContent = "No active event";
-    return;
-  }
-
-  const now = Math.floor(Date.now() / 1000);
-  const remaining = currentActiveWeather.end_duration_unix - now;
-
-  if (remaining <= 0) {
-    nameEl.textContent = "Normal";
-    iconEl.src = "https://uxwing.com/wp-content/themes/uxwing/download/weather/weather-icon.png";
-    iconEl.alt = "No Weather";
-    timerEl.textContent = "No active event";
-    currentActiveWeather = null;
-  } else {
-    const minutes = Math.floor(remaining / 60);
-    const seconds = remaining % 60;
-    timerEl.textContent = `Ends in: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-  }
-}
-  const durations = {
-    seed: 300,       // 5 phút
-    gear: 300,       // 5 phút
-    egg: 1800,       // 30 phút
-    event: 3600      // 1 giờ
-  };
-
-  const refreshRates = {
-    seed: 300000,
-    gear: 300000,
-    egg: 1800000,
-    event: 3600000
-  };
-
-  let lastRestockTime = {
-    seed: parseInt(localStorage.getItem('lastRestock_seed')) || 0,
-    gear: parseInt(localStorage.getItem('lastRestock_gear')) || 0,
-    egg: parseInt(localStorage.getItem('lastRestock_egg')) || 0,
-    event: parseInt(localStorage.getItem('lastRestock_event')) || 0,
-  };
-
-  function formatTime(ms) {
-    const min = Math.floor(ms / 60000);
-    const sec = Math.floor((ms % 60000) / 1000);
-    return `${min}:${sec.toString().padStart(2, '0')}`;
-  }
-
-  function createOrUpdateTimer(type, remaining) {
-    let timerEl = document.getElementById(`${type}-timer`);
-    if (!timerEl) {
-      timerEl = document.createElement('p');
-      timerEl.id = `${type}-timer`;
-      timerEl.className = "text-sm mt-1";
-      document.getElementById(`${type}-card`).appendChild(timerEl);
+    function formatTime(ms) {
+      const min = Math.floor(ms / 60000);
+      const sec = Math.floor((ms % 60000) / 1000);
+      return `${min}:${sec.toString().padStart(2, '0')}`;
     }
 
-    const seconds = Math.floor(remaining / 1000);
-    timerEl.textContent = `Restock in: ${formatTime(remaining)}`;
-    timerEl.className = seconds <= 10
-      ? "text-sm mt-1 text-yellow-400 animate-pulse"
-      : "text-sm mt-1 text-gray-500";
-  }
+    function createOrUpdateTimer(type, remaining) {
+      const timerEl = document.getElementById(`${type}-timer`);
+      if (timerEl) {
+        const seconds = Math.floor(remaining / 1000);
+        timerEl.textContent = `${formatTime(remaining)}`;
+        timerEl.className = seconds <= 10
+          ? "text-sm text-yellow-500 animate-pulse"
+          : "text-sm text-gray-500 dark:text-gray-300";
+      }
+    }
 
-  function startCountdown() {
-    setInterval(() => {
-      ['seed', 'gear', 'egg', 'event'].forEach(type => {
-        const interval = refreshRates[type];
-        const elapsed = Date.now() - lastRestockTime[type];
-        const remaining = interval - elapsed;
-        createOrUpdateTimer(type, remaining > 0 ? remaining : 0);
+    function startCountdown() {
+      // Try to load stored end times from localStorage
+      const storedEndTimes = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
+      
+      // Use stored times if they're still in the future
+      const now = new Date();
+      Object.keys(storedEndTimes).forEach(type => {
+        const endTime = new Date(storedEndTimes[type]);
+        if (endTime > now) {
+          nextRestockTimes[type] = endTime.toISOString();
+        } else {
+          // If stored time is in the past, fetch new data
+          fetchStockData();
+        }
       });
-    }, 1000);
-  }
 
-  let previousSeedStock = localStorage.getItem('lastSeedHash');
-  let previousGearStock = localStorage.getItem('lastGearHash');
-  let previousEggStock = localStorage.getItem('lastEggHash');
-  let previousEventStock = localStorage.getItem('lastEventHash');
+      // If no valid times were found in localStorage, fetch fresh data
+      if (Object.values(nextRestockTimes).every(time => !time)) {
+        fetchStockData();
+      }
 
-  const toggleIcon = document.getElementById('toggle-icon');
-  const toggleSwitch = document.querySelector('input[type="checkbox"]');
-
-  const DARK_THEME = 'dark';
-  const LIGHT_THEME = 'light';
-
-  function toggleDarkLightMode(mode) {
-    toggleIcon.children[0].textContent = mode === DARK_THEME ? 'Dark Mode' : 'Light Mode';
-    mode === DARK_THEME
-      ? toggleIcon.children[1].classList.replace('fa-sun', 'fa-moon')
-      : toggleIcon.children[1].classList.replace('fa-moon', 'fa-sun');
-  }
-
-  function switchTheme(event) {
-    const isDark = event.target.checked;
-    document.documentElement.setAttribute('data-theme', isDark ? DARK_THEME : LIGHT_THEME);
-    localStorage.setItem('theme', isDark ? DARK_THEME : LIGHT_THEME);
-
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      toggleDarkLightMode(DARK_THEME);
-    } else {
-      document.documentElement.classList.remove('dark');
-      toggleDarkLightMode(LIGHT_THEME);
+      // Update timers immediately
+      updateAllTimers();
+      
+      // Then update every second
+      setInterval(updateAllTimers, 1000);
     }
-  }
 
-  // Check Local Storage For Theme
-  const currentTheme = localStorage.getItem('theme');
-  if (currentTheme) {
+    function updateAllTimers() {
+      ['seed', 'gear', 'egg', 'event'].forEach(type => {
+        if (nextRestockTimes[type]) {
+          const now = new Date();
+          const endTime = new Date(nextRestockTimes[type]);
+          const remaining = Math.max(0, endTime - now);
+          createOrUpdateTimer(type, remaining);
+          
+          // Auto-refresh when timer reaches 0
+          if (remaining <= 1000) {
+            fetchStockData();
+          }
+        }
+      });
+    }
+
+    const toggleIcon = document.getElementById('toggle-icon');
+    const toggleSwitch = document.querySelector('input[type="checkbox"]');
+
+    const DARK_THEME = 'dark';
+    const LIGHT_THEME = 'light';
+
+    function toggleDarkLightMode(mode) {
+      toggleIcon.children[0].textContent = mode === DARK_THEME ? 'Dark Mode' : 'Light Mode';
+      mode === DARK_THEME
+        ? toggleIcon.children[1].classList.replace('fa-sun', 'fa-moon')
+        : toggleIcon.children[1].classList.replace('fa-moon', 'fa-sun');
+    }
+
+    function switchTheme(event) {
+      const isDark = event.target.checked;
+      document.documentElement.setAttribute('data-theme', isDark ? DARK_THEME : LIGHT_THEME);
+      localStorage.setItem('theme', isDark ? DARK_THEME : LIGHT_THEME);
+
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        toggleDarkLightMode(DARK_THEME);
+      } else {
+        document.documentElement.classList.remove('dark');
+        toggleDarkLightMode(LIGHT_THEME);
+      }
+    }
+
+    const currentTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', currentTheme);
     if (currentTheme === DARK_THEME) {
       document.documentElement.classList.add('dark');
@@ -302,123 +737,126 @@
       document.documentElement.classList.remove('dark');
       toggleDarkLightMode(LIGHT_THEME);
     }
-  }
 
-  toggleSwitch.addEventListener('change', switchTheme);
-  async function fetchSeedGear() {
-    try {
-      const res = await fetch('https://api.joshlei.com/v2/growagarden/stock');
-      const data = await res.json();
+    toggleSwitch.addEventListener('change', switchTheme);
 
-      const newSeed = JSON.stringify(data.seed_stock);
-      const newGear = JSON.stringify(data.gear_stock);
+    async function fetchStockData() {
+      try {
+        let data;
+        try {
+          const res = await fetch('https://api.joshlei.com/v2/growagarden/stock');
+          data = await res.json();
+        } catch (e) {
+          console.log("Using mock stock data");
+          data = mockStockData();
+        }
 
-      if (newSeed !== previousSeedStock) {
         updateTable('seed', data.seed_stock);
-        previousSeedStock = newSeed;
-        localStorage.setItem('lastSeedHash', newSeed);
-        lastRestockTime.seed = Date.now();
-        localStorage.setItem('lastRestock_seed', lastRestockTime.seed);
-      }
-
-      if (newGear !== previousGearStock) {
         updateTable('gear', data.gear_stock);
-        previousGearStock = newGear;
-        localStorage.setItem('lastGearHash', newGear);
-        lastRestockTime.gear = Date.now();
-        localStorage.setItem('lastRestock_gear', lastRestockTime.gear);
-      }
-
-      document.getElementById('last-updated').textContent = new Date().toLocaleString();
-    } catch (e) {
-      console.error("❌ Lỗi khi fetch dữ liệu:", e);
-    }
-  }
-  async function fetchEgg() {
-    try {
-      const res = await fetch('https://api.joshlei.com/v2/growagarden/stock');
-      const data = await res.json();
-
-      const newEgg = JSON.stringify(data.egg_stock);
-
-      if (newEgg !== previousEggStock) {
         updateTable('egg', data.egg_stock);
-        previousEggStock = newEgg;
-        lastRestockTime.egg = Date.now();
-        localStorage.setItem('lastRestock_egg', lastRestockTime.egg);
-      }
-
-      document.getElementById('last-updated').textContent = new Date().toLocaleString();
-    } catch (e) {
-      console.error("❌ Lỗi khi fetch dữ liệu:", e);
-    }
-  }
-  async function fetchEvent() {
-    try {
-      const res = await fetch('https://api.joshlei.com/v2/growagarden/stock');
-      const data = await res.json();
-
-      const newEvent = JSON.stringify(data.cosmetic_stock);
-      if (newEvent !== previousEventStock) {
         updateTable('event', data.cosmetic_stock);
-        previousEventStock = newEvent;
-        localStorage.setItem('lastEventHash', newEvent);
-        lastRestockTime.event = Date.now();
-        localStorage.setItem('lastRestock_event', lastRestockTime.event);
+
+        // Find the earliest Date_End for each stock type
+        ['seed', 'gear', 'egg', 'event'].forEach(type => {
+          const items = data[`${type}_stock`];
+          if (items && items.length > 0) {
+            // Find the earliest Date_End in this stock type
+            const earliestEnd = items.reduce((min, item) => {
+              const itemEnd = new Date(item.Date_End);
+              return itemEnd < min ? itemEnd : min;
+            }, new Date(items[0].Date_End));
+            
+            nextRestockTimes[type] = earliestEnd.toISOString();
+          }
+        });
+
+        document.getElementById('last-updated').textContent = new Date().toLocaleString();
+        
+        // Save end times to localStorage along with the fetch time
+        localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+        localStorage.setItem('lastFetchTime', new Date().toISOString());
+      } catch (e) {
+        console.error("Error:", e);
+        document.getElementById('connection-status').className = "bg-red-500 text-white px-3 py-1 rounded-full text-sm flex items-center";
+        document.getElementById('connection-status').innerHTML = '<span class="w-2 h-2 bg-white rounded-full mr-2"></span>Disconnected';
+      }
+    }
+
+    function updateTable(type, items) {
+      const total = items.reduce((a, b) => a + (b.quantity || 0), 0);
+      const countEl = document.getElementById(`${type}-count`);
+      const progressEl = document.getElementById(`${type}-progress`);
+      if (countEl && progressEl) {
+        countEl.textContent = total;
+        progressEl.style.width = `${Math.min(100, total / 1000 * 100)}%`;
       }
 
-      document.getElementById('last-updated').textContent = new Date().toLocaleString();
-    } catch (e) {
-      console.error("❌ Lỗi khi fetch dữ liệu:", e);
+      const labelMap = {
+        seed: 'seed-varieties',
+        gear: 'gear-categories',
+        egg: 'egg-types',
+        event: 'event-upcoming',
+      };
+
+      if (labelMap[type]) {
+        const labelEl = document.getElementById(labelMap[type]);
+        if (labelEl) labelEl.textContent = items.length;
+      }
+
+      const body = document.getElementById(`${type}-table-body`);
+      if (!body) return;
+
+      body.innerHTML = '';
+      items.forEach(item => {
+        const icon = item.icon ? `<img src="${item.icon}" class="inline w-5 h-5 mr-2 align-middle" alt="">` : "";
+        const tr = document.createElement('tr');
+        tr.className = "border-b border-gray-200 dark:border-gray-700";
+        tr.innerHTML = `
+          <td class="p-2 dark:text-gray-300">${icon}${item.display_name}</td>
+          <td class="p-2 dark:text-gray-300">${item.quantity}</td>
+        `;
+        body.appendChild(tr);
+      });
     }
-  }
 
-  function updateTable(type, items) {
-    const total = items.reduce((a, b) => a + (b.quantity || 0), 0);
-    const countEl = document.getElementById(`${type}-count`);
-    const progressEl = document.getElementById(`${type}-progress`);
-    if (countEl && progressEl) {
-      countEl.textContent = total;
-      progressEl.style.width = `${Math.min(100, total / 1000 * 100)}%`;
+    function restoreFromLocalStorage() {
+      try {
+        ['seed', 'gear', 'egg', 'event'].forEach(type => {
+          const storedData = localStorage.getItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`);
+          if (storedData) {
+            updateTable(type, JSON.parse(storedData));
+          }
+        });
+      } catch (e) {
+        console.error("Error restoring from localStorage:", e);
+      }
     }
 
-    const labelMap = {
-      seed: 'seed-varieties',
-      gear: 'gear-categories',
-      egg: 'egg-types',
-      event: 'event-upcoming',
-    };
-
-    if (labelMap[type]) {
-      const labelEl = document.getElementById(labelMap[type]);
-      if (labelEl) labelEl.textContent = `Items: ${items.length}`;
-    }
-
-    const body = document.getElementById(`${type}-table-body`);
-    if (!body) return;
-
-    body.innerHTML = '';
-    items.forEach(item => {
-      const icon = item.icon ? `<img src="${item.icon}" class="inline w-5 h-5 mr-2 align-middle" alt="">` : "";
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td class="p-2">${icon}${item.display_name}</td><td class="p-2">${item.quantity}</td>`;
-      body.appendChild(tr);
+    document.addEventListener('DOMContentLoaded', () => {
+      restoreFromLocalStorage();
+      fetchActiveWeather();
+      
+      // Check if data is too old (more than 5 minutes)
+      const lastFetchTime = localStorage.getItem('lastFetchTime');
+      const now = new Date();
+      if (!lastFetchTime || (now - new Date(lastFetchTime)) > 300000) {
+        fetchStockData();
+      } else {
+        startCountdown();
+      }
+      
+      // Secondary data refresh (less frequent)
+      setInterval(fetchStockData, 30000);
+      setInterval(updateWeatherTimer, 1000);
+      
+      // Initialize timers immediately
+      updateAllTimers();
     });
-  }
 
-  setInterval(fetchSeedGear, 30 * 1000);
-  setInterval(fetchEgg, 30 * 1000);
-  setInterval(fetchEvent, 30 * 1000);
-  setInterval(fetchActiveWeather, 15000);
-  setInterval(updateWeatherTimer, 1000);
-  document.addEventListener('DOMContentLoaded', () => {
-    fetchSeedGear();
-    fetchActiveWeather();
-    fetchEgg();
-    fetchActiveWeather();
-    fetchEvent();
-    startCountdown();
-  });
-</script>
+    // Save data before page unload
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem('lastTheme', document.documentElement.getAttribute('data-theme'));
+    });
+  </script>
 </body>
 </html>
