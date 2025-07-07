@@ -64,15 +64,6 @@
         <div id="egg-progress" class="h-2 bg-yellow-500 rounded-full" style="width: 0%"></div>
       </div>
     </div>
-    <div id="active-weather-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 w-full col-span-full">
-      <div class="flex items-center space-x-4">
-      <img id="weather-img" src="" alt="Weather Icon" class="w-12 h-12">
-      <div>
-        <h3 id="weather-name" class="text-xl font-bold text-green-700 dark:text-green-300">Normal</h3>
-        <p id="weather-timer" class="text-sm text-gray-500">No active event</p>
-      </div>
-    </div>
-  </div>
   <!-- Event Card -->
     <div id="event-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 w-full">
       <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Cosmetics</h3>
@@ -83,7 +74,15 @@
       </div>
     </div>
   </div>
-
+    <div id="active-weather-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 w-full col-span-full">
+      <div class="flex items-center space-x-4">
+      <img id="weather-img" src="" alt="Weather Icon" class="w-12 h-12">
+      <div>
+        <h3 id="weather-name" class="text-xl font-bold text-green-700 dark:text-green-300">Normal</h3>
+        <p id="weather-timer" class="text-sm text-gray-500">No active event</p>
+      </div>
+    </div>
+  </div>
 <!-- Tables Section -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
   <!-- Seed Table -->
@@ -385,9 +384,11 @@
   setInterval(fetchSeedGear, 30 * 1000);
   setInterval(fetchEgg, 30 * 1000);
   setInterval(fetchEvent, 30 * 1000);
+  setInterval(fetchActiveWeather, 15000);
 
   document.addEventListener('DOMContentLoaded', () => {
     fetchSeedGear();
+    fetchActiveWeather();
     fetchEgg();
     fetchEvent();
     startCountdown();
