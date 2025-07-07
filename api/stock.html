@@ -179,6 +179,31 @@
     console.error("❌ Lỗi khi fetch thời tiết:", err);
   }
 }
+  function updateWeatherTimer() {
+  const timerEl = document.getElementById("weather-timer");
+  const nameEl = document.getElementById("weather-name");
+  const iconEl = document.getElementById("weather-img");
+
+  if (!currentActiveWeather) {
+    timerEl.textContent = "No active event";
+    return;
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const remaining = currentActiveWeather.end_duration_unix - now;
+
+  if (remaining <= 0) {
+    nameEl.textContent = "Normal";
+    iconEl.src = "https://uxwing.com/wp-content/themes/uxwing/download/weather/weather-icon.png";
+    iconEl.alt = "No Weather";
+    timerEl.textContent = "No active event";
+    currentActiveWeather = null;
+  } else {
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    timerEl.textContent = `Ends in: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+}
   const durations = {
     seed: 300,       // 5 phút
     gear: 300,       // 5 phút
@@ -385,11 +410,12 @@
   setInterval(fetchEgg, 30 * 1000);
   setInterval(fetchEvent, 30 * 1000);
   setInterval(fetchActiveWeather, 15000);
-
+  setInterval(updateWeatherTimer, 1000);
   document.addEventListener('DOMContentLoaded', () => {
     fetchSeedGear();
     fetchActiveWeather();
     fetchEgg();
+    fetchActiveWeather();
     fetchEvent();
     startCountdown();
   });
