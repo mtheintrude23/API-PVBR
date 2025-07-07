@@ -114,7 +114,15 @@
       </table>
     </div>
   </div>
-
+    <div id="active-weather-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 w-full col-span-full">
+      <div class="flex items-center space-x-4">
+      <img id="weather-img" src="" alt="Weather Icon" class="w-12 h-12">
+      <div>
+        <h3 id="weather-name" class="text-xl font-bold text-green-700 dark:text-green-300">No Weather</h3>
+        <p id="weather-timer" class="text-sm text-gray-500">No active event</p>
+      </div>
+    </div>
+  </div>
 
     <footer class="text-center text-gray-600 dark:text-gray-300 text-sm mt-10">
       <p>© 2025 Grow Garden Stock Trackers. All rights reserved.</p>
@@ -130,6 +138,49 @@
 </script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
+  async function fetchActiveWeather() {
+  try {
+    const res = await fetch("https://api.joshlei.com/v2/growagarden/weather");
+    const data = await res.json();
+    const allWeather = data.weather;
+
+    const active = allWeather.find(w => w.active === true);
+
+    const nameEl = document.getElementById("weather-name");
+    const iconEl = document.getElementById("weather-img");
+    const timerEl = document.getElementById("weather-timer");
+
+    if (active) {
+      nameEl.textContent = active.weather_name;
+      iconEl.src = active.icon;
+      iconEl.alt = active.weather_name;
+
+      function updateRemainingTime() {
+        const now = Math.floor(Date.now() / 1000);
+        const remaining = active.end_duration_unix - now;
+        if (remaining <= 0) {
+          nameEl.textContent = "No Weather";
+          iconEl.src = "";
+          timerEl.textContent = "No active event";
+        } else {
+          const minutes = Math.floor(remaining / 60);
+          const seconds = remaining % 60;
+          timerEl.textContent = `Ends in: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+      }
+
+      updateRemainingTime();
+      setInterval(updateRemainingTime, 1000);
+    } else {
+      nameEl.textContent = "Normal";
+      iconEl.src = "";
+      timerEl.textContent = "No active event";
+    }
+
+  } catch (err) {
+    console.error("❌ Lỗi khi fetch thời tiết:", err);
+  }
+}
   const durations = {
     seed: 300,       // 5 phút
     gear: 300,       // 5 phút
