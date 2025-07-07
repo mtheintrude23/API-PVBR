@@ -44,7 +44,7 @@ latest_data = {
     "eggStock": [],
     "eventStock": [],
     "cosmeticsStock": [],
-    "lastGlobalUpdate": [],
+    "lastGlobalUpdate": "",
 }
 
 # ----------------------------
@@ -61,7 +61,6 @@ async def websocket_listener():
                     data = json.loads(message)
                     if data.get("type"):
                         raw_data = data["data"]
-                        latest_data["timestamp"] = int(asyncio.get_event_loop().time())
 
                         if "weather" in raw_data:
                             latest_data["weather"] = raw_data["weather"]
@@ -76,7 +75,7 @@ async def websocket_listener():
                         if "eggs" in raw_data:
                             latest_data["eggStock"] = combine_items_by_name(raw_data["eggs"])
                         if "lastGlobalUpdate" in raw_data:
-                            latest_data["lastGlobalUpdate"] = combine-items_by_name(raw_data["lastGlobalUpdate"])
+                            latest_data["lastGlobalUpdate"] = combine_items_by_name(raw_data["lastGlobalUpdate"])
                             
         except Exception as e:
             print(f"❌ WebSocket error: {e}. Retrying in 5s...")
