@@ -869,7 +869,7 @@
       restoreFromLocalStorage();
       fetchActiveWeather();
       // Auto-refresh weather data every second
-      setInterval(fetchActiveWeather, 1000);
+      setInterval(fetchActiveWeather, 60000);
       
       // Check if data is too old (more than 5 minutes)
       const lastFetchTime = localStorage.getItem('lastFetchTime');
