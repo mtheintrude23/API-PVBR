@@ -523,22 +523,26 @@
 
     async function fetchActiveWeather() {
       try {
-        // Clear previous interval if exists
-        if (weatherInterval) {
-          clearInterval(weatherInterval);
-        }
+        if (weatherInterval) clearInterval(weatherInterval);
 
-        // Use mock data if API fails
-        let data;
-        try {
-          const res = await fetch("https://api.joshlei.com/v2/growagarden/weather");
-          data = await res.json();
-        } catch (e) {
-          console.log("Using mock weather data");
-          data = mockWeatherData();
-        }
-        
-        const active = data.weather.find(w => w.active === true);
+    // Fetch từ API chính (joshlei)
+        const mainRes = await fetch("https://api.joshlei.com/v2/growagarden/weather");
+        const mainData = await mainRes.json();
+        const mainWeather = mainData.weather?.find(w => w.active === true);
+
+    // Fetch từ API phụ (onrender)
+        const effectRes = await fetch("https://api-yvj3.onrender.com/weather");
+        const effectData = await effectRes.json();
+
+        if (!mainWeather) return;
+
+        const active = {
+          weather_name: mainWeather.weather_name,
+          icon: mainWeather.icon,
+          end_duration_unix: mainWeather.end_duration_unix,
+          effects: Array.isArray(effectData.effects) ? effectData.effects : []
+        };
+
         currentActiveWeather = active;
 
         const nameEl = document.getElementById("weather-name");
@@ -547,50 +551,60 @@
         const statusEl = document.getElementById("weather-status");
         const effectsEl = document.getElementById("weather-effects");
 
-        if (active) {
-          nameEl.textContent = active.weather_name;
-          iconEl.src = active.icon;
-          iconEl.alt = active.weather_name;
-          statusEl.textContent = "Active";
-          statusEl.className = "bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm dark:bg-green-900 dark:text-green-200";
+        nameEl.textContent = active.weather_name;
+        iconEl.src = active.icon;
+        iconEl.alt = active.weather_name;
+        statusEl.textContent = "Active";
+        statusEl.className = "bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm dark:bg-green-900 dark:text-green-200";
 
+    // Show effects
+        if (active.effects.length > 0) {
           effectsEl.innerHTML = active.effects.map(effect => `
             <li class="flex items-center dark:text-gray-300">
               <i class="fas fa-check-circle text-green-500 mr-2"></i>
               ${effect}
             </li>
           `).join('');
-
-          function updateRemainingTime() {
-            const now = Math.floor(Date.now() / 1000);
-            const remaining = active.end_duration_unix - now;
-            if (remaining <= 0) {
-              nameEl.textContent = "Normal";
-              iconEl.src = "https://uxwing.com/wp-content/themes/uxwing/download/weather/weather-icon.png";
-              timerEl.textContent = "No active event";
-              statusEl.textContent = "Inactive";
-              statusEl.className = "bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm dark:bg-blue-900 dark:text-blue-200";
-              effectsEl.innerHTML = `
-                <li class="flex items-center dark:text-gray-300">
-                  <i class="fas fa-info-circle text-blue-500 mr-2"></i>
-                  No active weather effects
-                </li>
-              `;
-              currentActiveWeather = null;
-            } else {
-              const minutes = Math.floor(remaining / 60);
-              const seconds = remaining % 60;
-              timerEl.textContent = `Ends in: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-            }
-          }
-
-          updateRemainingTime();
-          weatherInterval = setInterval(updateRemainingTime, 1000);
+        } else {
+          effectsEl.innerHTML = `
+            <li class="flex items-center dark:text-gray-300">
+              <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+              No active weather effects
+            </li>
+          `;
         }
+
+        function updateRemainingTime() {
+          const now = Math.floor(Date.now() / 1000);
+          const remaining = active.end_duration_unix - now;
+
+          if (remaining <= 0) {
+            nameEl.textContent = "Normal";
+            iconEl.src = "https://uxwing.com/wp-content/themes/uxwing/download/weather/weather-icon.png";
+            timerEl.textContent = "No active event";
+            statusEl.textContent = "Inactive";
+            statusEl.className = "bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm dark:bg-blue-900 dark:text-blue-200";
+            effectsEl.innerHTML = `
+              <li class="flex items-center dark:text-gray-300">
+                <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                No active weather effects
+              </li>
+            `;
+            currentActiveWeather = null;
+          } else {
+            const minutes = Math.floor(remaining / 60);
+            const seconds = remaining % 60;
+            timerEl.textContent = `Ends in: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+          }
+        }
+
+        updateRemainingTime();
+        weatherInterval = setInterval(updateRemainingTime, 1000);
       } catch (err) {
         console.error("Weather error:", err);
       }
     }
+
 
     function updateWeatherTimer() {
       const timerEl = document.getElementById("weather-timer");
