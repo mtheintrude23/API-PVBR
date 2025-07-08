@@ -528,12 +528,16 @@
         try {
           const res = await fetch("https://api.joshlei.com/v2/growagarden/weather");
           data = await res.json();
+          // Ensure data has expected structure
+          if (!data.weather || !Array.isArray(data.weather)) {
+            throw new Error("Invalid weather data format");
+          }
         } catch (e) {
           console.log("Using mock weather data");
           data = mockWeatherData();
         }
         
-        const active = data.weather.find(w => w.active === true);
+        const active = data.weather.find(w => w && w.active === true);
         currentActiveWeather = active;
 
         const nameEl = document.getElementById("weather-name");
@@ -543,13 +547,15 @@
         const effectsEl = document.getElementById("weather-effects");
 
         if (active) {
-          nameEl.textContent = active.weather_name;
-          iconEl.src = active.icon;
-          iconEl.alt = active.weather_name;
+          nameEl.textContent = active.weather_name || "Unknown";
+          iconEl.src = active.icon || "https://uxwing.com/wp-content/themes/uxwing/download/weather/weather-icon.png";
+          iconEl.alt = active.weather_name || "Weather Icon";
           statusEl.textContent = "Active";
           statusEl.className = "bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm dark:bg-green-900 dark:text-green-200";
 
-          effectsEl.innerHTML = active.effects.map(effect => `
+          // Safely handle effects array
+          const effects = Array.isArray(active.effects) ? active.effects : ["No effects data available"];
+          effectsEl.innerHTML = effects.map(effect => `
             <li class="flex items-center dark:text-gray-300">
               <i class="fas fa-check-circle text-green-500 mr-2"></i>
               ${effect}
@@ -561,7 +567,7 @@
             const remaining = active.end_duration_unix - now;
             if (remaining <= 0) {
               nameEl.textContent = "Normal";
-              iconEl.src = "https://media.discordapp.net/attachments/1250295354008539250/1391990035250806874/image-removebg-preview.png?ex=686de73e&is=686c95be&hm=f00fe4a9fcdff0a51cf8421b301faaa655215abd9cc516f5def898dc56a44ff8&=&format=webp&quality=lossless";
+              iconEl.src = "https://media.discordapp.net/attachments/1250295354008539250/1391981380778463273/2Q.png?ex=686ddf2e&is=686c8dae&hm=c8d9b4395cd2e978b41f98973edb172196ee1b44a2ceb1d7d8e7dfd8df45dc19&=&format=webp&quality=lossless&width=656&height=656";
               timerEl.textContent = "No active event";
               statusEl.textContent = "Inactive";
               statusEl.className = "bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm dark:bg-blue-900 dark:text-blue-200";
@@ -602,7 +608,7 @@
 
       if (remaining <= 0) {
         nameEl.textContent = "Normal";
-        iconEl.src = "https://media.discordapp.net/attachments/1250295354008539250/1391990035250806874/image-removebg-preview.png?ex=686de73e&is=686c95be&hm=f00fe4a9fcdff0a51cf8421b301faaa655215abd9cc516f5def898dc56a44ff8&=&format=webp&quality=lossless";
+        iconEl.src = "https://media.discordapp.net/attachments/1250295354008539250/1391981380778463273/2Q.png?ex=686ddf2e&is=686c8dae&hm=c8d9b4395cd2e978b41f98973edb172196ee1b44a2ceb1d7d8e7dfd8df45dc19&=&format=webp&quality=lossless&width=656&height=656";
         iconEl.alt = "No Weather";
         timerEl.textContent = "No active event";
         currentActiveWeather = null;
@@ -649,6 +655,7 @@
         const storedTime = storedEndTimes[type];
         if (storedTime) {
           const endTime = new Date(storedTime);
+          // For egg timer, ensure it's not less than current time
           if (endTime > now) {
             nextRestockTimes[type] = endTime.toISOString();
             return;
@@ -656,12 +663,17 @@
         }
         
         // If no valid stored time, set default
-        const defaultTime = new Date(now.getTime() + (
-          type === 'seed' ? 300000 :
-          type === 'gear' ? 300000 :
-          type === 'egg' ? 1800000 :
-          14400000 // event
-        ));
+        const defaultDuration = type === 'seed' ? 300000 :
+                              type === 'gear' ? 300000 :
+                              type === 'egg' ? 1800000 :
+                              14400000; // event
+        
+        // For egg timer, ensure we don't reset to full duration if just slightly expired
+        const adjustedDuration = type === 'egg' && storedTime 
+          ? Math.min(defaultDuration, now - new Date(storedTime)) 
+          : defaultDuration;
+          
+        const defaultTime = new Date(now.getTime() + adjustedDuration);
         nextRestockTimes[type] = defaultTime.toISOString();
       });
 
@@ -697,19 +709,23 @@
         
         if (remaining <= 0) {
           // Timer has expired - reset it
-          const newEndTime = new Date(now.getTime() + (
-            type === 'seed' ? 300000 :
-            type === 'gear' ? 300000 :
-            type === 'egg' ? 1800000 :
-            14400000 // event
-          ));
+          const defaultDuration = type === 'seed' ? 300000 :
+                                type === 'gear' ? 300000 :
+                                type === 'egg' ? 1800000 :
+                                14400000; // event
+          
+          // For egg timer, ensure we don't lose time between API calls
+          const newEndTime = new Date(now.getTime() + defaultDuration);
           nextRestockTimes[type] = newEndTime.toISOString();
           
           // Force update the display immediately
-          createOrUpdateTimer(type, newEndTime - now);
+          createOrUpdateTimer(type, defaultDuration);
           
-          // Immediately fetch new stock data
-          fetchStockData();
+          // Immediately fetch new stock data but don't wait for it
+          fetchStockData().catch(console.error);
+          
+          // Save the new end time immediately
+          localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
         }
       });
     }
@@ -780,7 +796,15 @@
               return itemEnd < min ? itemEnd : min;
             }, new Date(items[0].Date_End));
             
-            nextRestockTimes[type] = earliestEnd.toISOString();
+            // For egg timer, ensure we don't reset if server time is slightly different
+            if (type === 'egg' && nextRestockTimes[type]) {
+              const currentEnd = new Date(nextRestockTimes[type]);
+              if (earliestEnd > currentEnd) {
+                nextRestockTimes[type] = earliestEnd.toISOString();
+              }
+            } else {
+              nextRestockTimes[type] = earliestEnd.toISOString();
+            }
           }
         });
 
