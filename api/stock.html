@@ -502,26 +502,7 @@
       const gearEnd = new Date(now.getTime() + 300000); // 5 minutes from now
       const eggEnd = new Date(now.getTime() + 1800000); // 30 minutes from now
       const eventEnd = new Date(now.getTime() + 14400000); // 4 hours from now
-      
-      return {
-        seed_stock: [
-          { display_name: "Sunflower Seed", quantity: 25, icon: "https://img.icons8.com/color/48/sunflower--v1.png", Date_End: seedEnd.toISOString() },
-          { display_name: "Carrot Seed", quantity: 40, icon: "https://img.icons8.com/color/48/carrot.png", Date_End: seedEnd.toISOString() },
-          { display_name: "Tomato Seed", quantity: 30, icon: "https://img.icons8.com/color/48/tomato.png", Date_End: seedEnd.toISOString() }
-        ],
-        gear_stock: [
-          { display_name: "Watering Can", quantity: 15, icon: "https://img.icons8.com/color/48/watering-can.png", Date_End: gearEnd.toISOString() },
-          { display_name: "Garden Hoe", quantity: 8, icon: "https://img.icons8.com/color/48/garden-hoe.png", Date_End: gearEnd.toISOString() }
-        ],
-        egg_stock: [
-          { display_name: "Chicken Egg", quantity: 12, icon: "https://img.icons8.com/color/48/chicken.png", Date_End: eggEnd.toISOString() },
-          { display_name: "Duck Egg", quantity: 5, icon: "https://img.icons8.com/color/48/duck.png", Date_End: eggEnd.toISOString() }
-        ],
-        cosmetic_stock: [
-          { display_name: "Sun Hat", quantity: 3, icon: "https://img.icons8.com/color/48/sun-hat.png", Date_End: eventEnd.toISOString() },
-          { display_name: "Gardener Apron", quantity: 7, icon: "https://img.icons8.com/color/48/apron.png", Date_End: eventEnd.toISOString() }
-        ]
-      };
+      // Ensure all items have proper Date_End
     }
 
     function mockWeatherData() {
@@ -580,7 +561,7 @@
             const remaining = active.end_duration_unix - now;
             if (remaining <= 0) {
               nameEl.textContent = "Normal";
-              iconEl.src = "https://uxwing.com/wp-content/themes/uxwing/download/weather/weather-icon.png";
+              iconEl.src = "https://media.discordapp.net/attachments/1250295354008539250/1391981380778463273/2Q.png?ex=686ddf2e&is=686c8dae&hm=c8d9b4395cd2e978b41f98973edb172196ee1b44a2ceb1d7d8e7dfd8df45dc19&=&format=webp&quality=lossless&width=656&height=656";
               timerEl.textContent = "No active event";
               statusEl.textContent = "Inactive";
               statusEl.className = "bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm dark:bg-blue-900 dark:text-blue-200";
@@ -621,10 +602,12 @@
 
       if (remaining <= 0) {
         nameEl.textContent = "Normal";
-        iconEl.src = "https://uxwing.com/wp-content/themes/uxwing/download/weather/weather-icon.png";
+        iconEl.src = "https://media.discordapp.net/attachments/1250295354008539250/1391981380778463273/2Q.png?ex=686ddf2e&is=686c8dae&hm=c8d9b4395cd2e978b41f98973edb172196ee1b44a2ceb1d7d8e7dfd8df45dc19&=&format=webp&quality=lossless&width=656&height=656";
         iconEl.alt = "No Weather";
         timerEl.textContent = "No active event";
         currentActiveWeather = null;
+        // Immediately fetch new weather data when weather ends
+        fetchActiveWeather();
       } else {
         const minutes = Math.floor(remaining / 60);
         const seconds = remaining % 60;
@@ -649,7 +632,7 @@
       const timerEl = document.getElementById(`${type}-timer`);
       if (timerEl) {
         const seconds = Math.floor(remaining / 1000);
-        timerEl.textContent = `${formatTime(remaining)}`;
+        timerEl.textContent = remaining <= 0 ? "0:00" : `${formatTime(remaining)}`;
         timerEl.className = seconds <= 10
           ? "text-sm text-yellow-500 animate-pulse"
           : "text-sm text-gray-500 dark:text-gray-300";
@@ -659,43 +642,74 @@
     function startCountdown() {
       // Try to load stored end times from localStorage
       const storedEndTimes = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
-      
-      // Use stored times if they're still in the future
       const now = new Date();
-      Object.keys(storedEndTimes).forEach(type => {
-        const endTime = new Date(storedEndTimes[type]);
-        if (endTime > now) {
-          nextRestockTimes[type] = endTime.toISOString();
-        } else {
-          // If stored time is in the past, fetch new data
-          fetchStockData();
+      
+      // Initialize all timers
+      ['seed', 'gear', 'egg', 'event'].forEach(type => {
+        const storedTime = storedEndTimes[type];
+        if (storedTime) {
+          const endTime = new Date(storedTime);
+          if (endTime > now) {
+            nextRestockTimes[type] = endTime.toISOString();
+            return;
+          }
         }
+        
+        // If no valid stored time, set default
+        const defaultTime = new Date(now.getTime() + (
+          type === 'seed' ? 300000 :
+          type === 'gear' ? 300000 :
+          type === 'egg' ? 1800000 :
+          14400000 // event
+        ));
+        nextRestockTimes[type] = defaultTime.toISOString();
       });
-
-      // If no valid times were found in localStorage, fetch fresh data
-      if (Object.values(nextRestockTimes).every(time => !time)) {
-        fetchStockData();
-      }
 
       // Update timers immediately
       updateAllTimers();
       
       // Then update every second
       setInterval(updateAllTimers, 1000);
+      
+      // Fetch initial data
+      fetchStockData();
     }
 
     function updateAllTimers() {
+      const now = new Date();
+      
       ['seed', 'gear', 'egg', 'event'].forEach(type => {
-        if (nextRestockTimes[type]) {
-          const now = new Date();
-          const endTime = new Date(nextRestockTimes[type]);
-          const remaining = Math.max(0, endTime - now);
-          createOrUpdateTimer(type, remaining);
+        if (!nextRestockTimes[type]) {
+          // Initialize with default time if missing
+          const defaultTime = new Date(now.getTime() + (
+            type === 'seed' ? 300000 :
+            type === 'gear' ? 300000 :
+            type === 'egg' ? 1800000 :
+            14400000 // event
+          ));
+          nextRestockTimes[type] = defaultTime.toISOString();
+          return;
+        }
+
+        const endTime = new Date(nextRestockTimes[type]);
+        const remaining = Math.max(0, endTime - now);
+        createOrUpdateTimer(type, remaining);
+        
+        if (remaining <= 0) {
+          // Timer has expired - reset it
+          const newEndTime = new Date(now.getTime() + (
+            type === 'seed' ? 300000 :
+            type === 'gear' ? 300000 :
+            type === 'egg' ? 1800000 :
+            14400000 // event
+          ));
+          nextRestockTimes[type] = newEndTime.toISOString();
           
-          // Auto-refresh when timer reaches 0
-          if (remaining <= 1000) {
-            fetchStockData();
-          }
+          // Force update the display immediately
+          createOrUpdateTimer(type, newEndTime - now);
+          
+          // Immediately fetch new stock data
+          fetchStockData();
         }
       });
     }
