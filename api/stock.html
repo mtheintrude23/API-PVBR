@@ -502,6 +502,8 @@
       if (now - lastFetchTimestamp > 5000) {
         lastFetchTimestamp = now;
         fetchStockData();
+      }
+    }
     function mockStockData() {
       const now = new Date();
       const seedEnd = new Date(now.getTime() + 300000); // 5 minutes from now
