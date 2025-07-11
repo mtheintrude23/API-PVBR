@@ -136,7 +136,7 @@ async def serve_stocks():
 async def serve_docs():
     return FileResponse("index.html", media_type="text/html")
 
-@app.get("/", summary="Kiểm tra sức khỏe", description="Trả về trạng thái đơn giản để xác minh API đang trực tuyến.")
+@app.get("/api", summary="Kiểm tra sức khỏe", description="Trả về trạng thái đơn giản để xác minh API đang trực tuyến.")
 @limiter.limit("5/minute")
 async def root(request: Request):
     return {"status": "200"}
@@ -145,37 +145,37 @@ async def root(request: Request):
 # API Routes
 # ----------------------------
 
-@app.get("/alldata")
+@app.get("/api/stock")
 @limiter.limit("5/minute")
 async def alldata(request: Request):
     return latest_data
 
-@app.get("/gear")
+@app.get("/api/gear")
 @limiter.limit("5/minute")
 async def get_gear(request: Request):
     return latest_data.get("gearStock", [])
 
-@app.get("/seeds")
+@app.get("/api/seeds")
 @limiter.limit("5/minute")
 async def get_seeds(request: Request):
     return latest_data.get("seedsStock", [])
 
-@app.get("/cosmetics")
+@app.get("/api/cosmetics")
 @limiter.limit("5/minute")
 async def get_cosmetics(request: Request):
     return latest_data.get("cosmeticsStock", [])
 
-@app.get("/eventshop")
+@app.get("/api/eventshop")
 @limiter.limit("5/minute")
 async def get_eventshop(request: Request):
     return latest_data.get("eventStock", [])
 
-@app.get("/eggs")
+@app.get("/api/eggs")
 @limiter.limit("5/minute")
 async def get_eggs(request: Request):
     return latest_data.get("eggStock", [])
 
-@app.get("/weather")
+@app.get("/api/weather")
 @limiter.limit("5/minute")
 async def get_weather(request: Request):
     return latest_data.get("weather", {})
