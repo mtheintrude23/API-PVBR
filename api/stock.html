@@ -496,6 +496,12 @@
     }
 
     // Mock data function to simulate API responses
+    let lastFetchTimestamp = 0;
+    function safeFetchStockData() {
+      const now = Date.now();
+      if (now - lastFetchTimestamp > 5000) {
+        lastFetchTimestamp = now;
+        fetchStockData();
     function mockStockData() {
       const now = new Date();
       const seedEnd = new Date(now.getTime() + 300000); // 5 minutes from now
@@ -641,34 +647,29 @@
     }
 
     function startCountdown() {
-      // Try to load stored end times from localStorage
       const storedEndTimes = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
-      
-      // Use stored times if they're still in the future
       const now = new Date();
       Object.keys(storedEndTimes).forEach(type => {
         const endTime = new Date(storedEndTimes[type]);
         if (endTime > now) {
           nextRestockTimes[type] = endTime.toISOString();
         } else {
-          // If stored time is in the past, set to default refresh time
           const defaultTimes = {
             seed: new Date(now.getTime() + 300000),
             gear: new Date(now.getTime() + 300000),
             egg: new Date(now.getTime() + 1800000),
-            event: new Date(now.getTime() + 14400000)
+            event: new Date(now.getTime() + 3600000)
           };
           nextRestockTimes[type] = defaultTimes[type].toISOString();
-          fetchStockData();
+          safeFetchStockData();
         }
       });
 
-      // Initialize any missing timers with default values
       const defaultTimes = {
         seed: new Date(now.getTime() + 300000),
         gear: new Date(now.getTime() + 300000),
         egg: new Date(now.getTime() + 1800000),
-        event: new Date(now.getTime() + 14400000)
+        event: new Date(now.getTime() + 3600000)
       };
       
       ['seed', 'gear', 'egg', 'event'].forEach(type => {
@@ -677,24 +678,21 @@
         }
       });
 
-      // Update timers immediately
       updateAllTimers();
-      
-      // Then update every second
+  
       setInterval(updateAllTimers, 1000);
     }
 
     function updateAllTimers() {
       const now = new Date();
-      
+      let shouldFetch = false;
       ['seed', 'gear', 'egg', 'event'].forEach(type => {
         if (!nextRestockTimes[type]) {
-          // Initialize with default time if missing
           const defaultTime = new Date(now.getTime() + (
             type === 'seed' ? 300000 :
             type === 'gear' ? 300000 :
             type === 'egg' ? 1800000 :
-            14400000 // event
+            3600000 // event
           ));
           nextRestockTimes[type] = defaultTime.toISOString();
         }
@@ -709,12 +707,15 @@
             type === 'seed' ? 300000 :
             type === 'gear' ? 300000 :
             type === 'egg' ? 1800000 :
-            14400000 // event
+            3600000 // event
           ));
           nextRestockTimes[type] = newEndTime.toISOString();
-          fetchStockData();
+          shouldFetch = true;
         }
       });
+      if (shouldFetch) {
+        safeFetchStockData();
+      }
     }
 
     const toggleIcon = document.getElementById('toggle-icon');
