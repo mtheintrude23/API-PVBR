@@ -47,7 +47,7 @@ new_data = {
 # ----------------------------
 
 async def websocket_listener():
-    uri = "wss://websocket.joshlei.com/growagarden?user_id=1134775644887195800/"
+    uri = "wss://websocket.joshlei.com/growagarden?user_id=1390149379561885817/"
     while True:
         try:
             async with websockets.connect(uri) as websocket:
