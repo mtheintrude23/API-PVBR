@@ -39,7 +39,9 @@ latest_data = {
     "eventStock": [],
     "cosmeticsStock": [],
 }
-
+new_data = {
+    "weather": {},
+}
 # ----------------------------
 # WebSocket Listener
 # ----------------------------
@@ -53,9 +55,6 @@ async def websocket_listener():
                 async for message in websocket:
                     data = json.loads(message)
                     raw_data = data
-
-                    if "weather" in raw_data:
-                        latest_data["weather"] = raw_data["weather"]
                     if "gear_stock" in raw_data:
                         latest_data["gearStock"] = clean_items(raw_data["gear_stock"])
                     if "seed_stock" in raw_data:
@@ -78,7 +77,28 @@ async def websocket_listener():
         except Exception as e:
             print(f"❌ WebSocket error: {e}. Retrying in 5s...")
             await asyncio.sleep(5)
-
+async def websocket_listener():
+    uri = "wss://websocket.joshlei.com/growagarden?user_id=1219514896778133594/"
+    while True:
+        try:
+            async with websockets.connect(uri) as websocket:
+                print("✅ API WebSocket Connected 2.")
+                async for message in websocket:
+                    data = json.loads(message)
+                    raw_data = data
+                    if "weather" in raw_data:
+                        new_data["weather"] = raw_data["weather"]
+        except Exception as e:
+            print(f"❌ WebSocket error: {e}. Retrying in 5s...")
+            await asyncio.sleep(5)
+                            
+        except Exception as e:
+            print(f"❌ WebSocket error: {e}. Retrying in 5s...")
+            await asyncio.sleep(5)
+                            
+        except Exception as e:
+            print(f"❌ WebSocket error: {e}. Retrying in 5s...")
+            await asyncio.sleep(5)
 # ----------------------------
 # App Initialization
 # ----------------------------
@@ -139,33 +159,7 @@ async def root(request: Request):
 @limiter.limit("5/minute")
 async def alldata(request: Request):
     return latest_data
-
-@app.get("/api/gear")
-@limiter.limit("5/minute")
-async def get_gear(request: Request):
-    return latest_data.get("gearStock", [])
-
-@app.get("/api/seeds")
-@limiter.limit("5/minute")
-async def get_seeds(request: Request):
-    return latest_data.get("seedsStock", [])
-
-@app.get("/api/cosmetics")
-@limiter.limit("5/minute")
-async def get_cosmetics(request: Request):
-    return latest_data.get("cosmeticsStock", [])
-
-@app.get("/api/eventshop")
-@limiter.limit("5/minute")
-async def get_eventshop(request: Request):
-    return latest_data.get("eventStock", [])
-
-@app.get("/api/eggs")
-@limiter.limit("5/minute")
-async def get_eggs(request: Request):
-    return latest_data.get("eggStock", [])
-
-@app.get("/api/weather")
+@app.get("/api/stock/weather")
 @limiter.limit("5/minute")
 async def get_weather(request: Request):
-    return latest_data.get("weather", {})
+    return new_data
