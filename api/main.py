@@ -21,7 +21,7 @@ def combine_items_by_name(items):
     return [{"name": name, "quantity": qty, "item_id": normalize_name(name)} for name, qty in combined.items()]
 
 
-def clean_items(items, keys_to_keep={"name", "quantity"}):
+def clean_items(items, keys_to_keep={"display_name", "quantity", "icon"}):
     return [add_item_id({k: item[k] for k in keys_to_keep if k in item}) for item in items]
 
 
@@ -52,7 +52,7 @@ latest_data = {
 # ----------------------------
 
 async def websocket_listener():
-    uri = "wss://ws.growagardenpro.com/"
+    uri = "wss://websocket.joshlei.com/growagarden?user_id=1219514896778133594"
     while True:
         try:
             async with websockets.connect(uri) as websocket:
@@ -64,16 +64,16 @@ async def websocket_listener():
 
                         if "weather" in raw_data:
                             latest_data["weather"] = raw_data["weather"]
-                        if "gear" in raw_data:
-                            latest_data["gearStock"] = clean_items(raw_data["gear"])
-                        if "seeds" in raw_data:
-                            latest_data["seedsStock"] = clean_items(raw_data["seeds"])
-                        if "cosmetics" in raw_data:
-                            latest_data["cosmeticsStock"] = clean_items(raw_data["cosmetics"])
-                        if "honey" in raw_data:
-                            latest_data["eventStock"] = clean_items(raw_data["honey"])
-                        if "eggs" in raw_data:
-                            latest_data["eggStock"] = clean_items(raw_data["eggs"])
+                        if "gear_stock" in raw_data:
+                            latest_data["gearStock"] = clean_items(raw_data["gear_stock"])
+                        if "seed_stock" in raw_data:
+                            latest_data["seedsStock"] = clean_items(raw_data["seed_stock"])
+                        if "cosmetic_stock" in raw_data:
+                            latest_data["cosmeticsStock"] = clean_items(raw_data["cosmetic_stock"])
+                        if "eventshop_stock" in raw_data:
+                            latest_data["eventStock"] = clean_items(raw_data["eventshop_stock"])
+                        if "egg_stock" in raw_data:
+                            latest_data["eggStock"] = clean_items(raw_data["egg_stock"])
                         if "lastGlobalUpdate" in raw_data:
                             latest_data["lastGlobalUpdate"] = raw_data["lastGlobalUpdate"]
                             
