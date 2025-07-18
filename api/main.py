@@ -21,17 +21,11 @@ def combine_items_by_name(items):
     return [{"name": name, "quantity": qty, "item_id": normalize_name(name)} for name, qty in combined.items()]
 
 
-def clean_items(items, keys_to_keep={"display_name", "quantity", "icon"}):
-    return [add_item_id({k: item[k] for k in keys_to_keep if k in item}) for item in items]
-
+def clean_items(items):
+    return items
 
 def normalize_name(name):
     return re.sub(r'\s+', '_', re.sub(r"[^\w\s]", "", name.strip().lower()))
-
-
-def add_item_id(item):
-    item["item_id"] = normalize_name(item.get("name", ""))
-    return item
 
 # ----------------------------
 # Global Data Store
@@ -44,7 +38,6 @@ latest_data = {
     "eggStock": [],
     "eventStock": [],
     "cosmeticsStock": [],
-    "lastGlobalUpdate": "",
 }
 
 # ----------------------------
@@ -52,7 +45,7 @@ latest_data = {
 # ----------------------------
 
 async def websocket_listener():
-    uri = "wss://websocket.joshlei.com/growagarden?user_id=1219514896778133594"
+    uri = "wss://websocket.joshlei.com/growagarden?user_id=1219514896778133594/"
     while True:
         try:
             async with websockets.connect(uri) as websocket:
@@ -74,8 +67,6 @@ async def websocket_listener():
                             latest_data["eventStock"] = clean_items(raw_data["eventshop_stock"])
                         if "egg_stock" in raw_data:
                             latest_data["eggStock"] = clean_items(raw_data["egg_stock"])
-                        if "lastGlobalUpdate" in raw_data:
-                            latest_data["lastGlobalUpdate"] = raw_data["lastGlobalUpdate"]
                             
         except Exception as e:
             print(f"❌ WebSocket error: {e}. Retrying in 5s...")
