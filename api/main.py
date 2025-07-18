@@ -47,7 +47,7 @@ new_data = {
 # ----------------------------
 
 async def websocket_listener():
-    uri = "wss://websocket.joshlei.com/growagarden?user_id=1219514896778133594/"
+    uri = "wss://websocket.joshlei.com/growagarden?user_id=1386504280822780054/"
     while True:
         try:
             async with websockets.connect(uri) as websocket:
@@ -77,8 +77,8 @@ async def websocket_listener():
         except Exception as e:
             print(f"❌ WebSocket error: {e}. Retrying in 5s...")
             await asyncio.sleep(5)
-async def websocket_listener():
-    uri = "wss://websocket.joshlei.com/growagarden?user_id=1219514896778133594/"
+async def websocket1_listener():
+    uri = "wss://websocket.joshlei.com/growagarden?user_id=1394221191329484844/"
     while True:
         try:
             async with websockets.connect(uri) as websocket:
