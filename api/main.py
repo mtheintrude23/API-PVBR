@@ -106,6 +106,7 @@ async def websocket1_listener():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     asyncio.create_task(websocket_listener())
+    asyncio.create_task(websocket1_listener())  
     yield
 
 app = FastAPI(
