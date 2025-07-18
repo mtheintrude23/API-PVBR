@@ -52,21 +52,20 @@ async def websocket_listener():
                 print("✅ API WebSocket Connected.")
                 async for message in websocket:
                     data = json.loads(message)
-                    if data.get("type"):
-                        raw_data = data["data"]
+                    raw_data = data
 
-                        if "weather" in raw_data:
-                            latest_data["weather"] = raw_data["weather"]
-                        if "gear_stock" in raw_data:
-                            latest_data["gearStock"] = clean_items(raw_data["gear_stock"])
-                        if "seed_stock" in raw_data:
-                            latest_data["seedsStock"] = clean_items(raw_data["seed_stock"])
-                        if "cosmetic_stock" in raw_data:
-                            latest_data["cosmeticsStock"] = clean_items(raw_data["cosmetic_stock"])
-                        if "eventshop_stock" in raw_data:
-                            latest_data["eventStock"] = clean_items(raw_data["eventshop_stock"])
-                        if "egg_stock" in raw_data:
-                            latest_data["eggStock"] = clean_items(raw_data["egg_stock"])
+                    if "weather" in raw_data:
+                        latest_data["weather"] = raw_data["weather"]
+                    if "gear_stock" in raw_data:
+                        latest_data["gearStock"] = clean_items(raw_data["gear_stock"])
+                    if "seed_stock" in raw_data:
+                        latest_data["seedsStock"] = clean_items(raw_data["seed_stock"])
+                    if "cosmetic_stock" in raw_data:
+                        latest_data["cosmeticsStock"] = clean_items(raw_data["cosmetic_stock"])
+                    if "eventshop_stock" in raw_data:
+                        latest_data["eventStock"] = clean_items(raw_data["eventshop_stock"])
+                    if "egg_stock" in raw_data:
+                        latest_data["eggStock"] = clean_items(raw_data["egg_stock"])
                             
         except Exception as e:
             print(f"❌ WebSocket error: {e}. Retrying in 5s...")
