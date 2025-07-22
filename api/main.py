@@ -33,11 +33,11 @@ def normalize_name(name):
 
 latest_data = {
     "weather": {},
-    "gearStock": [],
-    "seedsStock": [],
-    "eggStock": [],
-    "eventStock": [],
-    "cosmeticsStock": [],
+    "gear_stock": [],
+    "seed_stock": [],
+    "egg_stock": [],
+    "eventshop_stock": [],
+    "cosmetic_stock": [],
 }
 new_data = {
     "weather": {},
