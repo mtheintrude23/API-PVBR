@@ -131,7 +131,9 @@ const limiter = rateLimit({
 app.get('/stocks', (req, res) => {
   res.sendFile(path.join(__dirname, 'stock.html'));
 });
-
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'home.html'));
+});
 app.get('/docs', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
