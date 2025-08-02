@@ -151,5 +151,5 @@ app.get('/api/weather', limiter, (req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 1606;
+const PORT = process.env.PORT || 443;
 app.listen(PORT, '0.0.0.0', () => console.log(`🚀 API server running on port ${PORT}`));
