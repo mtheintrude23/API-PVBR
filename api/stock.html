@@ -532,9 +532,11 @@
     async function fetchActiveWeather() {
       try {
         if (weatherInterval) clearInterval(weatherInterval);
-
-    // Fetch từ API chính (joshlei)
-        const mainRes = await fetch("https://api.joshlei.com/v2/growagarden/weather");
+      	const mainRes = await fetch('https://api.joshlei.com/v2/growagarden/weather', {
+          headers: {
+              'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272' // Thêm header ở đây
+          }
+        });
         const mainData = await mainRes.json();
         const mainWeather = mainData.weather?.find(w => w.active === true);
 
@@ -764,7 +766,11 @@
       try {
         let data;
         try {
-          const res = await fetch('https://api.joshlei.com/v2/growagarden/stock');
+      	  const res = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
+            headers: {
+              'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272' // Thêm header ở đây
+            }
+          });
           data = await res.json();
         } catch (e) {
           console.log("Using mock stock data");
