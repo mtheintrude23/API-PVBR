@@ -1,4 +1,3 @@
-// Required dependencies
 import express from 'express';
 import { WebSocket } from 'ws';
 import cors from 'cors';
@@ -14,7 +13,6 @@ const app = express();
 
 // In-memory data store
 let latestData = {
-  weather: {},
   gearStock: [],
   seedsStock: [],
   eggStock: [],
@@ -23,7 +21,7 @@ let latestData = {
 };
 
 let newData = {
-  weather: {},
+  weather: []  // Changed from {} to [] to hold multiple entries
 };
 
 // Helper functions
@@ -45,10 +43,10 @@ function combineItemsByName(items) {
 }
 
 function cleanItems(items) {
-  return items; // Modify if needed later
+  return items;
 }
 
-// WebSocket Listeners
+// WebSocket Listener
 async function websocketListener(uri, updateFn) {
   while (true) {
     try {
@@ -57,13 +55,17 @@ async function websocketListener(uri, updateFn) {
       ws.on('open', () => console.log(`✅ WebSocket Connected: ${uri}`));
 
       ws.on('message', (message) => {
-        const data = JSON.parse(message);
-        updateFn(data);
+        try {
+          const data = JSON.parse(message);
+          updateFn(data);
+        } catch (err) {
+          console.error('❌ Failed to parse message:', err);
+        }
       });
 
-      await new Promise((resolve, reject) => {
-        ws.on('close', () => {
-          console.log(`🔌 WebSocket disconnected: ${uri}`);
+      await new Promise((resolve) => {
+        ws.on('close', (code, reason) => {
+          console.log(`🔌 Disconnected: code=${code}, reason=${reason.toString()}`);
           resolve();
         });
         ws.on('error', (err) => {
@@ -79,6 +81,7 @@ async function websocketListener(uri, updateFn) {
   }
 }
 
+// Data update functions
 function updateStockData(data) {
   if (data.gear_stock) latestData.gearStock = cleanItems(data.gear_stock);
   if (data.seed_stock) latestData.seedsStock = cleanItems(data.seed_stock);
@@ -88,12 +91,29 @@ function updateStockData(data) {
 }
 
 function updateWeatherData(data) {
-  if (data.weather) newData.weather = data.weather;
+  if (data.weather) {
+    const entry = {
+      timestamp: Date.now(),
+      ...data.weather
+    };
+    newData.weather.push(entry);
+
+    // Optional: limit to 100 most recent entries
+    if (newData.weather.length > 100) {
+      newData.weather.shift(); // remove oldest
+    }
+  }
 }
 
-// Launch WebSocket listeners
-websocketListener('wss://websocket.joshlei.com/growagarden?user_id=1390149379561885817/', updateStockData);
-websocketListener('wss://websocket.joshlei.com/growagarden?user_id=1266035019390914649/', updateWeatherData);
+// Start WebSocket (merged key, only one connection)
+const websocketKey = 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272';
+websocketListener(
+  `wss://websocket.joshlei.com/growagarden?jstudio-key=${websocketKey}`,
+  (data) => {
+    if (data.weather) updateWeatherData(data);
+    else updateStockData(data);
+  }
+);
 
 // Middleware
 app.use(cors());
@@ -124,10 +144,10 @@ app.get('/api/stock', limiter, (req, res) => {
   res.json(latestData);
 });
 
-app.get('/api/stock/weather', limiter, (req, res) => {
-  res.json(newData);
+app.get('/api/weather', limiter, (req, res) => {
+  res.json(newData.weather); // return the array
 });
 
-// Start Server
-const PORT = process.env.PORT || 80;
-app.listen(PORT, () => console.log(`🚀 API server running on port ${PORT}`));
+// Start server
+const PORT = process.env.PORT || 1606;
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 API server running on port ${PORT}`));
