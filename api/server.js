@@ -1,5 +1,5 @@
 import express from 'express';
-import { WebSocket } from 'ws';
+import { WebSocketServer } from 'ws';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import fs from 'fs';
@@ -11,6 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const client = jstudio.connect('js_4ece47b66df9cf728ed9a0508e82c9b66af86e5a988e5461bcd0e487eaead8a2');
 
 // In-memory data store
 let latestData = {
@@ -22,7 +23,7 @@ let latestData = {
 };
 
 let newData = {
-  weather: []  // Changed from {} to [] to hold multiple entries
+  weather: [] // Array to hold multiple weather entries
 };
 
 // Helper functions
@@ -33,7 +34,7 @@ function normalizeName(name) {
 function combineItemsByName(items) {
   const combined = {};
   for (const item of items) {
-    const name = item.name;
+    const name = item.name || item.display_name; // Handle both 'name' and 'display_name'
     combined[name] = (combined[name] || 0) + (item.quantity || 0);
   }
   return Object.entries(combined).map(([name, quantity]) => ({
@@ -44,46 +45,18 @@ function combineItemsByName(items) {
 }
 
 function cleanItems(items) {
-  return items;
-}
-
-// WebSocket Listener
-async function websocketListener(uri, updateFn) {
-  while (true) {
-    try {
-      const ws = new WebSocket(uri);
-
-      ws.on('open', () => console.log(`✅ WebSocket Connected: ${uri}`));
-
-      ws.on('message', (message) => {
-        try {
-          const data = JSON.parse(message);
-          updateFn(data);
-        } catch (err) {
-          console.error('❌ Failed to parse message:', err);
-        }
-      });
-
-      await new Promise((resolve) => {
-        ws.on('close', (code, reason) => {
-          console.log(`🔌 Disconnected: code=${code}, reason=${reason.toString()}`);
-          resolve();
-        });
-        ws.on('error', (err) => {
-          console.error(`❌ WebSocket error: ${err}`);
-          resolve();
-        });
-      });
-    } catch (err) {
-      console.error(`❌ Failed to connect WebSocket: ${err}`);
-    }
-
-    await new Promise((res) => setTimeout(res, 5000));
-  }
+  return items.map(item => ({
+    ...item,
+    name: item.name || item.display_name, // Normalize name field
+    quantity: item.quantity || 0,
+    icon: item.icon || '',
+    Date_End: item.Date_End || new Date(Date.now() + 300000).toISOString() // Default Date_End
+  }));
 }
 
 // Data update functions
 function updateStockData(data) {
+  console.log('Updating stock data:', data); // Debug
   if (data.gear_stock) latestData.gearStock = cleanItems(data.gear_stock);
   if (data.seed_stock) latestData.seedsStock = cleanItems(data.seed_stock);
   if (data.egg_stock) latestData.eggStock = cleanItems(data.egg_stock);
@@ -92,6 +65,7 @@ function updateStockData(data) {
 }
 
 function updateWeatherData(data) {
+  console.log('Updating weather data:', data); // Debug
   if (data.weather) {
     const entry = {
       timestamp: Date.now(),
@@ -99,22 +73,57 @@ function updateWeatherData(data) {
     };
     newData.weather.push(entry);
 
-    // Optional: limit to 100 most recent entries
+    // Limit to 100 most recent entries
     if (newData.weather.length > 100) {
-      newData.weather.shift(); // remove oldest
+      newData.weather.shift(); // Remove oldest
     }
   }
 }
 
-// Start WebSocket (merged key, only one connection)
-const websocketKey = 'js_4ece47b66df9cf728ed9a0508e82c9b66af86e5a988e5461bcd0e487eaead8a2';
-websocketListener(
-  `wss://websocket.joshlei.com/growagarden?jstudio-key=${websocketKey}`,
-  (data) => {
-    if (data.weather) updateWeatherData(data);
-    else updateStockData(data);
+// Initialize data and set up jstudio listeners
+async function initializeData() {
+  try {
+    // Fetch initial stock data
+    const stockData = await client.stocks.all();
+    console.log('Initial stock data:', stockData); // Debug
+    updateStockData(stockData);
+
+    // Fetch initial weather data
+    const weatherData = await client.weather.all();
+    console.log('Initial weather data:', weatherData); // Debug
+    updateWeatherData(weatherData);
+
+    // Set up jstudio event listeners (assuming jstudio supports real-time events)
+    client.on('stock_update', (data) => {
+      console.log('Received stock update event:', data); // Debug
+      updateStockData(data);
+    });
+
+    client.on('weather_update', (data) => {
+      console.log('Received weather update event:', data); // Debug
+      updateWeatherData(data);
+    });
+  } catch (error) {
+    console.error('Error initializing data:', error);
   }
-);
+}
+
+// Fallback: Polling if jstudio doesn't support real-time events
+function startPolling() {
+  setInterval(async () => {
+    try {
+      const stockData = await client.stocks.all();
+      console.log('Polled stock data:', stockData); // Debug
+      updateStockData(stockData);
+
+      const weatherData = await client.weather.all();
+      console.log('Polled weather data:', weatherData); // Debug
+      updateWeatherData(weatherData);
+    } catch (error) {
+      console.error('Error polling data:', error);
+    }
+  }, 60000); // Poll every 60 seconds
+}
 
 // Middleware
 app.use(cors());
@@ -148,9 +157,13 @@ app.get('/api/stock', limiter, (req, res) => {
 });
 
 app.get('/api/weather', limiter, (req, res) => {
-  res.json(newData.weather); // return the array
+  res.json(newData.weather);
 });
 
-// Start server
+// Start server and initialize data
 const PORT = process.env.PORT || 443;
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 API server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 API server running on port ${PORT}`);
+  initializeData(); // Initialize data on server start
+  startPolling(); // Start polling as fallback
+});
