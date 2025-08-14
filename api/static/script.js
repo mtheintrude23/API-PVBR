@@ -66,6 +66,10 @@ let lastFetchTimestamp = 0;
 
 function renderWeatherCards(weathers) {
   const container = document.getElementById('weather-card-container');
+  if (!container) {
+    console.error('Weather card container not found');
+    return;
+  }
   container.innerHTML = '';
 
   if (weathers.length === 0) {
@@ -124,7 +128,7 @@ async function fetchActiveWeather() {
     activeWeathers = mainData.weather?.filter(w => w.active === true) || [];
     renderWeatherCards(activeWeathers);
   } catch (err) {
-    console.error("Weather error:", err);
+    console.error("Weather fetch error:", err);
     activeWeathers = mockWeatherData().weather;
     renderWeatherCards(activeWeathers);
   }
@@ -137,7 +141,10 @@ function updateWeatherTimer() {
     const statusEl = document.getElementById(`weather-status-${index}`);
     const effectsEl = document.getElementById(`weather-effects-${index}`);
 
-    if (!timerEl || !nameEl || !statusEl || !effectsEl) return;
+    if (!timerEl || !nameEl || !statusEl || !effectsEl) {
+      console.warn(`Weather card elements missing for index ${index}`);
+      return;
+    }
 
     const now = Math.floor(Date.now() / 1000);
     const remaining = Math.max(0, weather.end_duration_unix - now);
@@ -187,6 +194,9 @@ function createOrUpdateTimer(type, remaining) {
     timerEl.className = seconds <= 10
       ? "text-sm text-yellow-500 animate-pulse"
       : "text-sm text-white";
+    console.log(`Updated ${type}-timer: ${formatTime(remaining)} (remaining: ${seconds}s)`);
+  } else {
+    console.warn(`Timer element ${type}-timer not found`);
   }
 }
 
@@ -197,6 +207,7 @@ function startCountdown() {
     const endTime = new Date(storedEndTimes[type]);
     if (endTime > now) {
       nextRestockTimes[type] = endTime.toISOString();
+      console.log(`Restored ${type} restock time: ${nextRestockTimes[type]}`);
     } else {
       const defaultTimes = {
         seed: new Date(now.getTime() + 300000),
@@ -205,6 +216,7 @@ function startCountdown() {
         event: new Date(now.getTime() + 14400000)
       };
       nextRestockTimes[type] = defaultTimes[type].toISOString();
+      console.log(`Reset ${type} restock time to default: ${nextRestockTimes[type]}`);
       safeFetchStockData();
     }
   });
@@ -219,6 +231,7 @@ function startCountdown() {
   ['seed', 'gear', 'egg', 'event'].forEach(type => {
     if (!nextRestockTimes[type]) {
       nextRestockTimes[type] = defaultTimes[type].toISOString();
+      console.log(`Initialized ${type} restock time: ${nextRestockTimes[type]}`);
     }
   });
 
@@ -237,14 +250,13 @@ function updateAllTimers() {
         14400000
       ));
       nextRestockTimes[type] = defaultTime.toISOString();
-      console.log(`Initialized ${type} restock time:`, nextRestockTimes[type]);
+      console.log(`Initialized ${type} restock time: ${nextRestockTimes[type]}`);
     }
 
     const endTime = new Date(nextRestockTimes[type]);
     const remaining = Math.max(0, endTime - now);
     createOrUpdateTimer(type, remaining);
 
-    // Chỉ reset nếu thời gian còn lại thực sự <= 1 giây
     if (remaining <= 1000) {
       console.log(`${type} restock triggered at ${new Date().toLocaleString()}, remaining: ${remaining}ms`);
       const newEndTime = new Date(now.getTime() + (
@@ -256,8 +268,6 @@ function updateAllTimers() {
       nextRestockTimes[type] = newEndTime.toISOString();
       localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
       shouldFetch = true;
-    } else if (type === 'egg' && remaining <= 1790000 && remaining >= 1789000) {
-      console.warn(`Egg timer near 29:49, remaining: ${remaining / 1000}s`); // Debug tại 29:49
     }
   });
   if (shouldFetch) {
@@ -279,7 +289,11 @@ const LIGHT_THEME = 'light';
 
 function toggleDarkLightMode(isDark) {
   const toggleIcon = document.getElementById('toggle-icon');
-  toggleIcon.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+  if (toggleIcon) {
+    toggleIcon.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+  } else {
+    console.warn('Toggle icon element not found');
+  }
 }
 
 function switchTheme(event) {
@@ -290,7 +304,7 @@ function switchTheme(event) {
   toggleDarkLightMode(isDark);
 }
 
-javascriptasync function fetchStockData() {
+async function fetchStockData() {
   try {
     let data;
     try {
@@ -299,13 +313,15 @@ javascriptasync function fetchStockData() {
           'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
         }
       });
+      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       data = await res.json();
+      console.log('Fetched stock data:', data);
     } catch (e) {
-      console.log("API fetch failed, using mock stock data");
+      console.log("API fetch failed, using mock stock data:", e);
       data = mockStockData();
     }
 
-    // Update tables with new data (always update UI with latest)
+    // Update tables with new data
     updateTable('seed', data.seed_stock);
     updateTable('gear', data.gear_stock);
     updateTable('egg', data.egg_stock);
@@ -315,7 +331,7 @@ javascriptasync function fetchStockData() {
     ['seed', 'gear', 'egg', 'event'].forEach(type => {
       const items = data[`${type === 'event' ? 'cosmetic' : type}_stock`];
       if (items && items.length > 0) {
-        // Create hash without Date_End (sort by display_name to avoid order issues)
+        // Create hash without Date_End
         const itemsForHash = items.map(({ Date_End, ...rest }) => rest)
           .sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
         const newHash = JSON.stringify(itemsForHash);
@@ -324,21 +340,21 @@ javascriptasync function fetchStockData() {
         const capitalType = type.charAt(0).toUpperCase() + type.slice(1);
         const oldHash = localStorage.getItem(`last${capitalType}Hash`);
 
-        if (newHash === oldHash) {
-          // Stock unchanged (ignore Date_End), keep current timer
-          console.log(`${type} stock unchanged, keeping existing timer`);
+        if (newHash === oldHash && nextRestockTimes[type]) {
+          // Stock unchanged, keep current timer
+          console.log(`${type} stock unchanged, keeping timer: ${nextRestockTimes[type]}`);
         } else {
-          // Stock changed, update timer with new earliest Date_End
+          // Stock changed or no existing timer, update with earliest Date_End
           const earliestEnd = items.reduce((min, item) => {
             const itemEnd = new Date(item.Date_End);
             return itemEnd < min ? itemEnd : min;
           }, new Date(items[0].Date_End));
           nextRestockTimes[type] = earliestEnd.toISOString();
-          console.log(`${type} stock changed, updating timer to ${nextRestockTimes[type]}`);
+          console.log(`${type} stock changed or no timer, updated to: ${nextRestockTimes[type]}`);
+          localStorage.setItem(`last${capitalType}Hash`, newHash);
         }
-
-        // Always save new hash (without Date_End)
-        localStorage.setItem(`last${capitalType}Hash`, newHash);
+      } else {
+        console.warn(`No items for ${type}, keeping existing timer if available`);
       }
     });
 
@@ -356,7 +372,10 @@ javascriptasync function fetchStockData() {
 }
 
 function updateTable(type, items) {
-  if (!items) return;
+  if (!items) {
+    console.warn(`No items provided for ${type} table`);
+    return;
+  }
   const total = items.reduce((a, b) => a + (b.quantity || 0), 0);
   const countEl = document.getElementById(`${type}-count`);
   const labelEl = document.getElementById({
@@ -369,18 +388,21 @@ function updateTable(type, items) {
 
   if (countEl) countEl.textContent = total;
   if (labelEl) labelEl.textContent = items.length;
-  if (!body) return;
+  if (!body) {
+    console.warn(`Table body for ${type} not found`);
+    return;
+  }
 
   body.innerHTML = '';
   items.forEach(item => {
-    const icon = item.icon ? `<img src="${item.icon}" class="w-8 h-8 rounded-full mr-2" alt="${item.display_name}">` : '';
+    const icon = item.icon ? `<img src="${item.icon}" class="w-8 h-8 rounded-full mr-2" alt="${item.display_name || 'item'}">` : '';
     const tr = document.createElement('tr');
     tr.className = "border-b border-gray-200 dark:border-gray-700";
     tr.innerHTML = `
       <td class="px-4 py-3 whitespace-nowrap">
-        <div class="flex items-center">${icon}<span class="text-gray-800 dark:text-white">${item.display_name}</span></div>
+        <div class="flex items-center">${icon}<span class="text-gray-800 dark:text-white">${item.display_name || 'Unknown'}</span></div>
       </td>
-      <td class="px-4 py-3 whitespace-nowrap text-gray-800 dark:text-white">${item.quantity}</td>
+      <td class="px-4 py-3 whitespace-nowrap text-gray-800 dark:text-white">${item.quantity || 0}</td>
     `;
     body.appendChild(tr);
   });
@@ -392,6 +414,7 @@ function restoreFromLocalStorage() {
       const storedData = localStorage.getItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`);
       if (storedData) {
         updateTable(type, JSON.parse(storedData));
+        console.log(`Restored ${type} from localStorage`);
       }
     });
   } catch (e) {
@@ -401,12 +424,15 @@ function restoreFromLocalStorage() {
 
 document.addEventListener('DOMContentLoaded', () => {
   const toggleSwitch = document.getElementById('theme-toggle');
+  if (!toggleSwitch) console.warn('Theme toggle element not found');
   const currentTheme = localStorage.getItem('theme') || 'light';
   document.documentElement.setAttribute('data-theme', currentTheme);
   document.documentElement.classList.toggle('dark', currentTheme === DARK_THEME);
-  toggleSwitch.checked = currentTheme === DARK_THEME;
+  if (toggleSwitch) {
+    toggleSwitch.checked = currentTheme === DARK_THEME;
+    toggleSwitch.addEventListener('change', switchTheme);
+  }
   toggleDarkLightMode(currentTheme === DARK_THEME);
-  toggleSwitch.addEventListener('change', switchTheme);
 
   restoreFromLocalStorage();
   fetchActiveWeather();
