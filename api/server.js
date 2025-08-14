@@ -1,12 +1,11 @@
-import express from 'express';
-import { WebSocket } from 'ws';
-import cors from 'cors';
-import rateLimit from 'express-rate-limit';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+const express = require('express');
+const { WebSocket } = require('ws');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const fs = require('fs');
+const path = require('path');
 
-const __filename = fileURLToPath(import.meta.url);
+const __filename = __filename;
 const __dirname = path.dirname(__filename);
 
 const app = express();
