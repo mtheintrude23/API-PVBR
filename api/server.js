@@ -4,6 +4,7 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import fs from 'fs';
 import path from 'path';
+import jstudio from 'jstudio';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
