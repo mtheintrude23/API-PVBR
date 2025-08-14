@@ -172,9 +172,9 @@ function formatTime(ms) {
   const minutes = totalMinutes % 60;
   const hours = Math.floor(totalMinutes / 60);
 
-  let formatted = `${minutes.toString().padStart(2, '0')}P:${seconds.toString().padStart(2, '0')}S`;
+  let formatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   if (hours > 0) {
-    formatted = `${hours.toString().padStart(2, '0')}H:${formatted}`;
+    formatted = `${hours.toString().padStart(2, '0')}:${formatted}`;
   }
   return formatted;
 }
