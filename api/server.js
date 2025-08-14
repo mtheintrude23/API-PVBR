@@ -85,22 +85,20 @@ async function initializeData() {
   try {
     // Fetch initial stock data
     const stockData = await client.stocks.all();
-    console.log('Initial stock data:', stockData); // Debug
+    console.log('Kết nối đến API Stock thành công'); // Debug
     updateStockData(stockData);
 
     // Fetch initial weather data
     const weatherData = await client.weather.all();
-    console.log('Initial weather data:', weatherData); // Debug
+    console.log('Kết nối đến API Weather thành công'); // Debug
     updateWeatherData(weatherData);
 
     // Set up jstudio event listeners (assuming jstudio supports real-time events)
     client.on('stock_update', (data) => {
-      console.log('Received stock update event:', data); // Debug
       updateStockData(data);
     });
 
     client.on('weather_update', (data) => {
-      console.log('Received weather update event:', data); // Debug
       updateWeatherData(data);
     });
   } catch (error) {
