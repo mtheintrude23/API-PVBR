@@ -1,11 +1,12 @@
-const express = require('express');
-const { WebSocket } = require('ws');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-const fs = require('fs');
-const path = require('path');
+import express from 'express';
+import { WebSocket } from 'ws';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const __filename = __filename;
+const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
@@ -20,7 +21,7 @@ let latestData = {
 };
 
 let newData = {
-  weather: []  // Changed from {} to [] to hold multiple entries
+  weather: [] // Holds multiple weather entries
 };
 
 // Helper functions
@@ -97,14 +98,14 @@ function updateWeatherData(data) {
     };
     newData.weather.push(entry);
 
-    // Optional: limit to 100 most recent entries
+    // Limit to 100 most recent entries
     if (newData.weather.length > 100) {
-      newData.weather.shift(); // remove oldest
+      newData.weather.shift(); // Remove oldest
     }
   }
 }
 
-// Start WebSocket (merged key, only one connection)
+// Start WebSocket
 const websocketKey = 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272';
 websocketListener(
   `wss://websocket.joshlei.com/growagarden?jstudio-key=${websocketKey}`,
@@ -116,39 +117,4 @@ websocketListener(
 
 // Middleware
 app.use(cors());
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
-app.use('/static', express.static(path.join(__dirname, 'static')));
-
-// Rate Limiting
-const limiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 5,
-  message: { error: 'Too many requests, please try again later.' }
-});
-
-// Routes
-app.get('/stocks', (req, res) => {
-  res.sendFile(path.join(__dirname, 'stock.html'));
-});
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'home.html'));
-});
-app.get('/docs', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.get('/api', limiter, (req, res) => {
-  res.json({ status: '200' });
-});
-
-app.get('/api/stock', limiter, (req, res) => {
-  res.json(latestData);
-});
-
-app.get('/api/weather', limiter, (req, res) => {
-  res.json(newData.weather); // return the array
-});
-
-// Start server
-const PORT = process.env.PORT || 443;
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 API server running on port ${PORT}`));
+app.use('/assets', express.static(path.join(__dirname, 'assets
