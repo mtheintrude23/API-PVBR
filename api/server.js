@@ -92,15 +92,6 @@ async function initializeData() {
     const weatherData = await client.weather.all();
     console.log('Kết nối đến API Weather thành công'); // Debug
     updateWeatherData(weatherData);
-
-    // Set up jstudio event listeners (assuming jstudio supports real-time events)
-    client.on('stock_update', (data) => {
-      updateStockData(data);
-    });
-
-    client.on('weather_update', (data) => {
-      updateWeatherData(data);
-    });
   } catch (error) {
     console.error('Error initializing data:', error);
   }
