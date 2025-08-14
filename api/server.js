@@ -106,7 +106,7 @@ function updateWeatherData(data) {
 }
 
 // Start WebSocket (merged key, only one connection)
-const websocketKey = 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272';
+const websocketKey = 'js_4ece47b66df9cf728ed9a0508e82c9b66af86e5a988e5461bcd0e487eaead8a2';
 websocketListener(
   `wss://websocket.joshlei.com/growagarden?jstudio-key=${websocketKey}`,
   (data) => {
