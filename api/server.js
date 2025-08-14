@@ -5,7 +5,7 @@ import rateLimit from 'express-rate-limit';
 import fs from 'fs';
 import path from 'path';
 import jstudio from 'jstudio';
-import logger from 'console-wizard';
+import { logger } from 'console-wizard';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
