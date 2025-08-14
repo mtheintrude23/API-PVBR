@@ -237,13 +237,16 @@ function updateAllTimers() {
         14400000
       ));
       nextRestockTimes[type] = defaultTime.toISOString();
+      console.log(`Initialized ${type} restock time:`, nextRestockTimes[type]);
     }
 
     const endTime = new Date(nextRestockTimes[type]);
     const remaining = Math.max(0, endTime - now);
     createOrUpdateTimer(type, remaining);
 
+    // Chỉ reset nếu thời gian còn lại thực sự <= 1 giây
     if (remaining <= 1000) {
+      console.log(`${type} restock triggered at ${new Date().toLocaleString()}, remaining: ${remaining}ms`);
       const newEndTime = new Date(now.getTime() + (
         type === 'seed' ? 300000 :
         type === 'gear' ? 300000 :
@@ -251,7 +254,10 @@ function updateAllTimers() {
         14400000
       ));
       nextRestockTimes[type] = newEndTime.toISOString();
+      localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
       shouldFetch = true;
+    } else if (type === 'egg' && remaining <= 1790000 && remaining >= 1789000) {
+      console.warn(`Egg timer near 29:49, remaining: ${remaining / 1000}s`); // Debug tại 29:49
     }
   });
   if (shouldFetch) {
@@ -284,7 +290,7 @@ function switchTheme(event) {
   toggleDarkLightMode(isDark);
 }
 
-async function fetchStockData() {
+javascriptasync function fetchStockData() {
   try {
     let data;
     try {
@@ -295,24 +301,44 @@ async function fetchStockData() {
       });
       data = await res.json();
     } catch (e) {
-      console.log("Using mock stock data");
+      console.log("API fetch failed, using mock stock data");
       data = mockStockData();
     }
 
+    // Update tables with new data (always update UI with latest)
     updateTable('seed', data.seed_stock);
     updateTable('gear', data.gear_stock);
     updateTable('egg', data.egg_stock);
     updateTable('event', data.cosmetic_stock);
 
+    // Process each type
     ['seed', 'gear', 'egg', 'event'].forEach(type => {
-      const items = data[`${type}_stock`];
+      const items = data[`${type === 'event' ? 'cosmetic' : type}_stock`];
       if (items && items.length > 0) {
-        const earliestEnd = items.reduce((min, item) => {
-          const itemEnd = new Date(item.Date_End);
-          return itemEnd < min ? itemEnd : min;
-        }, new Date(items[0].Date_End));
-        nextRestockTimes[type] = earliestEnd.toISOString();
-        localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(items));
+        // Create hash without Date_End (sort by display_name to avoid order issues)
+        const itemsForHash = items.map(({ Date_End, ...rest }) => rest)
+          .sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
+        const newHash = JSON.stringify(itemsForHash);
+
+        // Get old hash
+        const capitalType = type.charAt(0).toUpperCase() + type.slice(1);
+        const oldHash = localStorage.getItem(`last${capitalType}Hash`);
+
+        if (newHash === oldHash) {
+          // Stock unchanged (ignore Date_End), keep current timer
+          console.log(`${type} stock unchanged, keeping existing timer`);
+        } else {
+          // Stock changed, update timer with new earliest Date_End
+          const earliestEnd = items.reduce((min, item) => {
+            const itemEnd = new Date(item.Date_End);
+            return itemEnd < min ? itemEnd : min;
+          }, new Date(items[0].Date_End));
+          nextRestockTimes[type] = earliestEnd.toISOString();
+          console.log(`${type} stock changed, updating timer to ${nextRestockTimes[type]}`);
+        }
+
+        // Always save new hash (without Date_End)
+        localStorage.setItem(`last${capitalType}Hash`, newHash);
       }
     });
 
@@ -320,7 +346,7 @@ async function fetchStockData() {
     localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
     localStorage.setItem('lastFetchTime', new Date().toISOString());
   } catch (e) {
-    console.error("Error:", e);
+    console.error("Error fetching stock data:", e);
     const connectionStatus = document.getElementById('connection-status');
     if (connectionStatus) {
       connectionStatus.className = "bg-red-500 text-white px-3 py-1 rounded-full text-sm flex items-center";
