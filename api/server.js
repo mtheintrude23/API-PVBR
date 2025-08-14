@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import fs from 'fs';
 import path from 'path';
 import jstudio from 'jstudio';
+import logger from 'console-wizard';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -56,7 +57,6 @@ function cleanItems(items) {
 
 // Data update functions
 function updateStockData(data) {
-  console.log('Updating stock data:', data); // Debug
   if (data.gear_stock) latestData.gearStock = cleanItems(data.gear_stock);
   if (data.seed_stock) latestData.seedsStock = cleanItems(data.seed_stock);
   if (data.egg_stock) latestData.eggStock = cleanItems(data.egg_stock);
@@ -65,7 +65,6 @@ function updateStockData(data) {
 }
 
 function updateWeatherData(data) {
-  console.log('Updating weather data:', data); // Debug
   if (data.weather) {
     const entry = {
       timestamp: Date.now(),
@@ -85,15 +84,15 @@ async function initializeData() {
   try {
     // Fetch initial stock data
     const stockData = await client.stocks.all();
-    console.log('Kết nối đến API Stock thành công'); // Debug
+    logger.success('Kết nối đến API Stock thành công'); // Debug
     updateStockData(stockData);
 
     // Fetch initial weather data
     const weatherData = await client.weather.all();
-    console.log('Kết nối đến API Weather thành công'); // Debug
+    logger.success('Kết nối đến API Weather thành công'); // Debug
     updateWeatherData(weatherData);
   } catch (error) {
-    console.error('Error initializing data:', error);
+    logger.error('Error initializing data:', error);
   }
 }
 
@@ -102,14 +101,12 @@ function startPolling() {
   setInterval(async () => {
     try {
       const stockData = await client.stocks.all();
-      console.log('Polled stock data:', stockData); // Debug
       updateStockData(stockData);
 
       const weatherData = await client.weather.all();
-      console.log('Polled weather data:', weatherData); // Debug
       updateWeatherData(weatherData);
     } catch (error) {
-      console.error('Error polling data:', error);
+      logger.error('Error polling data:', error);
     }
   }, 60000); // Poll every 60 seconds
 }
@@ -152,7 +149,7 @@ app.get('/api/weather', limiter, (req, res) => {
 // Start server and initialize data
 const PORT = process.env.PORT || 443;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 API server running on port ${PORT}`);
+  logger.info(`🚀 API server running on port ${PORT}`);
   initializeData(); // Initialize data on server start
   startPolling(); // Start polling as fallback
 });
