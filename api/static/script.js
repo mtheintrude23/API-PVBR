@@ -124,8 +124,10 @@ async function fetchActiveWeather() {
         'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
       }
     });
+    if (!mainRes.ok) throw new Error(`HTTP error! Status: ${mainRes.status}`);
     const mainData = await mainRes.json();
     activeWeathers = mainData.weather?.filter(w => w.active === true) || [];
+    console.log('Fetched active weather:', activeWeathers);
     renderWeatherCards(activeWeathers);
   } catch (err) {
     console.error("Weather fetch error:", err);
@@ -205,37 +207,16 @@ function startCountdown() {
   const now = new Date();
   Object.keys(storedEndTimes).forEach(type => {
     const endTime = new Date(storedEndTimes[type]);
-    if (endTime > now) {
+    if (!isNaN(endTime) && endTime > now) {
       nextRestockTimes[type] = endTime.toISOString();
-      console.log(`Restored ${type} restock time: ${nextRestockTimes[type]}`);
+      console.log(`Restored ${type} restock time from localStorage: ${nextRestockTimes[type]}`);
     } else {
-      const defaultTimes = {
-        seed: new Date(now.getTime() + 300000),
-        gear: new Date(now.getTime() + 300000),
-        egg: new Date(now.getTime() + 1800000),
-        event: new Date(now.getTime() + 14400000)
-      };
-      nextRestockTimes[type] = defaultTimes[type].toISOString();
-      console.log(`Reset ${type} restock time to default: ${nextRestockTimes[type]}`);
-      safeFetchStockData();
+      console.log(`Invalid or expired ${type} restock time in localStorage, will fetch new data`);
     }
   });
 
-  const defaultTimes = {
-    seed: new Date(now.getTime() + 300000),
-    gear: new Date(now.getTime() + 300000),
-    egg: new Date(now.getTime() + 1800000),
-    event: new Date(now.getTime() + 14400000)
-  };
-
-  ['seed', 'gear', 'egg', 'event'].forEach(type => {
-    if (!nextRestockTimes[type]) {
-      nextRestockTimes[type] = defaultTimes[type].toISOString();
-      console.log(`Initialized ${type} restock time: ${nextRestockTimes[type]}`);
-    }
-  });
-
-  updateAllTimers();
+  // Fetch initial data to ensure we have valid timers
+  safeFetchStockData();
 }
 
 function updateAllTimers() {
@@ -243,14 +224,8 @@ function updateAllTimers() {
   let shouldFetch = false;
   ['seed', 'gear', 'egg', 'event'].forEach(type => {
     if (!nextRestockTimes[type]) {
-      const defaultTime = new Date(now.getTime() + (
-        type === 'seed' ? 300000 :
-        type === 'gear' ? 300000 :
-        type === 'egg' ? 1800000 :
-        14400000
-      ));
-      nextRestockTimes[type] = defaultTime.toISOString();
-      console.log(`Initialized ${type} restock time: ${nextRestockTimes[type]}`);
+      console.warn(`${type} restock time not set, waiting for fetch`);
+      return;
     }
 
     const endTime = new Date(nextRestockTimes[type]);
@@ -259,17 +234,10 @@ function updateAllTimers() {
 
     if (remaining <= 1000) {
       console.log(`${type} restock triggered at ${new Date().toLocaleString()}, remaining: ${remaining}ms`);
-      const newEndTime = new Date(now.getTime() + (
-        type === 'seed' ? 300000 :
-        type === 'gear' ? 300000 :
-        type === 'egg' ? 1800000 :
-        14400000
-      ));
-      nextRestockTimes[type] = newEndTime.toISOString();
-      localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
       shouldFetch = true;
     }
   });
+
   if (shouldFetch) {
     safeFetchStockData();
   }
@@ -315,7 +283,7 @@ async function fetchStockData() {
       });
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       data = await res.json();
-      console.log('Fetched stock data:', data);
+      console.log('Fetched stock data:', JSON.stringify(data, null, 2));
     } catch (e) {
       console.log("API fetch failed, using mock stock data:", e);
       data = mockStockData();
@@ -328,33 +296,46 @@ async function fetchStockData() {
     updateTable('event', data.cosmetic_stock);
 
     // Process each type
+    const defaultDurations = {
+      seed: 300000,
+      gear: 300000,
+      egg: 1800000,
+      event: 14400000
+    };
+
     ['seed', 'gear', 'egg', 'event'].forEach(type => {
       const items = data[`${type === 'event' ? 'cosmetic' : type}_stock`];
       if (items && items.length > 0) {
-        // Create hash without Date_End
-        const itemsForHash = items.map(({ Date_End, ...rest }) => rest)
-          .sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
+        // Create hash based on display_name and quantity only
+        const itemsForHash = items.map(item => ({
+          display_name: item.display_name || 'Unknown',
+          quantity: item.quantity || 0
+        })).sort((a, b) => a.display_name.localeCompare(b.display_name));
         const newHash = JSON.stringify(itemsForHash);
 
         // Get old hash
         const capitalType = type.charAt(0).toUpperCase() + type.slice(1);
         const oldHash = localStorage.getItem(`last${capitalType}Hash`);
 
-        if (newHash === oldHash && nextRestockTimes[type]) {
-          // Stock unchanged, keep current timer
+        if (newHash === oldHash && nextRestockTimes[type] && new Date(nextRestockTimes[type]) > new Date()) {
+          // Stock unchanged and timer still valid, keep current timer
           console.log(`${type} stock unchanged, keeping timer: ${nextRestockTimes[type]}`);
         } else {
-          // Stock changed or no existing timer, update with earliest Date_End
+          // Stock changed or timer invalid/expired, update with earliest Date_End
           const earliestEnd = items.reduce((min, item) => {
-            const itemEnd = new Date(item.Date_End);
+            const itemEnd = new Date(item.Date_End || new Date(Date.now() + defaultDurations[type]));
             return itemEnd < min ? itemEnd : min;
-          }, new Date(items[0].Date_End));
+          }, new Date(Date.now() + defaultDurations[type]));
           nextRestockTimes[type] = earliestEnd.toISOString();
-          console.log(`${type} stock changed or no timer, updated to: ${nextRestockTimes[type]}`);
+          console.log(`${type} stock changed or timer invalid, updated to: ${nextRestockTimes[type]}`);
           localStorage.setItem(`last${capitalType}Hash`, newHash);
         }
       } else {
-        console.warn(`No items for ${type}, keeping existing timer if available`);
+        // No items, set default timer if not set
+        if (!nextRestockTimes[type]) {
+          nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
+          console.log(`${type} no items, set default timer: ${nextRestockTimes[type]}`);
+        }
       }
     });
 
@@ -406,6 +387,12 @@ function updateTable(type, items) {
     `;
     body.appendChild(tr);
   });
+
+  // Save items to localStorage for restoration
+  localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(items.map(item => ({
+    display_name: item.display_name || 'Unknown',
+    quantity: item.quantity || 0
+  })).sort((a, b) => a.display_name.localeCompare(b.display_name))));
 }
 
 function restoreFromLocalStorage() {
@@ -439,16 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(fetchActiveWeather, 60000);
   setInterval(updateWeatherTimer, 1000);
 
-  const lastFetchTime = localStorage.getItem('lastFetchTime');
-  const now = new Date();
-  if (!lastFetchTime || (now - new Date(lastFetchTime)) > 300000) {
-    fetchStockData();
-  } else {
-    startCountdown();
-  }
-
-  setInterval(fetchStockData, 30000);
-  updateAllTimers();
+  startCountdown();
 });
 
 window.addEventListener('beforeunload', () => {
