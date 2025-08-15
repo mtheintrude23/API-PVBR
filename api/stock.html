@@ -1,11 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="https://i.postimg.cc/mrG7NySP/images-3-removebg-preview.png" crossorigin>
     <title>Live Stock Tracker - Grow A Garden Roblox Tools</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        };
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @keyframes pulse {
@@ -50,43 +55,23 @@
 
         <!-- Main Dashboard -->
         <main>
-            <!-- Weather/Status Card -->
+            <!-- Weather/Status Section -->
             <div class="gradient-bg rounded-xl p-6 mb-8 shadow-lg">
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Grow Garden Warehouse</h2>
-                            <p class="text-green-600 dark:text-green-400">Connected Alerts</p>
-                        </div>
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Grow Garden Warehouse</h2>
+                        <p class="text-green-600 dark:text-green-400">Connected Alerts</p>
                     </div>
                     <div class="text-center md:text-right">
                         <p class="text-gray-600 dark:text-gray-300 mb-1">Inventory management dashboard • Real-time updates</p>
                         <p class="text-gray-600 dark:text-gray-300">Never miss rare items</p>
                     </div>
                 </div>
-                
-                <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-                    <div class="flex items-center mb-4 md:mb-0">
-                        <img id="weather-img" src="https://i.postimg.cc/FdnXTFY0/images.png"
-                             alt="Weather Icon" class="w-16 h-16 mr-4">
-                    </div>
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 id="weather-name" class="text-lg font-medium text-gray-800 dark:text-white">Normal</h3>
-                        <span id="weather-timer" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">No active event</span>
-                    </div>
-                    <div class="flex items-center">
-                        <span id="weather-status" class="px-3 py-1 text-sm rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">Inactive</span>
-                        <ul id="weather-effects" class="ml-3 text-gray-600 dark:text-gray-300">
-                            <li class="flex items-center">
-                                <i class="fas fa-info-circle text-blue-500 mr-2"></i>
-                                No active weather effects
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <div id="weather-card-container" class="flex flex-col gap-4"></div>
             </div>
 
             <!-- Inventory Sections -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 mb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <!-- Seeds Card -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden card-hover transition-all duration-300">
                     <div class="bg-green-600 dark:bg-green-800 px-6 py-3 flex justify-between items-center">
@@ -136,7 +121,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 mb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <!-- Eggs Card -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden card-hover transition-all duration-300">
                     <div class="bg-purple-600 dark:bg-purple-800 px-6 py-3 flex justify-between items-center">
@@ -179,9 +164,7 @@
                                         <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Quantity</th>
                                     </tr>
                                 </thead>
-                                <tbody id="event-table-body" class="bg
-
--white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                                <tbody id="event-table-body" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                             </table>
                         </div>
                     </div>
@@ -192,7 +175,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Last global update</h2>
-                    <span id="last-updated" class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-sm">8/14/2025, 12:41:31 PM</span>
+                    <span id="last-updated" class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-sm">8/15/2025, 9:39 PM</span>
                 </div>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">Stay ahead of the competition with our comprehensive Grow A Garden stock tracker, providing real-time updates on seeds, gear, eggs, and cosmetics across all Roblox servers.</p>
                 <p class="text-gray-600 dark:text-gray-300">Never miss rare items again with live inventory monitoring and instant notifications.</p>
