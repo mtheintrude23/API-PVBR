@@ -6,158 +6,112 @@
     <title>Grow A Garden Bot - Trợ lý cho game Grow a Garden trên Roblox</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f8fdf7;
+            @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
         }
         .hero-pattern {
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%2399bc8f' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-image: linear-gradient(to bottom right, #d4f4dd, #a3e6b2);
+            @apply relative overflow-hidden;
         }
-        .plant-animation {
-            animation: grow 3s ease-out forwards;
-            transform-origin: bottom center;
-        }
-        @keyframes grow {
-            0% {
-                transform: scaleY(0.1);
-                opacity: 0;
-            }
-            100% {
-                transform: scaleY(1);
-                opacity: 1;
-            }
+        .hero-pattern::before {
+            content: '';
+            @apply absolute inset-0 opacity-10;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2399bc8f' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30v4h-4v2h4v4h2v-4h4v-2h-4V0h-2zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
         .floating {
-            animation: float 3s ease-in-out infinite;
+            animation: float 4s ease-in-out infinite;
         }
         @keyframes float {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .grow-animation {
+            animation: grow 1.5s ease-out forwards;
+        }
+        @keyframes grow {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
         .discord-btn {
-            background-color: #5865F2;
-            transition: background-color 0.3s ease;
-        }
-        .discord-btn:hover {
-            background-color: #4752C4;
+            @apply bg-indigo-600 hover:bg-indigo-700 transition-all duration-300;
         }
         .roblox-btn {
-            background-color: #FF0000;
-            transition: background-color 0.3s ease;
+            @apply bg-red-600 hover:bg-red-700 transition-all duration-300;
         }
-        .roblox-btn:hover {
-            background-color: #D90000;
+        .faq-item.active .faq-arrow {
+            @apply rotate-180;
         }
     </style>
 </head>
 <body>
     <!-- Header -->
-    <header class="bg-green-600 text-white shadow-lg">
+    <header class="bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg sticky top-0 z-50">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <img src="./image/growagarden.jpg" alt="Grow A Garden Logo" class="w-8 h-8">
+            <div class="flex items-center space-x-3">
+                <img src="./image/growagarden.jpg" alt="Grow A Garden Logo" class="w-10 h-10 rounded-full">
                 <h1 class="text-xl md:text-2xl font-bold">Grow A Garden Bot</h1>
             </div>
-            <nav class="hidden md:flex space-x-6">
-                <a href="#features" class="hover:text-green-200 transition-colors">Tính năng</a>
-                <a href="#how-it-works" class="hover:text-green-200 transition-colors">Cách hoạt động</a>
-                <a href="#testimonials" class="hover:text-green-200 transition-colors">Đánh giá</a>
-                <a href="#faq" class="hover:text-green-200 transition-colors">Câu hỏi thường gặp</a>
+            <nav class="hidden md:flex space-x-8">
+                <a href="#features" class="hover:text-green-200 transition-colors font-medium">Tính năng</a>
+                <a href="#how-it-works" class="hover:text-green-200 transition-colors font-medium">Cách hoạt động</a>
+                <a href="#testimonials" class="hover:text-green-200 transition-colors font-medium">Đánh giá</a>
+                <a href="#faq" class="hover:text-green-200 transition-colors font-medium">FAQ</a>
             </nav>
             <button class="md:hidden focus:outline-none" id="menu-button">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
+                <i class="fas fa-bars text-2xl"></i>
             </button>
         </div>
-        <!-- Mobile menu -->
-        <div class="md:hidden hidden bg-green-700 px-4 py-3" id="mobile-menu">
-            <a href="#features" class="block py-2 hover:text-green-200 transition-colors">Tính năng</a>
-            <a href="#how-it-works" class="block py-2 hover:text-green-200 transition-colors">Cách hoạt động</a>
-            <a href="#testimonials" class="block py-2 hover:text-green-200 transition-colors">Đánh giá</a>
-            <a href="#faq" class="block py-2 hover:text-green-200 transition-colors">Câu hỏi thường gặp</a>
+        <div class="md:hidden hidden bg-green-800 px-4 py-4" id="mobile-menu">
+            <a href="#features" class="block py-2 hover:text-green-200 transition-colors font-medium">Tính năng</a>
+            <a href="#how-it-works" class="block py-2 hover:text-green-200 transition-colors font-medium">Cách hoạt động</a>
+            <a href="#testimonials" class="block py-2 hover:text-green-200 transition-colors font-medium">Đánh giá</a>
+            <a href="#faq" class="block py-2 hover:text-green-200 transition-colors font-medium">FAQ</a>
         </div>
     </header>
 
     <!-- Hero Section -->
     <section class="hero-pattern py-16 md:py-24">
-        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center">
-            <div class="md:w-1/2 mb-10 md:mb-0">
-                <div class="inline-block bg-blue-100 text-blue-800 font-medium px-3 py-1 rounded-full mb-4">
-                    Bot Discord cho Roblox
-                </div>
-                <h2 class="text-3xl md:text-5xl font-bold text-green-800 mb-6">Theo dõi Grow a Garden trên Roblox dễ dàng hơn bao giờ hết</h2>
-                <p class="text-lg text-gray-700 mb-8">Grow A Garden Bot là trợ lý Discord thông minh giúp bạn theo dõi và nhận thông báo nhanh chóng về trạng thái Seed, Gear và Egg Stock trong trò chơi Grow a Garden trên Roblox.</p>
-                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                    <a href="https://discord.com/oauth2/authorize?client_id=.054&permissions=.&integration_type=0&scope=bot" target="_blank" class="discord-btn text-white font-medium py-3 px-6 rounded-lg transition-colors shadow-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 mr-2" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36">
-                            <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
-                        </svg>
-                        Thêm vào Discord
+        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center gap-8">
+            <div class="md:w-1/2 space-y-6 grow-animation">
+                <span class="inline-block bg-blue-100 text-blue-800 font-medium px-4 py-1 rounded-full">Bot Discord cho Roblox</span>
+                <h2 class="text-4xl md:text-5xl font-bold text-green-900 leading-tight">Theo dõi Grow a Garden dễ dàng hơn bao giờ hết</h2>
+                <p class="text-lg text-gray-700">Grow A Garden Bot là trợ lý Discord thông minh giúp bạn nhận thông báo nhanh chóng về Seed, Gear, và Egg Stock trong trò chơi Grow a Garden trên Roblox.</p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="https://discord.com/oauth2/authorize?client_id=.054&permissions=8&integration_type=0&scope=bot" target="_blank" class="discord-btn text-white font-semibold py-3 px-6 rounded-lg shadow-lg flex items-center justify-center">
+                        <i class="fab fa-discord mr-2"></i> Thêm vào Discord
                     </a>
-                    <a href="https://www.roblox.com/games/grow-a-garden" target="_blank" class="roblox-btn text-white font-medium py-3 px-6 rounded-lg transition-colors shadow-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5.164 0L.16 18.928 18.836 24l4.997-18.928L5.164 0zm2.125 5.5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm10.5 13a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
-                        </svg>
-                        Chơi trên Roblox
+                    <a href="https://www.roblox.com/games/grow-a-garden" target="_blank" class="roblox-btn text-white font-semibold py-3 px-6 rounded-lg shadow-lg flex items-center justify-center">
+                        <i class="fas fa-gamepad mr-2"></i> Chơi trên Roblox
                     </a>
                 </div>
             </div>
             <div class="md:w-1/2 flex justify-center">
-                <div class="relative w-72 h-72 md:w-96 md:h-96">
-                    <!-- Bot illustration -->
-                    <img src="./image/growagarden.jpg" alt="Grow A Garden Bot" class="floating w-full h-full object-contain">
-                </div>
+                <img src="" alt="Grow A Garden Bot" class="floating w-80 md:w-96 h-auto object-contain">
             </div>
         </div>
     </section>
 
     <!-- Game Info Section -->
-    <section class="py-12 bg-white">
+    <section class="py-16 bg-white dark:bg-gray-800">
         <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row items-center bg-green-50 rounded-xl overflow-hidden shadow-lg">
-                <div class="md:w-1/2 p-8">
-                    <h2 class="text-2xl md:text-3xl font-bold text-green-800 mb-4">Về Grow a Garden trên Roblox</h2>
-                    <p class="text-gray-700 mb-6">Grow a Garden là một trò chơi phổ biến trên nền tảng Roblox, nơi người chơi có thể trồng và chăm sóc vườn ảo của mình. Với nhiều loại hạt giống, công cụ và trứng thú cưng, trò chơi mang đến trải nghiệm làm vườn thú vị và thư giãn.</p>
-                    <div class="flex items-center space-x-2 text-green-700 font-medium">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span>Hàng triệu lượt chơi trên Roblox</span>
+            <div class="flex flex-col md:flex-row items-center bg-green-50 dark:bg-green-900 rounded-2xl shadow-xl overflow-hidden">
+                <div class="md:w-1/2 p-8 space-y-4">
+                    <h2 class="text-3xl font-bold text-green-800 dark:text-green-200">Về Grow a Garden trên Roblox</h2>
+                    <p class="text-gray-600 dark:text-gray-300">Grow a Garden là trò chơi thư giãn trên Roblox, nơi bạn trồng và chăm sóc vườn ảo với nhiều loại hạt giống, công cụ và trứng thú cưng độc đáo.</p>
+                    <div class="flex items-center text-green-700 dark:text-green-300 font-medium">
+                        <i class="fas fa-check-circle mr-2"></i> Hàng triệu lượt chơi trên Roblox
                     </div>
                 </div>
-                <div class="md:w-1/2 bg-green-600 p-8 text-white">
-                    <h3 class="text-xl font-bold mb-4">Bot Discord của chúng tôi giúp bạn:</h3>
+                <div class="md:w-1/2 bg-green-600 dark:bg-green-700 p-8 text-white">
+                    <h3 class="text-xl font-bold mb-4">Bot của chúng tôi hỗ trợ:</h3>
                     <ul class="space-y-3">
-                        <li class="flex items-start">
-                            <svg class="w-6 h-6 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span>Theo dõi trạng thái Seed (hạt giống) trong cửa hàng</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-6 h-6 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span>Nhận thông báo về Gear (công cụ) mới</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-6 h-6 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span>Cập nhật tình trạng Egg Stock (kho trứng)</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-6 h-6 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span>Không bỏ lỡ bất kỳ vật phẩm giới hạn nào</span>
-                        </li>
+                        <li class="flex items-start"><i class="fas fa-seedling mr-2 mt-1"></i> Theo dõi trạng thái Seed Stock</li>
+                        <li class="flex items-start"><i class="fas fa-tools mr-2 mt-1"></i> Nhận thông báo về Gear mới</li>
+                        <li class="flex items-start"><i class="fas fa-egg mr-2 mt-1"></i> Cập nhật tình trạng Egg Stock</li>
+                        <li class="flex items-start"><i class="fas fa-star mr-2 mt-1"></i> Không bỏ lỡ vật phẩm giới hạn</li>
                     </ul>
                 </div>
             </div>
@@ -165,221 +119,141 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-16 bg-white">
+    <section id="features" class="py-16 bg-gray-50 dark:bg-gray-900">
         <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center text-green-800 mb-12">Tính năng nổi bật</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Feature 1 -->
-                <div class="bg-green-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                        <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
-                        </svg>
+            <h2 class="text-3xl font-bold text-center text-green-800 dark:text-green-200 mb-12">Tính năng nổi bật</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow grow-animation">
+                    <div class="bg-green-100 dark:bg-green-700 w-14 h-14 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-bell text-green-600 dark:text-green-300 text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2 text-green-800">Thông báo thời gian thực</h3>
-                    <p class="text-gray-600">Nhận thông báo ngay lập tức khi có hạt giống mới, công cụ hoặc trứng thú cưng xuất hiện trong cửa hàng Grow a Garden trên Roblox.</p>
+                    <h3 class="text-xl font-semibold mb-2 text-green-800 dark:text-green-200">Thông báo thời gian thực</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Nhận thông báo tức thì khi có hạt giống, công cụ, hoặc trứng mới trong cửa hàng.</p>
                 </div>
-                
-                <!-- Feature 2 -->
-                <div class="bg-green-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                        <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd"></path>
-                        </svg>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow grow-animation">
+                    <div class="bg-green-100 dark:bg-green-700 w-14 h-14 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-warehouse text-green-600 dark:text-green-300 text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2 text-green-800">Theo dõi kho hàng</h3>
-                    <p class="text-gray-600">Kiểm tra nhanh chóng tình trạng kho hàng của Seed, Gear và Egg trong trò chơi mà không cần phải đăng nhập vào Roblox.</p>
+                    <h3 class="text-xl font-semibold mb-2 text-green-800 dark:text-green-200">Theo dõi kho hàng</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Kiểm tra nhanh trạng thái Seed, Gear, và Egg mà không cần đăng nhập Roblox.</p>
                 </div>
-                
-                <!-- Feature 3 -->
-                <div class="bg-green-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                        <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
-                        </svg>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow grow-animation">
+                    <div class="bg-green-100 dark:bg-green-700 w-14 h-14 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-users text-green-600 dark:text-green-300 text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2 text-green-800">Cộng đồng Discord</h3>
-                    <p class="text-gray-600">Kết nối với những người chơi Grow a Garden khác, chia sẻ mẹo và thủ thuật, và cùng nhau xây dựng vườn tuyệt vời.</p>
+                    <h3 class="text-xl font-semibold mb-2 text-green-800 dark:text-green-200">Cộng đồng Discord</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Kết nối, chia sẻ mẹo và xây dựng vườn cùng người chơi khác.</p>
                 </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-                <!-- Feature 4 -->
-                <div class="bg-green-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                        <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                        </svg>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow grow-animation">
+                    <div class="bg-green-100 dark:bg-green-700 w-14 h-14 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-code text-green-600 dark:text-green-300 text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2 text-green-800">Lệnh tùy chỉnh</h3>
-                    <p class="text-gray-600">Sử dụng các lệnh đơn giản để kiểm tra thông tin cụ thể về các vật phẩm trong trò chơi, giá cả và tính khả dụng của chúng.</p>
+                    <h3 class="text-xl font-semibold mb-2 text-green-800 dark:text-green-200">Lệnh tùy chỉnh</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Sử dụng lệnh đơn giản để kiểm tra thông tin vật phẩm, giá cả, và tình trạng.</p>
                 </div>
-                
-                <!-- Feature 5 -->
-                <div class="bg-green-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                        <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z"></path>
-                        </svg>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow grow-animation">
+                    <div class="bg-green-100 dark:bg-green-700 w-14 h-14 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-cog text-green-600 dark:text-green-300 text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2 text-green-800">Tùy chỉnh thông báo</h3>
-                    <p class="text-gray-600">Thiết lập thông báo cho các vật phẩm cụ thể mà bạn quan tâm, để không bỏ lỡ những món đồ hiếm hoặc giới hạn thời gian.</p>
+                    <h3 class="text-xl font-semibold mb-2 text-green-800 dark:text-green-200">Tùy chỉnh thông báo</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Thiết lập thông báo cho các vật phẩm hiếm hoặc giới hạn thời gian.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- How It Works Section -->
-    <section id="how-it-works" class="py-16 bg-green-50">
+    <section id="how-it-works" class="py-16 bg-green-50 dark:bg-gray-800">
         <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center text-green-800 mb-12">Cách Grow A Garden Bot hoạt động</h2>
-            
-            <div class="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-8">
-                <!-- Step 1 -->
-                <div class="bg-white p-6 rounded-lg shadow-md max-w-xs w-full text-center">
-                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl font-bold text-green-600">1</span>
+            <h2 class="text-3xl font-bold text-center text-green-800 dark:text-green-200 mb-12">Cách Grow A Garden Bot hoạt động</h2>
+            <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+                <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md max-w-xs w-full text-center grow-animation">
+                    <div class="bg-green-100 dark:bg-green-700 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-green-600 dark:text-green-300">1</span>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2 text-green-800">Thêm bot vào Discord</h3>
-                    <p class="text-gray-600">Nhấp vào nút "Thêm vào Discord" và chọn máy chủ Discord mà bạn muốn thêm bot vào.</p>
+                    <h3 class="text-xl font-semibold mb-2 text-green-800 dark:text-green-200">Thêm bot vào Discord</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Nhấp "Thêm vào Discord" và chọn máy chủ của bạn.</p>
                 </div>
-                
-                <!-- Arrow -->
-                <div class="hidden md:block">
-                    <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-                
-                <!-- Step 2 -->
-                <div class="bg-white p-6 rounded-lg shadow-md max-w-xs w-full text-center">
-                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl font-bold text-green-600">2</span>
+                <i class="hidden md:block fas fa-arrow-right text-3xl text-green-600 dark:text-green-300"></i>
+                <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md max-w-xs w-full text-center grow-animation">
+                    <div class="bg-green-100 dark:bg-green-700 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-green-600 dark:text-green-300">2</span>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2 text-green-800">Thiết lập kênh thông báo</h3>
-                    <p class="text-gray-600">Sử dụng lệnh để thiết lập kênh nơi bot sẽ gửi thông báo về cập nhật Seed, Gear và Egg.</p>
+                    <h3 class="text-xl font-semibold mb-2 text-green-800 dark:text-green-200">Thiết lập kênh</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Dùng lệnh để thiết lập kênh nhận thông báo.</p>
                 </div>
-                
-                <!-- Arrow -->
-                <div class="hidden md:block">
-                    <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-                
-                <!-- Step 3 -->
-                <div class="bg-white p-6 rounded-lg shadow-md max-w-xs w-full text-center">
-                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl font-bold text-green-600">3</span>
+                <i class="hidden md:block fas fa-arrow-right text-3xl text-green-600 dark:text-green-300"></i>
+                <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md max-w-xs w-full text-center grow-animation">
+                    <div class="bg-green-100 dark:bg-green-700 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-green-600 dark:text-green-300">3</span>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2 text-green-800">Nhận thông báo</h3>
-                    <p class="text-gray-600">Bot sẽ tự động theo dõi và gửi thông báo khi có cập nhật mới về vật phẩm trong Grow a Garden.</p>
+                    <h3 class="text-xl font-semibold mb-2 text-green-800 dark:text-green-200">Nhận thông báo</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Bot tự động gửi cập nhật về vật phẩm mới.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Discord Bot Preview Section -->
-    <section class="py-16 bg-white">
+    <section class="py-16 bg-white dark:bg-gray-800">
         <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center text-green-800 mb-12">Xem trước bot Discord</h2>
-            
-            <div class="max-w-4xl mx-auto bg-gray-800 rounded-lg overflow-hidden shadow-xl">
-                <!-- Discord header -->
-                <div class="bg-gray-900 px-4 py-3 flex items-center">
-                    <svg class="w-6 h-6 text-white mr-2" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36">
-                        <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" fill="#5865F2"/>
-                    </svg>
+            <h2 class="text-3xl font-bold text-center text-green-800 dark:text-green-200 mb-12">Xem trước bot Discord</h2>
+            <div class="max-w-4xl mx-auto bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gray-800 px-4 py-3 flex items-center">
+                    <i class="fab fa-discord text-white text-2xl mr-2"></i>
                     <span class="text-white font-medium">#grow-a-garden-updates</span>
                 </div>
-                
-                <!-- Discord messages -->
-                <div class="p-4 space-y-4">
-                    <!-- Bot message 1 -->
+                <div class="p-6 space-y-6">
                     <div class="flex">
-                        <div class="flex-shrink-0 mr-3">
-                            <img src="./image/growagarden.jpg" alt="Bot Avatar" class="w-10 h-10 rounded-full">
-                        </div>
-                        <div>
+                        <img src="./image/growagarden.jpg" alt="Bot Avatar" class="w-10 h-10 rounded-full mr-3">
+                        <div class="flex-1">
                             <div class="flex items-center">
                                 <span class="font-medium text-green-400">Grow A Garden Bot</span>
                                 <span class="text-gray-500 text-xs ml-2">Hôm nay lúc 10:15</span>
                             </div>
-                            <div class="mt-1 bg-gray-700 p-3 rounded-lg text-white">
+                            <div class="mt-2 bg-gray-800 p-4 rounded-lg text-white">
                                 <div class="font-medium text-green-300">🌱 Cập nhật Seed Stock!</div>
-                                <div class="mt-2">
-                                    <div class="flex justify-between">
-                                        <span>Sunflower Seeds</span>
-                                        <span class="text-green-300">Còn hàng</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>Carrot Seeds</span>
-                                        <span class="text-green-300">Còn hàng</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>Rare Rose Seeds</span>
-                                        <span class="text-red-300">Hết hàng</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>Magic Bean Seeds</span>
-                                        <span class="text-yellow-300">Sắp hết hàng!</span>
-                                    </div>
+                                <div class="mt-2 space-y-1">
+                                    <div class="flex justify-between"><span>Sunflower Seeds</span><span class="text-green-300">Còn hàng</span></div>
+                                    <div class="flex justify-between"><span>Carrot Seeds</span><span class="text-green-300">Còn hàng</span></div>
+                                    <div class="flex justify-between"><span>Rare Rose Seeds</span><span class="text-red-300">Hết hàng</span></div>
+                                    <div class="flex justify-between"><span>Magic Bean Seeds</span><span class="text-yellow-300">Sắp hết hàng!</span></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Bot message 2 -->
                     <div class="flex">
-                        <div class="flex-shrink-0 mr-3">
-                            <img src="./image/growagarden.jpg" alt="Bot Avatar" class="w-10 h-10 rounded-full">
-                        </div>
-                        <div>
+                        <img src="./image/growagarden.jpg" alt="Bot Avatar" class="w-10 h-10 rounded-full mr-3">
+                        <div class="flex-1">
                             <div class="flex items-center">
                                 <span class="font-medium text-green-400">Grow A Garden Bot</span>
                                 <span class="text-gray-500 text-xs ml-2">Hôm nay lúc 12:30</span>
                             </div>
-                            <div class="mt-1 bg-gray-700 p-3 rounded-lg text-white">
+                            <div class="mt-2 bg-gray-800 p-4 rounded-lg text-white">
                                 <div class="font-medium text-blue-300">⚒️ Cập nhật Gear mới!</div>
                                 <div class="mt-2">
                                     <div class="font-medium">Golden Watering Can</div>
-                                    <div class="text-gray-300 text-sm">Công cụ mới đã được thêm vào cửa hàng! Tăng 50% tốc độ phát triển của cây.</div>
-                                    <div class="mt-1 text-yellow-300">Giá: 500 Coins</div>
-                                    <div class="mt-1 text-red-300">Giới hạn thời gian: 24 giờ</div>
+                                    <div class="text-gray-300 text-sm">Công cụ mới tăng 50% tốc độ phát triển cây.</div>
+                                    <div class="text-yellow-300">Giá: 500 Coins</div>
+                                    <div class="text-red-300">Giới hạn: 24 giờ</div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Bot message 3 -->
                     <div class="flex">
-                        <div class="flex-shrink-0 mr-3">
-                            <img src="./image/growagarden.jpg" alt="Bot Avatar" class="w-10 h-10 rounded-full">
-                        </div>
-                        <div>
+                        <img src="./image/growagarden.jpg" alt="Bot Avatar" class="w-10 h-10 rounded-full mr-3">
+                        <div class="flex-1">
                             <div class="flex items-center">
                                 <span class="font-medium text-green-400">Grow A Garden Bot</span>
                                 <span class="text-gray-500 text-xs ml-2">Hôm nay lúc 14:45</span>
                             </div>
-                            <div class="mt-1 bg-gray-700 p-3 rounded-lg text-white">
+                            <div class="mt-2 bg-gray-800 p-4 rounded-lg text-white">
                                 <div class="font-medium text-purple-300">🥚 Cập nhật Egg Stock!</div>
-                                <div class="mt-2">
-                                    <div class="flex justify-between">
-                                        <span>Common Egg</span>
-                                        <span class="text-green-300">Còn hàng (45)</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>Rare Egg</span>
-                                        <span class="text-green-300">Còn hàng (12)</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>Legendary Dragon Egg</span>
-                                        <span class="text-red-300">Hết hàng</span>
-                                    </div>
-                                    <div class="flex justify-between font-medium text-yellow-300 mt-2">
-                                        <span>Event Egg</span>
-                                        <span>Mới! (5 còn lại)</span>
-                                    </div>
+                                <div class="mt-2 space-y-1">
+                                    <div class="flex justify-between"><span>Common Egg</span><span class="text-green-300">Còn hàng (45)</span></div>
+                                    <div class="flex justify-between"><span>Rare Egg</span><span class="text-green-300">Còn hàng (12)</span></div>
+                                    <div class="flex justify-between"><span>Legendary Dragon Egg</span><span class="text-red-300">Hết hàng</span></div>
+                                    <div class="flex justify-between font-medium text-yellow-300"><span>Event Egg</span><span>Mới! (5 còn lại)</span></div>
                                 </div>
                             </div>
                         </div>
@@ -390,71 +264,65 @@
     </section>
 
     <!-- Testimonials Section -->
-    <section id="testimonials" class="py-16 bg-white">
+    <section id="testimonials" class="py-16 bg-gray-50 dark:bg-gray-900">
         <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center text-green-800 mb-12">Người dùng nói gì về chúng tôi</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Testimonial 1 -->
-                <div class="bg-green-50 p-6 rounded-lg shadow-md">
+            <h2 class="text-3xl font-bold text-center text-green-800 dark:text-green-200 mb-12">Người dùng nói gì</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow">
                     <div class="flex items-center mb-4">
-                        <div class="bg-green-200 w-12 h-12 rounded-full flex items-center justify-center mr-4">
-                            <span class="text-xl font-bold text-green-700">T</span>
+                        <div class="bg-green-200 dark:bg-green-700 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-xl font-bold text-green-700 dark:text-green-300">T</span>
                         </div>
                         <div>
-                            <h4 class="font-semibold">Trần Minh</h4>
-                            <p class="text-sm text-gray-500">Người chơi Roblox</p>
+                            <h4 class="font-semibold text-green-800 dark:text-green-200">Trần Minh</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Người chơi Roblox</p>
                         </div>
                     </div>
-                    <p class="text-gray-600 italic">"Bot này đã giúp tôi không bỏ lỡ những hạt giống hiếm trong Grow a Garden. Thông báo luôn đúng lúc và chính xác. Cảm ơn vì đã tạo ra công cụ tuyệt vời này!"</p>
-                    <div class="flex mt-4">
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <p class="text-gray-600 dark:text-gray-300 italic">"Bot giúp tôi không bỏ lỡ hạt giống hiếm. Thông báo luôn chính xác và đúng lúc!"</p>
+                    <div class="flex mt-4 gap-1">
+                        <i class="fas fa-star text-yellow-500"></i>
+                        <i class="fas fa-star text-yellow-500"></i>
+                        <i class="fas fa-star text-yellow-500"></i>
+                        <i class="fas fa-star text-yellow-500"></i>
+                        <i class="fas fa-star text-yellow-500"></i>
                     </div>
                 </div>
-                
-                <!-- Testimonial 2 -->
-                <div class="bg-green-50 p-6 rounded-lg shadow-md">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow">
                     <div class="flex items-center mb-4">
-                        <div class="bg-green-200 w-12 h-12 rounded-full flex items-center justify-center mr-4">
-                            <span class="text-xl font-bold text-green-700">L</span>
+                        <div class="bg-green-200 dark:bg-green-700 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-xl font-bold text-green-700 dark:text-green-300">L</span>
                         </div>
                         <div>
-                            <h4 class="font-semibold">Lê Hương</h4>
-                            <p class="text-sm text-gray-500">Quản trị viên máy chủ Discord</p>
+                            <h4 class="font-semibold text-green-800 dark:text-green-200">Lê Hương</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Quản trị viên Discord</p>
                         </div>
                     </div>
-                    <p class="text-gray-600 italic">"Thêm bot này vào máy chủ Discord của chúng tôi là quyết định tuyệt vời. Cộng đồng của chúng tôi luôn cập nhật về các vật phẩm mới trong Grow a Garden và mọi người rất thích điều đó!"</p>
-                    <div class="flex mt-4">
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <p class="text-gray-600 dark:text-gray-300 italic">"Thêm bot này là quyết định tuyệt vời. Cộng đồng của chúng tôi luôn cập nhật vật phẩm mới!"</p>
+                    <div class="flex mt-4 gap-1">
+                        <i class="fas fa-star text-yellow-500"></i>
+                        <i class="fas fa-star text-yellow-500"></i>
+                        <i class="fas fa-star text-yellow-500"></i>
+                        <i class="fas fa-star text-yellow-500"></i>
+                        <i class="fas fa-star text-yellow-500"></i>
                     </div>
                 </div>
-                
-                <!-- Testimonial 3 -->
-                <div class="bg-green-50 p-6 rounded-lg shadow-md">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow">
                     <div class="flex items-center mb-4">
-                        <div class="bg-green-200 w-12 h-12 rounded-full flex items-center justify-center mr-4">
-                            <span class="text-xl font-bold text-green-700">N</span>
+                        <div class="bg-green-200 dark:bg-green-700 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-xl font-bold text-green-700 dark:text-green-300">N</span>
                         </div>
                         <div>
-                            <h4 class="font-semibold">Nguyễn Thành</h4>
-                            <p class="text-sm text-gray-500">Người sưu tầm vật phẩm hiếm</p>
+                            <h4 class="font-semibold text-green-800 dark:text-green-200">Nguyễn Thành</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Người sưu tầm vật phẩm</p>
                         </div>
                     </div>
-                    <p class="text-gray-600 italic">"Nhờ có thông báo từ bot này, tôi đã mua được Legendary Dragon Egg trong đợt bán hàng cuối cùng. Nếu không có bot, tôi chắc chắn đã bỏ lỡ cơ hội. Rất đáng để thêm vào Discord!"</p>
-                    <div class="flex mt-4">
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <p class="text-gray-600 dark:text-gray-300 italic">"Nhờ bot, tôi đã mua được Legendary Dragon Egg. Không có bot, tôi chắc chắn đã bỏ lỡ!"</p>
+                    <div class="flex mt-4 gap-1">
+                        <i class="fas fa-star text-yellow-500"></i>
+                        <i class="fas fa-star text-yellow-500"></i>
+                        <i class="fas fa-star text-yellow-500"></i>
+                        <i class="fas fa-star text-yellow-500"></i>
+                        <i class="far fa-star text-gray-300"></i>
                     </div>
                 </div>
             </div>
@@ -462,60 +330,44 @@
     </section>
 
     <!-- FAQ Section -->
-    <section id="faq" class="py-16 bg-green-50">
+    <section id="faq" class="py-16 bg-green-50 dark:bg-gray-800">
         <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center text-green-800 mb-12">Câu hỏi thường gặp</h2>
-            
-            <div class="max-w-3xl mx-auto space-y-6">
-                <!-- FAQ Item 1 -->
-                <div class="bg-white p-6 rounded-lg shadow-md" x-data="{ open: false }">
-                    <button class="flex justify-between items-center w-full text-left focus:outline-none" id="faq-btn-1">
-                        <h3 class="text-lg font-semibold text-green-800">Bot Grow A Garden có miễn phí không?</h3>
-                        <svg class="w-5 h-5 text-green-600 transform transition-transform" id="faq-arrow-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
+            <h2 class="text-3xl font-bold text-center text-green-800 dark:text-green-200 mb-12">Câu hỏi thường gặp</h2>
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="faq-item bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md">
+                    <button class="flex justify-between items-center w-full text-left focus:outline-none">
+                        <h3 class="text-lg font-semibold text-green-800 dark:text-green-200">Bot Grow A Garden có miễn phí không?</h3>
+                        <i class="faq-arrow fas fa-chevron-down text-green-600 dark:text-green-300 transition-transform"></i>
                     </button>
-                    <div class="mt-3 hidden" id="faq-answer-1">
-                        <p class="text-gray-600">Có, Grow A Garden Bot hoàn toàn miễn phí để thêm vào máy chủ Discord của bạn. Tất cả các tính năng cơ bản đều có sẵn mà không cần trả phí.</p>
+                    <div class="faq-answer mt-3 hidden text-gray-600 dark:text-gray-300">
+                        <p>Có, Grow A Garden Bot hoàn toàn miễn phí. Tất cả tính năng cơ bản đều có sẵn mà không cần trả phí.</p>
                     </div>
                 </div>
-                
-                <!-- FAQ Item 2 -->
-                <div class="bg-white p-6 rounded-lg shadow-md" x-data="{ open: false }">
-                    <button class="flex justify-between items-center w-full text-left focus:outline-none" id="faq-btn-2">
-                        <h3 class="text-lg font-semibold text-green-800">Bot có thể theo dõi những gì trong Grow a Garden?</h3>
-                        <svg class="w-5 h-5 text-green-600 transform transition-transform" id="faq-arrow-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
+                <div class="faq-item bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md">
+                    <button class="flex justify-between items-center w-full text-left focus:outline-none">
+                        <h3 class="text-lg font-semibold text-green-800 dark:text-green-200">Bot có thể theo dõi những gì?</h3>
+                        <i class="faq-arrow fas fa-chevron-down text-green-600 dark:text-green-300 transition-transform"></i>
                     </button>
-                    <div class="mt-3 hidden" id="faq-answer-2">
-                        <p class="text-gray-600">Bot có thể theo dõi và thông báo về trạng thái Seed (hạt giống), Gear (công cụ), và Egg Stock (kho trứng) trong trò chơi. Bot sẽ thông báo khi có vật phẩm mới, khi vật phẩm sắp hết hàng hoặc khi có sự kiện đặc biệt.</p>
+                    <div class="faq-answer mt-3 hidden text-gray-600 dark:text-gray-300">
+                        <p>Bot theo dõi và thông báo về Seed, Gear, và Egg Stock, bao gồm vật phẩm mới, sắp hết hàng, hoặc sự kiện đặc biệt.</p>
                     </div>
                 </div>
-                
-                <!-- FAQ Item 3 -->
-                <div class="bg-white p-6 rounded-lg shadow-md" x-data="{ open: false }">
-                    <button class="flex justify-between items-center w-full text-left focus:outline-none" id="faq-btn-3">
-                        <h3 class="text-lg font-semibold text-green-800">Làm thế nào để thiết lập bot trong Discord?</h3>
-                        <svg class="w-5 h-5 text-green-600 transform transition-transform" id="faq-arrow-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
+                <div class="faq-item bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md">
+                    <button class="flex justify-between items-center w-full text-left focus:outline-none">
+                        <h3 class="text-lg font-semibold text-green-800 dark:text-green-200">Làm thế nào để thiết lập bot?</h3>
+                        <i class="faq-arrow fas fa-chevron-down text-green-600 dark:text-green-300 transition-transform"></i>
                     </button>
-                    <div class="mt-3 hidden" id="faq-answer-3">
-                        <p class="text-gray-600">Sau khi thêm bot vào máy chủ Discord của bạn, bạn có thể sử dụng lệnh <code>/setup</code> để thiết lập kênh thông báo. Sau đó, bạn có thể tùy chỉnh loại thông báo bạn muốn nhận bằng lệnh <code>/settings</code>. Bot sẽ tự động bắt đầu theo dõi và gửi thông báo.</p>
+                    <div class="faq-answer mt-3 hidden text-gray-600 dark:text-gray-300">
+                        <p>Sau khi thêm bot, dùng lệnh <code>/setup</code> để thiết lập kênh thông báo và <code>/settings</code> để tùy chỉnh thông báo.</p>
                     </div>
                 </div>
-                
-                <!-- FAQ Item 4 -->
-                <div class="bg-white p-6 rounded-lg shadow-md" x-data="{ open: false }">
-                    <button class="flex justify-between items-center w-full text-left focus:outline-none" id="faq-btn-4">
-                        <h3 class="text-lg font-semibold text-green-800">Bot có thể theo dõi nhiều máy chủ cùng lúc không?</h3>
-                        <svg class="w-5 h-5 text-green-600 transform transition-transform" id="faq-arrow-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
+                <div class="faq-item bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md">
+                    <button class="flex justify-between items-center w-full text-left focus:outline-none">
+                        <h3 class="text-lg font-semibold text-green-800 dark:text-green-200">Bot có hỗ trợ nhiều máy chủ?</h3>
+                        <i class="faq-arrow fas fa-chevron-down text-green-600 dark:text-green-300 transition-transform"></i>
                     </button>
-                    <div class="mt-3 hidden" id="faq-answer-4">
-                        <p class="text-gray-600">Có, bot có thể được thêm vào nhiều máy chủ Discord khác nhau và sẽ hoạt động độc lập trên mỗi máy chủ. Mỗi máy chủ có thể có cài đặt riêng về kênh thông báo và loại thông báo mà họ muốn nhận.</p>
+                    <div class="faq-answer mt-3 hidden text-gray-600 dark:text-gray-300">
+                        <p>Có, bot hoạt động độc lập trên nhiều máy chủ Discord với cài đặt riêng cho mỗi máy chủ.</p>
                     </div>
                 </div>
             </div>
@@ -523,22 +375,16 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="py-16 bg-green-600 text-white">
+    <section class="py-16 bg-gradient-to-r from-green-600 to-green-700 text-white">
         <div class="container mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold mb-6">Sẵn sàng theo dõi Grow a Garden?</h2>
-            <p class="text-lg mb-8 max-w-2xl mx-auto">Thêm Grow A Garden Bot vào Discord của bạn ngay hôm nay và không bao giờ bỏ lỡ bất kỳ vật phẩm hiếm nào trong trò chơi yêu thích của bạn.</p>
-            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <a href="https://discord.com/oauth2/authorize?client_id=.054&permissions=.&integration_type=0&scope=bot" target="_blank" class="bg-white text-green-600 hover:bg-green-100 font-medium py-3 px-8 rounded-lg transition-colors shadow-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 mr-2" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36">
-                        <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
-                    </svg>
-                    Thêm vào Discord
+            <p class="text-lg mb-8 max-w-2xl mx-auto">Thêm Grow A Garden Bot vào Discord ngay hôm nay để không bỏ lỡ bất kỳ vật phẩm hiếm nào!</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="https://discord.com/oauth2/authorize?client_id=.054&permissions=.&integration_type=0&scope=bot" target="_blank" class="discord-btn text-white font-semibold py-3 px-8 rounded-lg shadow-lg flex items-center justify-center">
+                    <i class="fab fa-discord mr-2"></i> Thêm vào Discord
                 </a>
-                <a href="https://www.roblox.com/games/grow-a-garden" target="_blank" class="bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-8 rounded-lg transition-colors shadow-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5.164 0L.16 18.928 18.836 24l4.997-18.928L5.164 0zm2.125 5.5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm10.5 13a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
-                    </svg>
-                    Chơi trên Roblox
+                <a href="https://www.roblox.com/games/grow-a-garden" target="_blank" class="roblox-btn text-white font-semibold py-3 px-8 rounded-lg shadow-lg flex items-center justify-center">
+                    <i class="fas fa-gamepad mr-2"></i> Chơi trên Roblox
                 </a>
             </div>
         </div>
@@ -548,19 +394,68 @@
     <footer class="bg-gray-800 text-white py-12">
         <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <!-- Column 1 -->
                 <div>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <img src="./image/garden-logo.png" alt="Grow A Garden Logo" class="w-8 h-8">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="./image/garden-logo.png" alt="Grow A Garden Logo" class="w-10 h-10 rounded-full">
                         <h3 class="text-xl font-bold">Grow A Garden Bot</h3>
                     </div>
-                    <p class="text-gray-400 mb-4">Bot Discord thông minh giúp theo dõi trò chơi Grow a Garden trên Roblox.</p>
+                    <p class="text-gray-400">Bot Discord thông minh giúp theo dõi Grow a Garden trên Roblox.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Liên kết nhanh</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition-colors">Tính năng</a></li>
+                        <li><a href="#how-it-works" class="text-gray-400 hover:text-white transition-colors">Cách hoạt động</a></li>
+                        <li><a href="#testimonials" class="text-gray-400 hover:text-white transition-colors">Đánh giá</a></li>
+                        <li><a href="#faq" class="text-gray-400 hover:text-white transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Liên hệ</h4>
+                    <p class="text-gray-400">Hỗ trợ: <a href="mailto:support@growagardenbot.com" class="hover:text-white transition-colors">support@growagardenbot.com</a></p>
+                    <p class="text-gray-400">Discord: <a href="https://discord.gg/growagarden" class="hover:text-white transition-colors">Tham gia máy chủ</a></p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Theo dõi chúng tôi</h4>
                     <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M22 12.0611C22 6.50451 17.5229 2 12 2C6.47715 2 2 6.50451 2 12.0611C2 17.0828 5.65684 21.2452 10.4375 22V14.9694H7.89844V12.0611H10.4375V9.84452C10.4375 7.32296 11.9305 5.93012 14.2146 5.93012C15.3084 5.93012 16.4531 6.12663 16.4531 6.12663V8.60261H15.1922C13.95 8.60261 13.5625 9.37822 13.5625 10.1747V12.0611H16.3359L15.8926 14.9694H13.5625V22C18.3432 21.2452 22 17.0828 22 12.0611Z" />
-                            </svg>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <svg class="w-6 h-6" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36">
-                                <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69... (Còn 8 KB)
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-facebook-f text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-discord text-xl"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center">
+                <p class="text-gray-400">&copy; 2025 Grow A Garden Bot. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('menu-button').addEventListener('click', () => {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // FAQ accordion
+        document.querySelectorAll('.faq-item button').forEach(button => {
+            button.addEventListener('click', () => {
+                const faqItem = button.parentElement;
+                const answer = faqItem.querySelector('.faq-answer');
+                const isOpen = !answer.classList.contains('hidden');
+                
+                // Close all other FAQs
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    item.querySelector('.faq-answer').classList.add('hidden');
+                    item.classList.remove('active');
+                });
+
+                // Toggle current FAQ
+                if (!isOpen) {
+                    answer.classList.remove('hidden');
+                    faqItem.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
