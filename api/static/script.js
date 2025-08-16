@@ -88,7 +88,7 @@ async function fetchWeatherEffects(weatherId) {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     return data.description || '';
-  } project (err) {
+  } catch (err) {
     console.error(`Error fetching description for weather ${weatherId}:`, err);
     return '';
   }
