@@ -165,23 +165,35 @@ async function fetchActiveWeather() {
     }
 
     activeWeathers = data.weather
-      .filter(w => w.active && w.item_id && w.display_name && w.last_seen && w.duration)
-      .map(w => ({
-        item_id: w.item_id,
-        display_name: w.display_name,
-        description: w.description || '',
-        icon: w.icon || '',
-        active: w.active,
-        end_duration_unix: parseInt(w.last_seen) + parseInt(w.duration)
-      }));
+      .map(w => {
+        console.log('fetchActiveWeather: Processing weather item:', w);
+        if (w.active !== true) {
+          console.log(`fetchActiveWeather: Skipping item due to active !== true:`, w);
+          return null;
+        }
+        return {
+          item_id: w.item_id || 'unknown',
+          display_name: w.display_name || 'Unknown Weather',
+          description: w.description || '',
+          icon: w.icon || '',
+          active: w.active,
+          end_duration_unix: (w.last_seen && w.duration && !isNaN(parseInt(w.last_seen)) && !isNaN(parseInt(w.duration)))
+            ? parseInt(w.last_seen) + parseInt(w.duration)
+            : Math.floor(Date.now() / 1000) + 3600 // Mặc định 1 giờ nếu thiếu
+        };
+      })
+      .filter(w => w !== null);
+
+    console.log('fetchActiveWeather: Filtered activeWeathers:', activeWeathers);
 
     for (let weather of activeWeathers) {
-      if (!weather.description && weather.item_id) {
+      if (!weather.description && weather.item_id && weather.item_id !== 'unknown') {
         try {
           const description = await fetchWeatherEffects(weather.item_id);
-          weather.description = description;
+          weather.description = description || 'No description available';
+          console.log(`fetchActiveWeather: Updated description for ${weather.item_id}:`, weather.description);
         } catch (err) {
-          console.warn(`fetchActiveWeather: Failed to fetch description for ${weather.item_id}`, err);
+          console.warn(`fetchActiveWeather: Failed to fetch description for ${weather.item_id}:`, err);
           weather.description = 'No description available';
         }
       }
@@ -189,19 +201,23 @@ async function fetchActiveWeather() {
 
     try {
       localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
-      console.log('fetchActiveWeather: activeWeathers saved to localStorage');
+      console.log('fetchActiveWeather: activeWeathers saved to localStorage:', activeWeathers);
     } catch (e) {
       console.error('Error saving activeWeathers to localStorage:', e);
     }
 
+    console.log('fetchActiveWeather: Final activeWeathers:', activeWeathers);
     renderWeatherCards(activeWeathers);
   } catch (err) {
-    console.error("fetchActiveWeather: Weather fetch error:", err);
+    console.error('fetchActiveWeather: Weather fetch error:', err);
     activeWeathers = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
+    activeWeathers = activeWeathers.filter(w => w && w.active === true && w.end_duration_unix > Math.floor(Date.now() / 1000));
+    console.log('fetchActiveWeather: Loaded from localStorage:', activeWeathers);
     if (!activeWeathers.length) {
       console.warn('fetchActiveWeather: Falling back to mockWeatherData');
-      activeWeathers = mockWeatherData().weather;
+      activeWeathers = mockWeatherData().weather.filter(w => w.active === true);
     }
+    console.log('fetchActiveWeather: Using fallback activeWeathers:', activeWeathers);
     renderWeatherCards(activeWeathers);
   }
 }
