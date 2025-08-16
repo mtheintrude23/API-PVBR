@@ -140,7 +140,7 @@ function renderWeatherCards(weathers) {
       <div class="flex items-center">
         <span id="weather-status-${index}" class="px-3 py-1 text-sm rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Active</span>
         <ul id="weather-effects-${index}" class="ml-3 text-gray-600 dark:text-gray-300">
-          ${weather.effects?.map(effect => `
+          ${weather.description?.map(effect => `
             <li class="flex items-center">
               <i class="fas fa-info-circle text-blue-500 mr-2"></i>
               ${effect}
