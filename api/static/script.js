@@ -78,6 +78,23 @@ let lastFetchTimestamp = 0;
 const DARK_THEME = 'dark';
 const LIGHT_THEME = 'light';
 
+async function fetchWeatherEffects(weatherId) {
+  try {
+    const response = await fetch(`https://api.joshlei.com/v2/growagarden/info/${weatherId}`, {
+      headers: {
+        'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
+      }
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    console.log(`Weather effects fetched for ${weatherId}:`, data); // Debug log
+    return Array.isArray(data.effects) ? data.effects : [];
+  } catch (err) {
+    console.error(`Error fetching effects for weather ${weatherId}:`, err);
+    return [];
+  }
+}
+
 function renderWeatherCards(weathers) {
   const container = document.getElementById('weather-card-container');
   if (!container) {
@@ -97,7 +114,7 @@ function renderWeatherCards(weathers) {
         </div>
         <div class="flex items-center">
           <span id="weather-status-0" class="px-3 py-1 text-sm rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">Inactive</span>
-          <ul id="weather-effects-0" class="ml-3 text-gray-600 dark:text-gray-300">
+          <ul id="weather-effects-0" class="ml-3 text-gray-600 dark:text-gray-300 flex flex-col">
             <li class="flex items-center">
               <i class="fas fa-info-circle text-blue-500 mr-2"></i>
               No active weather effects
@@ -135,6 +152,7 @@ function renderWeatherCards(weathers) {
     container.appendChild(card);
   });
 }
+
 async function fetchActiveWeather() {
   try {
     const response = await fetch('https://api.joshlei.com/v2/growagarden/weather', {
@@ -146,6 +164,15 @@ async function fetchActiveWeather() {
     const data = await response.json();
     console.log('Weather data fetched:', data); // Debug log
     activeWeathers = data.weather?.filter(w => w.active) || [];
+
+    // Fetch effects for each active weather
+    for (let weather of activeWeathers) {
+      if (weather.weather_id) {
+        const effects = await fetchWeatherEffects(weather.weather_id);
+        weather.effects = effects.length > 0 ? effects : (weather.effects || []);
+      }
+    }
+
     renderWeatherCards(activeWeathers);
   } catch (err) {
     console.error("Weather fetch error:", err);
@@ -153,7 +180,6 @@ async function fetchActiveWeather() {
     renderWeatherCards(activeWeathers);
   }
 }
-
 function updateWeatherTimer() {
   if (!activeWeathers?.length) return;
 
