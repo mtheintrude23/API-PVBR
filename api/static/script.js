@@ -80,7 +80,6 @@ const LIGHT_THEME = 'light';
 
 async function fetchWeatherEffects(weatherId) {
   if (!weatherId) {
-    console.error('fetchWeatherEffects: weatherId is undefined or empty');
     return '';
   }
   try {
@@ -91,10 +90,8 @@ async function fetchWeatherEffects(weatherId) {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.log(`fetchWeatherEffects: API response for ${weatherId}:`, data);
     return typeof data === 'object' && data.description ? data.description : '';
   } catch (err) {
-    console.error(`Error fetching description for weather ${weatherId}:`, err);
     return '';
   }
 }
@@ -157,23 +154,18 @@ async function fetchActiveWeather() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.log('fetchActiveWeather: Weather data fetched:', data);
 
     if (!data || !Array.isArray(data.weather)) {
-      console.error('fetchActiveWeather: Invalid or missing data.weather', data);
       throw new Error('Invalid weather data format');
     }
 
     activeWeathers = data.weather
       .map(w => {
-        console.log('fetchActiveWeather: Processing weather item:', w);
         if (w.active !== true) {
-          console.log(`fetchActiveWeather: Skipping item due to active !== true:`, w);
           return null;
         }
         const displayName = w.display_name || w.name || w.title || 'Unknown Weather';
         if (displayName === 'Unknown Weather') {
-          console.warn(`fetchActiveWeather: display_name not found for item, using default:`, w);
         }
         return {
           item_id: w.item_id || 'unknown',
@@ -188,59 +180,41 @@ async function fetchActiveWeather() {
       })
       .filter(w => w !== null);
 
-    console.log('fetchActiveWeather: Filtered activeWeathers:', activeWeathers);
-
     for (let weather of activeWeathers) {
       if (weather.active !== true) {
-        console.warn(`fetchActiveWeather: Skipping fetchWeatherEffects for ${weather.item_id} due to active !== true`, weather);
         continue;
       }
       if (!weather.description && weather.item_id && weather.item_id !== 'unknown') {
         try {
-          console.log(`fetchActiveWeather: Fetching description for ${weather.item_id} (active: ${weather.active})`);
           const description = await fetchWeatherEffects(weather.item_id);
           weather.description = description || 'No description available';
-          console.log(`fetchActiveWeather: Updated description for ${weather.item_id}:`, weather.description);
         } catch (err) {
-          console.warn(`fetchActiveWeather: Failed to fetch description for ${weather.item_id}:`, err);
           weather.description = 'No description available';
         }
       } else {
-        console.log(`fetchActiveWeather: Skipping fetchWeatherEffects for ${weather.item_id}: description=${!!weather.description}, item_id=${weather.item_id}, active=${weather.active}`);
-      }
     }
 
     try {
       localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
-      console.log('fetchActiveWeather: activeWeathers saved to localStorage:', activeWeathers);
     } catch (e) {
-      console.error('Error saving activeWeathers to localStorage:', e);
     }
-
-    console.log('fetchActiveWeather: Final activeWeathers:', activeWeathers);
     renderWeatherCards(activeWeathers);
   } catch (err) {
-    console.error('fetchActiveWeather: Weather fetch error:', err);
     activeWeathers = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
     activeWeathers = activeWeathers.map(w => {
       const displayName = w.display_name || w.name || w.title || 'Unknown Weather';
       if (displayName === 'Unknown Weather') {
-        console.warn('fetchActiveWeather: display_name not found in localStorage item:', w);
       }
       return { ...w, display_name: displayName };
     }).filter(w => w && w.active === true && w.end_duration_unix > Math.floor(Date.now() / 1000));
-    console.log('fetchActiveWeather: Loaded from localStorage:', activeWeathers);
     if (!activeWeathers.length) {
-      console.warn('fetchActiveWeather: Falling back to mockWeatherData');
       activeWeathers = mockWeatherData().weather.map(w => {
         const displayName = w.display_name || w.name || w.title || 'Unknown Weather';
         if (displayName === 'Unknown Weather') {
-          console.warn('fetchActiveWeather: display_name not found in mockWeatherData item:', w);
         }
         return { ...w, display_name: displayName };
       }).filter(w => w.active === true);
     }
-    console.log('fetchActiveWeather: Using fallback activeWeathers:', activeWeathers);
     renderWeatherCards(activeWeathers);
   }
 }
@@ -248,7 +222,6 @@ async function fetchActiveWeather() {
 
 function updateWeatherTimer() {
   if (!Array.isArray(activeWeathers) || !activeWeathers.length) {
-    console.warn('updateWeatherTimer: No active weathers to update');
     return;
   }
 
@@ -256,12 +229,10 @@ function updateWeatherTimer() {
   activeWeathers = activeWeathers.filter((weather, index) => {
     const timerEl = document.getElementById(`weather-timer-${index}`);
     if (!timerEl) {
-      console.warn(`updateWeatherTimer: Timer element not found for index ${index}`);
       return false;
     }
 
     if (!weather || !weather.end_duration_unix) {
-      console.warn(`updateWeatherTimer: Invalid weather object at index ${index}`, weather);
       return false;
     }
 
@@ -269,7 +240,6 @@ function updateWeatherTimer() {
     const remaining = Math.max(0, weather.end_duration_unix - now);
 
     if (remaining <= 0) {
-      console.log(`updateWeatherTimer: Weather ${weather.display_name} has expired`);
       hasChanges = true;
       return false;
     }
@@ -285,11 +255,9 @@ function updateWeatherTimer() {
   });
 
   if (hasChanges) {
-    console.log('updateWeatherTimer: Weather list changed, re-rendering cards');
     renderWeatherCards(activeWeathers);
     try {
       localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
-      console.log('updateWeatherTimer: activeWeathers updated in localStorage');
     } catch (e) {
       console.error('Error saving activeWeathers to localStorage:', e);
     }
@@ -327,7 +295,6 @@ async function fetchSeedGearStock() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.log('Seed and Gear stock data fetched:', data); // Debug log
     
     const seedItems = data.seed_stock || [];
     const gearItems = data.gear_stock || [];
@@ -338,7 +305,6 @@ async function fetchSeedGearStock() {
     updateRestockTime('seed', seedItems);
     updateRestockTime('gear', gearItems);
   } catch (e) {
-    console.error('Fetch seed and gear stock failed, using mock data:', e);
     const mockData = mockStockData();
     updateTable('seed', mockData.seed_stock);
     updateTable('gear', mockData.gear_stock);
@@ -354,12 +320,10 @@ async function fetchEggStock() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.log('Egg stock data fetched:', data); // Debug log
     const items = data.egg_stock || [];
     updateTable('egg', items);
     updateRestockTime('egg', items);
   } catch (e) {
-    console.error('Fetch egg stock failed, using mock data:', e);
     updateTable('egg', mockStockData().egg_stock);
   }
 }
@@ -373,12 +337,10 @@ async function fetchCosmeticStock() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.log('Cosmetic stock data fetched:', data); // Debug log
     const items = data.cosmetic_stock || [];
     updateTable('cosmetic', items);
     updateRestockTime('cosmetic', items);
   } catch (e) {
-    console.error('Fetch cosmetic stock failed, using mock data:', e);
     updateTable('cosmetic', mockStockData().cosmetic_stock);
   }
 }
@@ -392,7 +354,6 @@ function updateRestockTime(type, items) {
 
   // Kiểm tra items là mảng và không null/undefined
   if (!Array.isArray(items)) {
-    console.warn(`Items for ${type} is not an array, using empty array`);
     items = [];
   }
 
@@ -401,12 +362,10 @@ function updateRestockTime(type, items) {
       // Kiểm tra Date_End hợp lệ
       const earliestEnd = items.reduce((min, i) => {
         if (!i.Date_End) {
-          console.warn(`Missing Date_End for item in ${type}:`, i);
           return min;
         }
         const d = new Date(i.Date_End);
         if (isNaN(d.getTime())) {
-          console.warn(`Invalid Date_End for item in ${type}:`, i.Date_End);
           return min;
         }
         return d < min ? d : min;
@@ -414,7 +373,6 @@ function updateRestockTime(type, items) {
 
       // Kiểm tra earliestEnd hợp lệ
       if (isNaN(earliestEnd.getTime())) {
-        console.warn(`Invalid earliestEnd for ${type}, using default duration`);
         nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
       } else {
         nextRestockTimes[type] = earliestEnd.toISOString();
@@ -427,11 +385,9 @@ function updateRestockTime(type, items) {
         .sort((a, b) => a.display_name.localeCompare(b.display_name));
       localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
     } catch (e) {
-      console.error(`Error processing items for ${type}:`, e);
       nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
     }
   } else {
-    console.warn(`No items for ${type}, setting default restock time`);
     nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
   }
 
@@ -439,7 +395,6 @@ function updateRestockTime(type, items) {
   try {
     localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
   } catch (e) {
-    console.error(`Error saving restockEndTimes to localStorage:`, e);
   }
 
   // Cập nhật last-updated trên giao diện
@@ -447,7 +402,6 @@ function updateRestockTime(type, items) {
   if (lastUpdatedEl) {
     lastUpdatedEl.textContent = new Date().toLocaleString();
   } else {
-    console.error('Element last-updated not found');
   }
 }
 
