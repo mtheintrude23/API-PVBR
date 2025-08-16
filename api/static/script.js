@@ -113,7 +113,6 @@ function renderWeatherCards(weathers) {
         </div>
         <div class="flex items-center">
           <span id="weather-status-0" class="px-3 py-1 text-sm rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">Inactive</span>
-          <p class="ml-3 text-gray-600 dark:text-gray-300">No active weather effects</p>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mt-2">No special weather conditions active</p>
       </div>
