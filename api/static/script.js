@@ -197,6 +197,7 @@ async function fetchActiveWeather() {
     try {
       localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
     } catch (e) {
+      console.log("lỗi")
     }
     renderWeatherCards(activeWeathers);
   } catch (err) {
