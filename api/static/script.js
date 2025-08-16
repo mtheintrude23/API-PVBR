@@ -13,7 +13,9 @@ let nextRestockTimes = {
   egg: null,
   cosmetic: null
 };
-
+tailwind.config = {
+  darkMode: 'class'
+};
 // Mock data for testing when API fails
 function mockStockData() {
   return {
