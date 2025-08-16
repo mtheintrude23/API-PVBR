@@ -167,8 +167,8 @@ async function fetchActiveWeather() {
     activeWeathers = data.weather
       .map(w => {
         console.log('fetchActiveWeather: Processing weather item:', w);
-        if (w.active !== true) {
-          console.log(`fetchActiveWeather: Skipping item due to active !== true:`, w);
+        if (w.active !== false) {
+          console.log(`fetchActiveWeather: Skipping item due to active !== false:`, w);
           return null;
         }
         return {
