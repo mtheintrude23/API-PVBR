@@ -267,22 +267,71 @@ async function fetchCosmeticStock() {
 }
 
 function updateRestockTime(type, items) {
-  if (items.length > 0) {
-    const earliestEnd = items.reduce((min, i) => {
-      const d = new Date(i.Date_End);
-      return d < min ? d : min;
-    }, new Date(items[0].Date_End));
+  // Kiểm tra type hợp lệ
+  if (!stockTypes.includes(type)) {
+    console.error(`Invalid stock type: ${type}`);
+    return;
+  }
 
-    nextRestockTimes[type] = earliestEnd.toISOString();
-    const stripped = items.map(({ Date_End, ...rest }) => rest)
-      .sort((a, b) => a.display_name.localeCompare(b.display_name));
-    localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
+  // Kiểm tra items là mảng và không null/undefined
+  if (!Array.isArray(items)) {
+    console.warn(`Items for ${type} is not an array, using empty array`);
+    items = [];
+  }
+
+  if (items.length > 0) {
+    try {
+      // Kiểm tra Date_End hợp lệ
+      const earliestEnd = items.reduce((min, i) => {
+        if (!i.Date_End) {
+          console.warn(`Missing Date_End for item in ${type}:`, i);
+          return min;
+        }
+        const d = new Date(i.Date_End);
+        if (isNaN(d.getTime())) {
+          console.warn(`Invalid Date_End for item in ${type}:`, i.Date_End);
+          return min;
+        }
+        return d < min ? d : min;
+      }, new Date(items[0].Date_End));
+
+      // Kiểm tra earliestEnd hợp lệ
+      if (isNaN(earliestEnd.getTime())) {
+        console.warn(`Invalid earliestEnd for ${type}, using default duration`);
+        nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
+      } else {
+        nextRestockTimes[type] = earliestEnd.toISOString();
+      }
+
+      // Lưu items vào localStorage, loại bỏ Date_End
+      const stripped = items
+        .filter(item => item.display_name) // Đảm bảo có display_name
+        .map(({ Date_End, ...rest }) => rest)
+        .sort((a, b) => a.display_name.localeCompare(b.display_name));
+      localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
+    } catch (e) {
+      console.error(`Error processing items for ${type}:`, e);
+      nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
+    }
   } else {
     console.warn(`No items for ${type}, setting default restock time`);
     nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
   }
-  localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-  document.getElementById('last-updated')?.textContent = new Date().toLocaleString();
+
+  // Lưu nextRestockTimes vào localStorage
+  try {
+    localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+  } catch (e) {
+    console.error(`Error saving restockEndTimes to localStorage:`, e);
+  }
+
+  // Cập nhật last-updated trên giao diện
+  const lastUpdatedEl = document.getElementById('last-updated');
+  if (lastUpdatedEl) {
+    lastUpdatedEl.textContent = new Date().toLocaleString();
+  } else {
+    console.error('Element last-updated not found');
+  }
 }
 
 function updateAllTimers() {
@@ -313,14 +362,16 @@ function updateAllTimers() {
 }
 
 function updateTable(type, items) {
-  const total = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
-  const countEl = document.getElementById(`${type}-count`);
-  const labelEl = document.getElementById({
+  const typeToIdMap = {
     seed: 'seed-varieties',
     gear: 'gear-categories',
     egg: 'egg-types',
     cosmetic: 'cosmetic-types'
-  }[type]);
+  };
+
+  const total = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  const countEl = document.getElementById(`${type}-count`);
+  const labelEl = document.getElementById(typeToIdMap[type]);
   const body = document.getElementById(`${type}-table-body`);
 
   if (!countEl || !labelEl || !body) {
