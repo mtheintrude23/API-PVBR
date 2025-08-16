@@ -174,7 +174,6 @@ async function fetchActiveWeather() {
       }
     }
 
-    // Lưu activeWeathers vào localStorage
     try {
       localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
     } catch (e) {
@@ -218,7 +217,6 @@ function updateWeatherTimer() {
 
   if (activeWeathers.length !== document.querySelectorAll('[id^="weather-timer-"]').length) {
     renderWeatherCards(activeWeathers);
-    // Cập nhật localStorage khi activeWeathers thay đổi
     try {
       localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
     } catch (e) {
@@ -249,9 +247,9 @@ function createOrUpdateTimer(type, remaining) {
     : "text-sm text-white";
 }
 
-async function fetchEggStock() {
+async function fetchEggStock(isInitial = false) {
   const now = Date.now();
-  if (now - lastFetchTimestamp < 30000) {
+  if (!isInitial && now - lastFetchTimestamp < 30000) {
     console.log('Skipping fetchEggStock: too soon since last fetch');
     return;
   }
@@ -277,9 +275,9 @@ async function fetchEggStock() {
   }
 }
 
-async function fetchSeedGearStock() {
+async function fetchSeedGearStock(isInitial = false) {
   const now = Date.now();
-  if (now - lastFetchTimestamp < 30000) {
+  if (!isInitial && now - lastFetchTimestamp < 30000) {
     console.log('Skipping fetchSeedGearStock: too soon since last fetch');
     return;
   }
@@ -313,9 +311,9 @@ async function fetchSeedGearStock() {
   }
 }
 
-async function fetchCosmeticStock() {
+async function fetchCosmeticStock(isInitial = false) {
   const now = Date.now();
-  if (now - lastFetchTimestamp < 30000) {
+  if (!isInitial && now - lastFetchTimestamp < 30000) {
     console.log('Skipping fetchCosmeticStock: too soon since last fetch');
     return;
   }
@@ -347,9 +345,17 @@ function updateRestockTime(type, items) {
     return;
   }
 
+  const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
+  const now = Date.now();
+
   if (!Array.isArray(items) || items.length === 0) {
-    console.warn(`No items for ${type}, setting default restock time`);
-    nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
+    console.warn(`No items for ${type}, checking localStorage or setting default restock time`);
+    const savedTime = stored[type] && new Date(stored[type]);
+    if (savedTime && savedTime > now) {
+      nextRestockTimes[type] = savedTime.toISOString();
+    } else {
+      nextRestockTimes[type] = new Date(now + defaultDurations[type]).toISOString();
+    }
     try {
       localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
     } catch (e) {
@@ -373,8 +379,13 @@ function updateRestockTime(type, items) {
     }, new Date(items[0].Date_End));
 
     if (isNaN(earliestEnd.getTime())) {
-      console.warn(`Invalid earliestEnd for ${type}, using default duration`);
-      nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
+      console.warn(`Invalid earliestEnd for ${type}, checking localStorage or using default`);
+      const savedTime = stored[type] && new Date(stored[type]);
+      if (savedTime && savedTime > now) {
+        nextRestockTimes[type] = savedTime.toISOString();
+      } else {
+        nextRestockTimes[type] = new Date(now + defaultDurations[type]).toISOString();
+      }
     } else {
       nextRestockTimes[type] = earliestEnd.toISOString();
     }
@@ -386,7 +397,12 @@ function updateRestockTime(type, items) {
     localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
   } catch (e) {
     console.error(`Error processing items for ${type}:`, e);
-    nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
+    const savedTime = stored[type] && new Date(stored[type]);
+    if (savedTime && savedTime > now) {
+      nextRestockTimes[type] = savedTime.toISOString();
+    } else {
+      nextRestockTimes[type] = new Date(now + defaultDurations[type]).toISOString();
+    }
   }
 
   try {
@@ -435,6 +451,12 @@ function updateAllTimers() {
       }
     }
   });
+
+  try {
+    localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+  } catch (e) {
+    console.error(`Error saving restockEndTimes to localStorage:`, e);
+  }
 
   requestAnimationFrame(updateAllTimers);
 }
@@ -502,7 +524,6 @@ function switchTheme(event) {
 
 function restoreFromLocalStorage() {
   try {
-    // Khôi phục stock data
     stockTypes.forEach(type => {
       const storedData = localStorage.getItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`);
       if (storedData) {
@@ -511,12 +532,10 @@ function restoreFromLocalStorage() {
       }
     });
 
-    // Khôi phục activeWeathers
     const storedWeathers = localStorage.getItem('activeWeathers');
     if (storedWeathers) {
       console.log('Restoring activeWeathers from localStorage');
       activeWeathers = JSON.parse(storedWeathers);
-      // Lọc các thời tiết đã hết hạn
       const now = Math.floor(Date.now() / 1000);
       activeWeathers = activeWeathers.filter(weather => weather.end_duration_unix > now);
       renderWeatherCards(activeWeathers);
@@ -531,10 +550,13 @@ function startCountdown() {
   const now = new Date();
 
   stockTypes.forEach(type => {
-    const savedTime = stored[type];
-    nextRestockTimes[type] = (savedTime && new Date(savedTime) > now)
-      ? savedTime
-      : new Date(now.getTime() + defaultDurations[type]).toISOString();
+    const savedTime = stored[type] && new Date(stored[type]);
+    // Chỉ đặt lại thời gian mặc định nếu savedTime không hợp lệ hoặc đã hết hạn quá lâu
+    if (savedTime && !isNaN(savedTime.getTime()) && savedTime > new Date(now.getTime() - defaultDurations[type])) {
+      nextRestockTimes[type] = savedTime.toISOString();
+    } else {
+      nextRestockTimes[type] = new Date(now.getTime() + defaultDurations[type]).toISOString();
+    }
   });
 
   updateAllTimers();
@@ -557,9 +579,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(fetchActiveWeather, 60000);
   setInterval(updateWeatherTimer, 1000);
   startCountdown();
-  fetchSeedGearStock();
-  fetchEggStock();
-  fetchCosmeticStock();
+  fetchSeedGearStock(true); // Gọi lần đầu không giới hạn tần suất
+  fetchEggStock(true); // Gọi lần đầu không giới hạn tần suất
+  fetchCosmeticStock(true); // Gọi lần đầu không giới hạn tần suất
 
   setInterval(() => {
     console.log('Periodic stock refresh triggered');
