@@ -1,3 +1,19 @@
+const stockTypes = ['seed', 'gear', 'egg', 'cosmetic'];
+
+const defaultDurations = {
+  seed: 300000, // 5 phút
+  gear: 300000, // 5 phút
+  egg: 1800000, // 30 phút
+  cosmetic: 14400000 // 4 giờ
+};
+
+let nextRestockTimes = {
+  seed: null,
+  gear: null,
+  egg: null,
+  cosmetic: null
+};
+
 // Tailwind config
 tailwind.config = {
   darkMode: 'class'
@@ -66,21 +82,6 @@ let activeWeathers = [];
 let lastFetchTimestamp = 0;
 const DARK_THEME = 'dark';
 const LIGHT_THEME = 'light';
-const stockTypes = ['seed', 'gear', 'egg', 'event'];
-
-const nextRestockTimes = {
-  seed: null,
-  gear: null,
-  egg: null,
-  event: null
-};
-
-const defaultDurations = {
-  seed: 300000,
-  gear: 300000,
-  egg: 1800000,
-  event: 14400000
-};
 
 function renderWeatherCards(weathers) {
   const container = document.getElementById('weather-card-container');
@@ -171,8 +172,8 @@ function updateWeatherTimer() {
     const minutes = Math.floor((remaining % 3600) / 60);
     const seconds = remaining % 60;
     const formattedTime = hours > 0
-      ? `${hours.toString().padStart(2, '0')}H:${minutes.toString().padStart(2, '0')}P:${seconds.toString().padStart(2, '0')}S`
-      : `${minutes.toString().padStart(2, '0')}P:${seconds.toString().padStart(2, '0')}S`;
+      ? `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}S`
+      : `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}S`;
     timerEl.textContent = `Ends in: ${formattedTime}`;
     return true;
   });
@@ -201,14 +202,7 @@ function createOrUpdateTimer(type, remaining) {
     : "text-sm text-white";
 }
 
-async function fetchStockByType(type) {
-  const stockKey = {
-    seed: 'seed_stock',
-    gear: 'gear_stock',
-    egg: 'egg_stock',
-    event: 'cosmetic_stock'
-  }[type];
-
+async function fetchSeedGearStock() {
   try {
     const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
       headers: {
@@ -217,43 +211,96 @@ async function fetchStockByType(type) {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    const items = data[stockKey] || [];
-
-    updateTable(type, items);
-
-    if (items.length > 0) {
-      const earliestEnd = items.reduce((min, i) => {
-        const d = new Date(i.Date_End);
-        return d < min ? d : min;
-      }, new Date(items[0].Date_End));
-
-      nextRestockTimes[type] = earliestEnd.toISOString();
-      const stripped = items.map(({ Date_End, ...rest }) => rest)
-        .sort((a, b) => a.display_name.localeCompare(b.display_name));
-      localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
-    }
-
-    localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-    document.getElementById('last-updated')?.textContent = new Date().toLocaleString();
+    
+    const seedItems = data.seed_stock || [];
+    const gearItems = data.gear_stock || [];
+    
+    updateTable('seed', seedItems);
+    updateTable('gear', gearItems);
+    
+    updateRestockTime('seed', seedItems);
+    updateRestockTime('gear', gearItems);
   } catch (e) {
-    console.error(`Fetch failed for ${type}, using mock`, e);
-    updateTable(type, mockStockData()[stockKey]);
+    console.error('Fetch seed and gear stock failed, using mock data', e);
+    const mockData = mockStockData();
+    updateTable('seed', mockData.seed_stock);
+    updateTable('gear', mockData.gear_stock);
   }
+}
+
+async function fetchEggStock() {
+  try {
+    const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
+      headers: {
+        'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
+      }
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const items = data.egg_stock || [];
+    updateTable('egg', items);
+    updateRestockTime('egg', items);
+  } catch (e) {
+    console.error('Fetch egg stock failed, using mock data', e);
+    updateTable('egg', mockStockData().egg_stock);
+  }
+}
+
+async function fetchCosmeticStock() {
+  try {
+    const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
+      headers: {
+        'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
+      }
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const items = data.cosmetic_stock || [];
+    updateTable('cosmetic', items);
+    updateRestockTime('cosmetic', items);
+  } catch (e) {
+    console.error('Fetch cosmetic stock failed, using mock data', e);
+    updateTable('cosmetic', mockStockData().cosmetic_stock);
+  }
+}
+
+function updateRestockTime(type, items) {
+  if (items.length > 0) {
+    const earliestEnd = items.reduce((min, i) => {
+      const d = new Date(i.Date_End);
+      return d < min ? d : min;
+    }, new Date(items[0].Date_End));
+
+    nextRestockTimes[type] = earliestEnd.toISOString();
+    const stripped = items.map(({ Date_End, ...rest }) => rest)
+      .sort((a, b) => a.display_name.localeCompare(b.display_name));
+    localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
+  }
+  localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+  document.getElementById('last-updated')?.textContent = new Date().toLocaleString();
 }
 
 function updateAllTimers() {
   const now = new Date();
-
+  
   stockTypes.forEach(type => {
-    const endTime = new Date(nextRestockTimes[type]);
-    const remaining = Math.max(0, endTime - now);
+    const endTime = nextRestockTimes[type] ? new Date(nextRestockTimes[type]) : null;
+    const remaining = endTime ? Math.max(0, endTime - now) : defaultDurations[type];
     createOrUpdateTimer(type, remaining);
 
     if (remaining <= 1000) {
       const newEnd = new Date(now.getTime() + defaultDurations[type]);
       nextRestockTimes[type] = newEnd.toISOString();
       localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-      fetchStockByType(type);
+      
+      // Gọi hàm fetch tương ứng
+      if (type === 'seed' || type === 'gear') {
+        fetchSeedGearStock();
+      } else if (type === 'egg') {
+        fetchEggStock();
+      } else if (type === 'cosmetic') {
+        fetchCosmeticStock();
+      }
     }
   });
 
@@ -267,7 +314,7 @@ function updateTable(type, items) {
     seed: 'seed-varieties',
     gear: 'gear-categories',
     egg: 'egg-types',
-    event: 'event-upcoming'
+    cosmetic: 'event-upcoming'
   }[type]);
   const body = document.getElementById(`${type}-table-body`);
 
@@ -348,7 +395,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(fetchActiveWeather, 60000);
   setInterval(updateWeatherTimer, 1000);
   startCountdown();
-  stockTypes.forEach(fetchStockByType);
+  fetchSeedGearStock();
+  fetchEggStock();
+  fetchCosmeticStock();
 });
 
 // Cleanup on page unload
