@@ -56,7 +56,6 @@ function mockWeatherData() {
   return {
     weather: [
       {
-        weather_id: "rainy",
         weather_name: "Rainy",
         active: true,
         icon: "https://uxwing.com/wp-content/themes/uxwing/download/weather/rainy-icon.png",
@@ -64,7 +63,6 @@ function mockWeatherData() {
         end_duration_unix: Math.floor(Date.now() / 1000) + 1800
       },
       {
-        weather_id: "sunny",
         weather_name: "Sunny",
         active: true,
         icon: "https://uxwing.com/wp-content/themes/uxwing/download/weather/sun-icon.png",
@@ -170,7 +168,7 @@ async function fetchActiveWeather() {
     for (let weather of activeWeathers) {
       if (weather.weather_id) {
         const effects = await fetchWeatherEffects(weather.weather_id);
-        weather.description = desciption.length > 0 ? description : (weather.description || []);
+        description.effects = description.length > 0 ? description : (weather.description || []);
       }
     }
 
@@ -242,7 +240,7 @@ async function fetchSeedGearStock() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.log('Seed and Gear stock data fetched:', data);
+    console.log('Seed and Gear stock data fetched:', data); // Debug log
     
     const seedItems = data.seed_stock || [];
     const gearItems = data.gear_stock || [];
@@ -257,8 +255,6 @@ async function fetchSeedGearStock() {
     const mockData = mockStockData();
     updateTable('seed', mockData.seed_stock);
     updateTable('gear', mockData.gear_stock);
-    updateRestockTime('seed', mockData.seed_stock);
-    updateRestockTime('gear', mockData.gear_stock);
   }
 }
 
@@ -271,15 +267,13 @@ async function fetchEggStock() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.log('Egg stock data fetched:', data);
+    console.log('Egg stock data fetched:', data); // Debug log
     const items = data.egg_stock || [];
     updateTable('egg', items);
     updateRestockTime('egg', items);
   } catch (e) {
     console.error('Fetch egg stock failed, using mock data:', e);
-    const mockData = mockStockData();
-    updateTable('egg', mockData.egg_stock);
-    updateRestockTime('egg', mockData.egg_stock);
+    updateTable('egg', mockStockData().egg_stock);
   }
 }
 
@@ -292,24 +286,24 @@ async function fetchCosmeticStock() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.log('Cosmetic stock data fetched:', data);
+    console.log('Cosmetic stock data fetched:', data); // Debug log
     const items = data.cosmetic_stock || [];
     updateTable('cosmetic', items);
     updateRestockTime('cosmetic', items);
   } catch (e) {
     console.error('Fetch cosmetic stock failed, using mock data:', e);
-    const mockData = mockStockData();
-    updateTable('cosmetic', mockData.cosmetic_stock);
-    updateRestockTime('cosmetic', mockData.cosmetic_stock);
+    updateTable('cosmetic', mockStockData().cosmetic_stock);
   }
 }
 
 function updateRestockTime(type, items) {
+  // Kiểm tra type hợp lệ
   if (!stockTypes.includes(type)) {
     console.error(`Invalid stock type: ${type}`);
     return;
   }
 
+  // Kiểm tra items là mảng và không null/undefined
   if (!Array.isArray(items)) {
     console.warn(`Items for ${type} is not an array, using empty array`);
     items = [];
@@ -317,6 +311,7 @@ function updateRestockTime(type, items) {
 
   if (items.length > 0) {
     try {
+      // Kiểm tra Date_End hợp lệ
       const earliestEnd = items.reduce((min, i) => {
         if (!i.Date_End) {
           console.warn(`Missing Date_End for item in ${type}:`, i);
@@ -330,6 +325,7 @@ function updateRestockTime(type, items) {
         return d < min ? d : min;
       }, new Date(items[0].Date_End));
 
+      // Kiểm tra earliestEnd hợp lệ
       if (isNaN(earliestEnd.getTime())) {
         console.warn(`Invalid earliestEnd for ${type}, using default duration`);
         nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
@@ -337,8 +333,9 @@ function updateRestockTime(type, items) {
         nextRestockTimes[type] = earliestEnd.toISOString();
       }
 
+      // Lưu items vào localStorage, loại bỏ Date_End
       const stripped = items
-        .filter(item => item.display_name)
+        .filter(item => item.display_name) // Đảm bảo có display_name
         .map(({ Date_End, ...rest }) => rest)
         .sort((a, b) => a.display_name.localeCompare(b.display_name));
       localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
@@ -351,12 +348,14 @@ function updateRestockTime(type, items) {
     nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
   }
 
+  // Lưu nextRestockTimes vào localStorage
   try {
     localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
   } catch (e) {
     console.error(`Error saving restockEndTimes to localStorage:`, e);
   }
 
+  // Cập nhật last-updated trên giao diện
   const lastUpdatedEl = document.getElementById('last-updated');
   if (lastUpdatedEl) {
     lastUpdatedEl.textContent = new Date().toLocaleString();
@@ -374,14 +373,10 @@ function updateAllTimers() {
     createOrUpdateTimer(type, remaining);
 
     if (remaining <= 1000) {
-      console.log(`Restock time reached for ${type}, fetching new data`);
+      console.log(`Restock time reached for ${type}, fetching new data`); // Debug log
       const newEnd = new Date(now.getTime() + defaultDurations[type]);
       nextRestockTimes[type] = newEnd.toISOString();
-      try {
-        localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-      } catch (e) {
-        console.error(`Error saving restockEndTimes to localStorage:`, e);
-      }
+      localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
       
       if (type === 'seed' || type === 'gear') {
         fetchSeedGearStock();
@@ -397,16 +392,6 @@ function updateAllTimers() {
 }
 
 function updateTable(type, items) {
-  if (!stockTypes.includes(type)) {
-    console.error(`Invalid stock type: ${type}`);
-    return;
-  }
-
-  if (!Array.isArray(items)) {
-    console.warn(`Items for ${type} is not an array, using empty array`);
-    items = [];
-  }
-
   const typeToIdMap = {
     seed: 'seed-varieties',
     gear: 'gear-categories',
@@ -439,7 +424,7 @@ function updateTable(type, items) {
     `;
     body.appendChild(tr);
   });
-  console.log(`Table updated for ${type}: ${items.length} items, total quantity: ${total}`);
+  console.log(`Table updated for ${type}: ${items.length} items, total quantity: ${total}`); // Debug log
 }
 
 function toggleDarkLightMode(isDark) {
@@ -462,7 +447,7 @@ function restoreFromLocalStorage() {
     stockTypes.forEach(type => {
       const storedData = localStorage.getItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`);
       if (storedData) {
-        console.log(`Restoring ${type} from localStorage`);
+        console.log(`Restoring ${type} from localStorage`); // Debug log
         updateTable(type, JSON.parse(storedData));
       }
     });
@@ -486,7 +471,7 @@ function startCountdown() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM loaded, initializing...');
+  console.log('DOM loaded, initializing...'); // Debug log
   const toggleSwitch = document.getElementById('theme-toggle');
   const currentTheme = localStorage.getItem('theme') || LIGHT_THEME;
   document.documentElement.setAttribute('data-theme', currentTheme);
@@ -506,18 +491,16 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchEggStock();
   fetchCosmeticStock();
 
+  // Làm mới stock định kỳ
   setInterval(() => {
-    console.log('Periodic stock refresh triggered');
+    console.log('Periodic stock refresh triggered'); // Debug log
     fetchSeedGearStock();
     fetchEggStock();
     fetchCosmeticStock();
   }, 60000);
 });
 
+// Cleanup on page unload
 window.addEventListener('beforeunload', () => {
-  try {
-    localStorage.setItem('lastTheme', document.documentElement.getAttribute('data-theme'));
-  } catch (e) {
-    console.error('Error saving lastTheme to localStorage:', e);
-  }
+  localStorage.setItem('lastTheme', document.documentElement.getAttribute('data-theme'));
 });
