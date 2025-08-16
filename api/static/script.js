@@ -13,9 +13,7 @@ let nextRestockTimes = {
   egg: null,
   cosmetic: null
 };
-tailwind.config = {
-  darkMode: 'class'
-};
+
 // Mock data for testing when API fails
 function mockStockData() {
   return {
@@ -142,6 +140,7 @@ async function fetchActiveWeather() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
+    console.log('Weather data fetched:', data); // Debug log
     activeWeathers = data.weather?.filter(w => w.active) || [];
     renderWeatherCards(activeWeathers);
   } catch (err) {
@@ -192,7 +191,10 @@ function formatTime(ms) {
 
 function createOrUpdateTimer(type, remaining) {
   const el = document.getElementById(`${type}-timer`);
-  if (!el) return;
+  if (!el) {
+    console.error(`Timer element for ${type} not found`);
+    return;
+  }
   el.textContent = `Next update: ${formatTime(remaining)}`;
   el.className = remaining <= 10000
     ? "text-sm text-yellow-500 animate-pulse"
@@ -208,6 +210,7 @@ async function fetchSeedGearStock() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
+    console.log('Seed and Gear stock data fetched:', data); // Debug log
     
     const seedItems = data.seed_stock || [];
     const gearItems = data.gear_stock || [];
@@ -218,7 +221,7 @@ async function fetchSeedGearStock() {
     updateRestockTime('seed', seedItems);
     updateRestockTime('gear', gearItems);
   } catch (e) {
-    console.error('Fetch seed and gear stock failed, using mock data', e);
+    console.error('Fetch seed and gear stock failed, using mock data:', e);
     const mockData = mockStockData();
     updateTable('seed', mockData.seed_stock);
     updateTable('gear', mockData.gear_stock);
@@ -234,11 +237,12 @@ async function fetchEggStock() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
+    console.log('Egg stock data fetched:', data); // Debug log
     const items = data.egg_stock || [];
     updateTable('egg', items);
     updateRestockTime('egg', items);
   } catch (e) {
-    console.error('Fetch egg stock failed, using mock data', e);
+    console.error('Fetch egg stock failed, using mock data:', e);
     updateTable('egg', mockStockData().egg_stock);
   }
 }
@@ -252,11 +256,12 @@ async function fetchCosmeticStock() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
+    console.log('Cosmetic stock data fetched:', data); // Debug log
     const items = data.cosmetic_stock || [];
     updateTable('cosmetic', items);
     updateRestockTime('cosmetic', items);
   } catch (e) {
-    console.error('Fetch cosmetic stock failed, using mock data', e);
+    console.error('Fetch cosmetic stock failed, using mock data:', e);
     updateTable('cosmetic', mockStockData().cosmetic_stock);
   }
 }
@@ -272,6 +277,9 @@ function updateRestockTime(type, items) {
     const stripped = items.map(({ Date_End, ...rest }) => rest)
       .sort((a, b) => a.display_name.localeCompare(b.display_name));
     localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
+  } else {
+    console.warn(`No items for ${type}, setting default restock time`);
+    nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
   }
   localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
   document.getElementById('last-updated')?.textContent = new Date().toLocaleString();
@@ -286,11 +294,11 @@ function updateAllTimers() {
     createOrUpdateTimer(type, remaining);
 
     if (remaining <= 1000) {
+      console.log(`Restock time reached for ${type}, fetching new data`); // Debug log
       const newEnd = new Date(now.getTime() + defaultDurations[type]);
       nextRestockTimes[type] = newEnd.toISOString();
       localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
       
-      // Gọi hàm fetch tương ứng
       if (type === 'seed' || type === 'gear') {
         fetchSeedGearStock();
       } else if (type === 'egg') {
@@ -311,14 +319,17 @@ function updateTable(type, items) {
     seed: 'seed-varieties',
     gear: 'gear-categories',
     egg: 'egg-types',
-    cosmetic: 'event-upcoming'
+    cosmetic: 'cosmetic-types'
   }[type]);
   const body = document.getElementById(`${type}-table-body`);
 
-  if (countEl) countEl.textContent = total;
-  if (labelEl) labelEl.textContent = items.length;
-  if (!body) return;
+  if (!countEl || !labelEl || !body) {
+    console.error(`Element missing for ${type}: countEl=${!!countEl}, labelEl=${!!labelEl}, body=${!!body}`);
+    return;
+  }
 
+  countEl.textContent = total;
+  labelEl.textContent = items.length;
   body.innerHTML = '';
   items.sort((a, b) => a.display_name.localeCompare(b.display_name)).forEach(item => {
     const icon = item.icon ? `<img src="${item.icon}" class="w-8 h-8 rounded-full mr-2" alt="${item.display_name}" onerror="this.style.display='none'">` : '';
@@ -332,6 +343,7 @@ function updateTable(type, items) {
     `;
     body.appendChild(tr);
   });
+  console.log(`Table updated for ${type}: ${items.length} items, total quantity: ${total}`); // Debug log
 }
 
 function toggleDarkLightMode(isDark) {
@@ -354,6 +366,7 @@ function restoreFromLocalStorage() {
     stockTypes.forEach(type => {
       const storedData = localStorage.getItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`);
       if (storedData) {
+        console.log(`Restoring ${type} from localStorage`); // Debug log
         updateTable(type, JSON.parse(storedData));
       }
     });
@@ -377,6 +390,7 @@ function startCountdown() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM loaded, initializing...'); // Debug log
   const toggleSwitch = document.getElementById('theme-toggle');
   const currentTheme = localStorage.getItem('theme') || LIGHT_THEME;
   document.documentElement.setAttribute('data-theme', currentTheme);
@@ -395,6 +409,14 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchSeedGearStock();
   fetchEggStock();
   fetchCosmeticStock();
+
+  // Làm mới stock định kỳ
+  setInterval(() => {
+    console.log('Periodic stock refresh triggered'); // Debug log
+    fetchSeedGearStock();
+    fetchEggStock();
+    fetchCosmeticStock();
+  }, 60000);
 });
 
 // Cleanup on page unload
