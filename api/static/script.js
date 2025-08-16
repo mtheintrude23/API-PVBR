@@ -167,8 +167,8 @@ async function fetchActiveWeather() {
 
     for (let weather of activeWeathers) {
       if (weather.weather_id) {
-        const effects = await fetchWeatherEffects(weather.weather_id);
-        description.effects = description.length > 0 ? description : (weather.description || []);
+        const description = await fetchWeatherEffects(weather.weather_id);
+        weather.effects = description.length > 0 ? description : (weather.description || []);
       }
     }
 
