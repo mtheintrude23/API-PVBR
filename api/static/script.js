@@ -14,11 +14,6 @@ let nextRestockTimes = {
   cosmetic: null
 };
 
-// Tailwind config
-tailwind.config = {
-  darkMode: 'class'
-};
-
 // Mock data for testing when API fails
 function mockStockData() {
   return {
