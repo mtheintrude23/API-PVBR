@@ -90,7 +90,7 @@ async function fetchWeatherEffects(weatherId) {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     console.log(`Weather effects fetched for ${weatherId}:`, data);
-    return Array.isArray(data.effects) ? data.effects : [];
+    return Array.isArray(data.description) ? data.description : [];
   } catch (err) {
     console.error(`Error fetching effects for weather ${weatherId}:`, err);
     return [];
@@ -142,7 +142,7 @@ function renderWeatherCards(weathers) {
       <div class="flex items-center">
         <span id="weather-status-${index}" class="px-3 py-1 text-sm rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Active</span>
         <ul id="weather-effects-${index}" class="ml-3 text-gray-600 dark:text-gray-300 flex flex-col">
-          ${weather.effects?.map(effect => `
+          ${weather.description?.map(effect => `
             <li class="flex items-center">
               <i class="fas fa-info-circle text-blue-500 mr-2"></i>
               ${effect}
@@ -170,7 +170,7 @@ async function fetchActiveWeather() {
     for (let weather of activeWeathers) {
       if (weather.weather_id) {
         const effects = await fetchWeatherEffects(weather.weather_id);
-        weather.effects = effects.length > 0 ? effects : (weather.effects || []);
+        weather.description = desciption.length > 0 ? description : (weather.description || []);
       }
     }
 
@@ -201,7 +201,7 @@ function updateWeatherTimer() {
     const seconds = remaining % 60;
     const formattedTime = hours > 0
       ? `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-      : `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}S`;
+      : `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     timerEl.textContent = `Ends in: ${formattedTime}`;
     return true;
   });
