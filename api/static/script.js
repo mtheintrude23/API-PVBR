@@ -90,7 +90,9 @@ function renderWeatherCards(weathers) {
     container.innerHTML = `
       <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
         <div class="flex justify-between items-center mb-2">
-          <h3 id="weather-name-0" class="text-lg font-medium text-gray-800 dark:text-white">Normal</h3>
+          <div class="flex items-center">
+            <h3 id="weather-name-0" class="text-lg font-medium text-gray-800 dark:text-white">Normal</h3>
+          </div>
           <span id="weather-timer-0" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">No active event</span>
         </div>
         <div class="flex items-center">
@@ -112,7 +114,10 @@ function renderWeatherCards(weathers) {
     card.className = 'bg-white dark:bg-gray-800 rounded-lg p-4 shadow';
     card.innerHTML = `
       <div class="flex justify-between items-center mb-2">
-        <h3 id="weather-name-${index}" class="text-lg font-medium text-gray-800 dark:text-white">${weather.weather_name}</h3>
+        <div class="flex items-center">
+          ${weather.icon ? `<img src="${weather.icon}" class="w-6 h-6 mr-2 rounded-full" alt="${weather.weather_name} icon" onerror="this.style.display='none'">` : ''}
+          <h3 id="weather-name-${index}" class="text-lg font-medium text-gray-800 dark:text-white">${weather.weather_name}</h3>
+        </div>
         <span id="weather-timer-${index}" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Ends in: Calculating...</span>
       </div>
       <div class="flex items-center">
@@ -130,7 +135,6 @@ function renderWeatherCards(weathers) {
     container.appendChild(card);
   });
 }
-
 async function fetchActiveWeather() {
   try {
     const response = await fetch('https://api.joshlei.com/v2/growagarden/weather', {
