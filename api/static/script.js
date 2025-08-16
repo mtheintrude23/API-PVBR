@@ -128,7 +128,7 @@ function renderWeatherCards(weathers) {
               <i class="fas fa-info-circle text-blue-500 mr-2"></i>
               ${effect}
             </li>
-          `).join('') || '<li>No effects available</li>'}
+          `).join('\n') || '<li>No effects available</li>'}
         </ul>
       </div>
     `;
@@ -172,7 +172,7 @@ function updateWeatherTimer() {
     const minutes = Math.floor((remaining % 3600) / 60);
     const seconds = remaining % 60;
     const formattedTime = hours > 0
-      ? `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}S`
+      ? `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
       : `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}S`;
     timerEl.textContent = `Ends in: ${formattedTime}`;
     return true;
