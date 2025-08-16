@@ -14,12 +14,6 @@ let nextRestockTimes = {
   cosmetic: null
 };
 
-let activeWeathers = [];
-let lastFetchTimestamp = 0;
-let lastTimerUpdate = 0;
-const DARK_THEME = 'dark';
-const LIGHT_THEME = 'light';
-
 // Mock data for testing when API fails
 function mockStockData() {
   return {
@@ -81,6 +75,11 @@ function mockWeatherData() {
   };
 }
 
+let activeWeathers = [];
+let lastFetchTimestamp = 0;
+const DARK_THEME = 'dark';
+const LIGHT_THEME = 'light';
+
 async function fetchWeatherEffects(weatherId) {
   try {
     const response = await fetch(`https://api.joshlei.com/v2/growagarden/info/${weatherId}`, {
@@ -90,6 +89,7 @@ async function fetchWeatherEffects(weatherId) {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
+    console.log(`Weather effects fetched for ${weatherId}:`, data);
     return Array.isArray(data.effects) ? data.effects : [];
   } catch (err) {
     console.error(`Error fetching effects for weather ${weatherId}:`, err);
@@ -174,19 +174,10 @@ async function fetchActiveWeather() {
       }
     }
 
-    try {
-      localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
-    } catch (e) {
-      console.error('Error saving activeWeathers to localStorage:', e);
-    }
-
     renderWeatherCards(activeWeathers);
   } catch (err) {
     console.error("Weather fetch error:", err);
-    activeWeathers = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
-    if (!activeWeathers.length) {
-      activeWeathers = mockWeatherData().weather;
-    }
+    activeWeathers = mockWeatherData().weather;
     renderWeatherCards(activeWeathers);
   }
 }
@@ -217,11 +208,6 @@ function updateWeatherTimer() {
 
   if (activeWeathers.length !== document.querySelectorAll('[id^="weather-timer-"]').length) {
     renderWeatherCards(activeWeathers);
-    try {
-      localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
-    } catch (e) {
-      console.error('Error saving activeWeathers to localStorage:', e);
-    }
   }
 }
 
@@ -238,7 +224,7 @@ function formatTime(ms) {
 function createOrUpdateTimer(type, remaining) {
   const el = document.getElementById(`${type}-timer`);
   if (!el) {
-    console.warn(`Timer element for ${type} not found`);
+    console.error(`Timer element for ${type} not found`);
     return;
   }
   el.textContent = `Next update: ${formatTime(remaining)}`;
@@ -247,42 +233,7 @@ function createOrUpdateTimer(type, remaining) {
     : "text-sm text-white";
 }
 
-async function fetchEggStock(isInitial = false) {
-  const now = Date.now();
-  if (!isInitial && now - lastFetchTimestamp < 30000) {
-    console.log('Skipping fetchEggStock: too soon since last fetch');
-    return;
-  }
-  lastFetchTimestamp = now;
-
-  try {
-    const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
-      headers: {
-        'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
-      }
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    console.log('Egg stock data fetched:', data);
-    const items = data.egg_stock || [];
-    updateTable('egg', items);
-    updateRestockTime('egg', items);
-  } catch (e) {
-    console.error('Fetch egg stock failed:', e);
-    const mockData = mockStockData();
-    updateTable('egg', mockData.egg_stock);
-    updateRestockTime('egg', mockData.egg_stock);
-  }
-}
-
-async function fetchSeedGearStock(isInitial = false) {
-  const now = Date.now();
-  if (!isInitial && now - lastFetchTimestamp < 30000) {
-    console.log('Skipping fetchSeedGearStock: too soon since last fetch');
-    return;
-  }
-  lastFetchTimestamp = now;
-
+async function fetchSeedGearStock() {
   try {
     const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
       headers: {
@@ -302,7 +253,7 @@ async function fetchSeedGearStock(isInitial = false) {
     updateRestockTime('seed', seedItems);
     updateRestockTime('gear', gearItems);
   } catch (e) {
-    console.error('Fetch seed and gear stock failed:', e);
+    console.error('Fetch seed and gear stock failed, using mock data:', e);
     const mockData = mockStockData();
     updateTable('seed', mockData.seed_stock);
     updateTable('gear', mockData.gear_stock);
@@ -311,14 +262,28 @@ async function fetchSeedGearStock(isInitial = false) {
   }
 }
 
-async function fetchCosmeticStock(isInitial = false) {
-  const now = Date.now();
-  if (!isInitial && now - lastFetchTimestamp < 30000) {
-    console.log('Skipping fetchCosmeticStock: too soon since last fetch');
-    return;
+async function fetchEggStock() {
+  try {
+    const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
+      headers: {
+        'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
+      }
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    console.log('Egg stock data fetched:', data);
+    const items = data.egg_stock || [];
+    updateTable('egg', items);
+    updateRestockTime('egg', items);
+  } catch (e) {
+    console.error('Fetch egg stock failed, using mock data:', e);
+    const mockData = mockStockData();
+    updateTable('egg', mockData.egg_stock);
+    updateRestockTime('egg', mockData.egg_stock);
   }
-  lastFetchTimestamp = now;
+}
 
+async function fetchCosmeticStock() {
   try {
     const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
       headers: {
@@ -332,7 +297,7 @@ async function fetchCosmeticStock(isInitial = false) {
     updateTable('cosmetic', items);
     updateRestockTime('cosmetic', items);
   } catch (e) {
-    console.error('Fetch cosmetic stock failed:', e);
+    console.error('Fetch cosmetic stock failed, using mock data:', e);
     const mockData = mockStockData();
     updateTable('cosmetic', mockData.cosmetic_stock);
     updateRestockTime('cosmetic', mockData.cosmetic_stock);
@@ -345,64 +310,45 @@ function updateRestockTime(type, items) {
     return;
   }
 
-  const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
-  const now = Date.now();
-
-  if (!Array.isArray(items) || items.length === 0) {
-    console.warn(`No items for ${type}, checking localStorage or setting default restock time`);
-    const savedTime = stored[type] && new Date(stored[type]);
-    if (savedTime && savedTime > now) {
-      nextRestockTimes[type] = savedTime.toISOString();
-    } else {
-      nextRestockTimes[type] = new Date(now + defaultDurations[type]).toISOString();
-    }
-    try {
-      localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-    } catch (e) {
-      console.error(`Error saving restockEndTimes to localStorage:`, e);
-    }
-    return;
+  if (!Array.isArray(items)) {
+    console.warn(`Items for ${type} is not an array, using empty array`);
+    items = [];
   }
 
-  try {
-    const earliestEnd = items.reduce((min, i) => {
-      if (!i.Date_End) {
-        console.warn(`Missing Date_End for item in ${type}:`, i);
-        return min;
-      }
-      const d = new Date(i.Date_End);
-      if (isNaN(d.getTime())) {
-        console.warn(`Invalid Date_End for item in ${type}:`, i.Date_End);
-        return min;
-      }
-      return d < min ? d : min;
-    }, new Date(items[0].Date_End));
+  if (items.length > 0) {
+    try {
+      const earliestEnd = items.reduce((min, i) => {
+        if (!i.Date_End) {
+          console.warn(`Missing Date_End for item in ${type}:`, i);
+          return min;
+        }
+        const d = new Date(i.Date_End);
+        if (isNaN(d.getTime())) {
+          console.warn(`Invalid Date_End for item in ${type}:`, i.Date_End);
+          return min;
+        }
+        return d < min ? d : min;
+      }, new Date(items[0].Date_End));
 
-    if (isNaN(earliestEnd.getTime())) {
-      console.warn(`Invalid earliestEnd for ${type}, checking localStorage or using default`);
-      const savedTime = stored[type] && new Date(stored[type]);
-      if (savedTime && savedTime > now) {
-        nextRestockTimes[type] = savedTime.toISOString();
+      if (isNaN(earliestEnd.getTime())) {
+        console.warn(`Invalid earliestEnd for ${type}, using default duration`);
+        nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
       } else {
-        nextRestockTimes[type] = new Date(now + defaultDurations[type]).toISOString();
+        nextRestockTimes[type] = earliestEnd.toISOString();
       }
-    } else {
-      nextRestockTimes[type] = earliestEnd.toISOString();
-    }
 
-    const stripped = items
-      .filter(item => item.display_name)
-      .map(({ Date_End, ...rest }) => rest)
-      .sort((a, b) => a.display_name.localeCompare(b.display_name));
-    localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
-  } catch (e) {
-    console.error(`Error processing items for ${type}:`, e);
-    const savedTime = stored[type] && new Date(stored[type]);
-    if (savedTime && savedTime > now) {
-      nextRestockTimes[type] = savedTime.toISOString();
-    } else {
-      nextRestockTimes[type] = new Date(now + defaultDurations[type]).toISOString();
+      const stripped = items
+        .filter(item => item.display_name)
+        .map(({ Date_End, ...rest }) => rest)
+        .sort((a, b) => a.display_name.localeCompare(b.display_name));
+      localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
+    } catch (e) {
+      console.error(`Error processing items for ${type}:`, e);
+      nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
     }
+  } else {
+    console.warn(`No items for ${type}, setting default restock time`);
+    nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
   }
 
   try {
@@ -420,21 +366,16 @@ function updateRestockTime(type, items) {
 }
 
 function updateAllTimers() {
-  const now = Date.now();
-  if (now - lastTimerUpdate < 1000) {
-    requestAnimationFrame(updateAllTimers);
-    return;
-  }
-  lastTimerUpdate = now;
-
+  const now = new Date();
+  
   stockTypes.forEach(type => {
     const endTime = nextRestockTimes[type] ? new Date(nextRestockTimes[type]) : null;
     const remaining = endTime ? Math.max(0, endTime - now) : defaultDurations[type];
     createOrUpdateTimer(type, remaining);
 
     if (remaining <= 1000) {
-      console.log(`Restock time reached for ${type}, scheduling fetch`);
-      const newEnd = new Date(now + defaultDurations[type]);
+      console.log(`Restock time reached for ${type}, fetching new data`);
+      const newEnd = new Date(now.getTime() + defaultDurations[type]);
       nextRestockTimes[type] = newEnd.toISOString();
       try {
         localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
@@ -451,12 +392,6 @@ function updateAllTimers() {
       }
     }
   });
-
-  try {
-    localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-  } catch (e) {
-    console.error(`Error saving restockEndTimes to localStorage:`, e);
-  }
 
   requestAnimationFrame(updateAllTimers);
 }
@@ -485,7 +420,7 @@ function updateTable(type, items) {
   const body = document.getElementById(`${type}-table-body`);
 
   if (!countEl || !labelEl || !body) {
-    console.warn(`Element missing for ${type}: countEl=${!!countEl}, labelEl=${!!labelEl}, body=${!!body}`);
+    console.error(`Element missing for ${type}: countEl=${!!countEl}, labelEl=${!!labelEl}, body=${!!body}`);
     return;
   }
 
@@ -531,15 +466,6 @@ function restoreFromLocalStorage() {
         updateTable(type, JSON.parse(storedData));
       }
     });
-
-    const storedWeathers = localStorage.getItem('activeWeathers');
-    if (storedWeathers) {
-      console.log('Restoring activeWeathers from localStorage');
-      activeWeathers = JSON.parse(storedWeathers);
-      const now = Math.floor(Date.now() / 1000);
-      activeWeathers = activeWeathers.filter(weather => weather.end_duration_unix > now);
-      renderWeatherCards(activeWeathers);
-    }
   } catch (e) {
     console.error("Error restoring from localStorage:", e);
   }
@@ -550,13 +476,10 @@ function startCountdown() {
   const now = new Date();
 
   stockTypes.forEach(type => {
-    const savedTime = stored[type] && new Date(stored[type]);
-    // Chỉ đặt lại thời gian mặc định nếu savedTime không hợp lệ hoặc đã hết hạn quá lâu
-    if (savedTime && !isNaN(savedTime.getTime()) && savedTime > new Date(now.getTime() - defaultDurations[type])) {
-      nextRestockTimes[type] = savedTime.toISOString();
-    } else {
-      nextRestockTimes[type] = new Date(now.getTime() + defaultDurations[type]).toISOString();
-    }
+    const savedTime = stored[type];
+    nextRestockTimes[type] = (savedTime && new Date(savedTime) > now)
+      ? savedTime
+      : new Date(now.getTime() + defaultDurations[type]).toISOString();
   });
 
   updateAllTimers();
@@ -579,9 +502,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(fetchActiveWeather, 60000);
   setInterval(updateWeatherTimer, 1000);
   startCountdown();
-  fetchSeedGearStock(true); // Gọi lần đầu không giới hạn tần suất
-  fetchEggStock(true); // Gọi lần đầu không giới hạn tần suất
-  fetchCosmeticStock(true); // Gọi lần đầu không giới hạn tần suất
+  fetchSeedGearStock();
+  fetchEggStock();
+  fetchCosmeticStock();
 
   setInterval(() => {
     console.log('Periodic stock refresh triggered');
