@@ -79,6 +79,10 @@ const DARK_THEME = 'dark';
 const LIGHT_THEME = 'light';
 
 async function fetchWeatherEffects(weatherId) {
+  if (!weatherId) {
+    console.error('fetchWeatherEffects: weatherId is undefined or empty');
+    return '';
+  }
   try {
     const response = await fetch(`https://api.joshlei.com/v2/growagarden/info/${weatherId}`, {
       headers: {
@@ -87,7 +91,8 @@ async function fetchWeatherEffects(weatherId) {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    return data.description || '';
+    console.log(`fetchWeatherEffects: API response for ${weatherId}:`, data);
+    return typeof data === 'object' && data.description ? data.description : '';
   } catch (err) {
     console.error(`Error fetching description for weather ${weatherId}:`, err);
     return '';
@@ -102,7 +107,8 @@ function renderWeatherCards(weathers) {
   }
   container.innerHTML = '';
 
-  if (!weathers?.length) {
+  if (!Array.isArray(weathers) || weathers.length === 0) {
+    console.warn('renderWeatherCards: No valid weathers array, rendering default card');
     container.innerHTML = `
       <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
         <div class="flex justify-between items-center mb-2">
@@ -114,20 +120,23 @@ function renderWeatherCards(weathers) {
         <div class="flex items-center">
           <span id="weather-status-0" class="px-3 py-1 text-sm rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">Inactive</span>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mt-2">No special weather conditions active</p>
       </div>
     `;
     return;
   }
 
   weathers.forEach((weather, index) => {
+    if (!weather || !weather.display_name) {
+      console.warn(`renderWeatherCards: Invalid weather object at index ${index}`, weather);
+      return;
+    }
     const card = document.createElement('div');
     card.className = 'bg-white dark:bg-gray-800 rounded-lg p-4 shadow';
     card.innerHTML = `
       <div class="flex justify-between items-center mb-2">
         <div class="flex items-center">
           ${weather.icon ? `<img src="${weather.icon}" class="w-6 h-6 mr-2 rounded-full" alt="${weather.display_name} icon" onerror="this.style.display='none'">` : ''}
-          <h3 id="weather-name-${index}" class="text-lg font-medium text-gray-800 dark:text-white">${weather.display_name}</h3>
+          <h3 id="weather-name-${index}" class="text-lg font-medium text-gray-800 dark:text-white">${weather.display_name || 'Unknown'}</h3>
         </div>
         <span id="weather-timer-${index}" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Ends in: Calculating...</span>
       </div>
@@ -139,7 +148,6 @@ function renderWeatherCards(weathers) {
     container.appendChild(card);
   });
 }
-
 async function fetchActiveWeather() {
   try {
     const response = await fetch('https://api.joshlei.com/v2/growagarden/weather', {
@@ -149,50 +157,80 @@ async function fetchActiveWeather() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.log('Weather data fetched:', data);
-    activeWeathers = data.weather?.filter(w => w.active).map(w => ({
-      item_id: w.item_id,
-      display_name: w.display_name,
-      description: w.description || '',
-      icon: w.icon,
-      active: w.active,
-      end_duration_unix: parseInt(w.last_seen) + parseInt(w.duration)
-    })) || [];
+    console.log('fetchActiveWeather: Weather data fetched:', data);
+
+    if (!data || !Array.isArray(data.weather)) {
+      console.error('fetchActiveWeather: Invalid or missing data.weather', data);
+      throw new Error('Invalid weather data format');
+    }
+
+    activeWeathers = data.weather
+      .filter(w => w.active && w.item_id && w.display_name && w.last_seen && w.duration)
+      .map(w => ({
+        item_id: w.item_id,
+        display_name: w.display_name,
+        description: w.description || '',
+        icon: w.icon || '',
+        active: w.active,
+        end_duration_unix: parseInt(w.last_seen) + parseInt(w.duration)
+      }));
 
     for (let weather of activeWeathers) {
       if (!weather.description && weather.item_id) {
-        const description = await fetchWeatherEffects(weather.item_id);
-        weather.description = description;
+        try {
+          const description = await fetchWeatherEffects(weather.item_id);
+          weather.description = description;
+        } catch (err) {
+          console.warn(`fetchActiveWeather: Failed to fetch description for ${weather.item_id}`, err);
+          weather.description = 'No description available';
+        }
       }
     }
 
     try {
       localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
+      console.log('fetchActiveWeather: activeWeathers saved to localStorage');
     } catch (e) {
       console.error('Error saving activeWeathers to localStorage:', e);
     }
 
     renderWeatherCards(activeWeathers);
   } catch (err) {
-    console.error("Weather fetch error:", err);
+    console.error("fetchActiveWeather: Weather fetch error:", err);
     activeWeathers = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
     if (!activeWeathers.length) {
+      console.warn('fetchActiveWeather: Falling back to mockWeatherData');
       activeWeathers = mockWeatherData().weather;
     }
     renderWeatherCards(activeWeathers);
   }
 }
-function updateWeatherTimer() {
-  if (!activeWeathers?.length) return;
 
+function updateWeatherTimer() {
+  if (!Array.isArray(activeWeathers) || !activeWeathers.length) {
+    console.warn('updateWeatherTimer: No active weathers to update');
+    return;
+  }
+
+  let hasChanges = false;
   activeWeathers = activeWeathers.filter((weather, index) => {
     const timerEl = document.getElementById(`weather-timer-${index}`);
-    if (!timerEl) return false;
+    if (!timerEl) {
+      console.warn(`updateWeatherTimer: Timer element not found for index ${index}`);
+      return false;
+    }
+
+    if (!weather || !weather.end_duration_unix) {
+      console.warn(`updateWeatherTimer: Invalid weather object at index ${index}`, weather);
+      return false;
+    }
 
     const now = Math.floor(Date.now() / 1000);
     const remaining = Math.max(0, weather.end_duration_unix - now);
 
     if (remaining <= 0) {
+      console.log(`updateWeatherTimer: Weather ${weather.display_name} has expired`);
+      hasChanges = true;
       return false;
     }
 
@@ -206,8 +244,15 @@ function updateWeatherTimer() {
     return true;
   });
 
-  if (activeWeathers.length !== document.querySelectorAll('[id^="weather-timer-"]').length) {
+  if (hasChanges) {
+    console.log('updateWeatherTimer: Weather list changed, re-rendering cards');
     renderWeatherCards(activeWeathers);
+    try {
+      localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
+      console.log('updateWeatherTimer: activeWeathers updated in localStorage');
+    } catch (e) {
+      console.error('Error saving activeWeathers to localStorage:', e);
+    }
   }
 }
 
