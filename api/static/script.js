@@ -161,7 +161,7 @@ async function fetchActiveWeather() {
         let weather = {
           item_id: w.weather_id || '',
           display_name: w.weather_name || '',
-          description: w.description || '',
+          description: '',
           icon: w.icon || '',  // Nếu API đã có description thì lấy luôn
           active: true,
           start_time_unix: w.start_time_unix || Math.floor(Date.now() / 1000),
@@ -172,7 +172,7 @@ async function fetchActiveWeather() {
         if (!weather.description && weather.weather_id !== 'unknown') {
           try {
             const effect = await fetchWeatherEffects(weather.weather_id);
-            weather.description = (effect && effect.description) ? effect.description : 'No description available';
+            weather.description = effect.description : 'No description available';
           } catch (e) {
             console.warn(`Could not fetch effect for ${weather.item_id}:`, e.message);
           }
