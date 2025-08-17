@@ -1,3 +1,5 @@
+https://www.npmjs.com/package/fastapi
+
 import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
@@ -6,6 +8,8 @@ import { fileURLToPath } from 'url';
 import axios from 'axios';
 import jstudio from 'jstudio';
 import { logger } from 'console-wizard';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,7 +59,17 @@ function updateStockData(data) {
   if (data.eventshop_stock) latestData.eventshop_stock = cleanItems(data.eventshop_stock);
   if (data.cosmetic_stock) latestData.cosmetics_stock = cleanItems(data.cosmetic_stock);
 }
-
+const swaggerDefinition = {
+  openapi: '3.0.0',
+  info: { title: 'Grow a Garden API', version: '1.0.0', description: 'API for Grow a Garden' },
+  servers: [{ url: 'http://localhost:443', description: 'Local server' }]
+};
+const options = {
+  swaggerDefinition,
+  apis: [__filename] // dùng JSDoc comment trong file này
+};
+const swaggerSpec = swaggerJsdoc(options);
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 function updateWeatherData(data) {
   if (data?.weather) {
     const weatherObj = {};
@@ -109,6 +123,170 @@ function startPolling() {
     }
   }, 60000);
 }
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     summary: Health check
+ *     description: Kiểm tra API còn hoạt động hay không
+ *     responses:
+ *       200:
+ *         description: API hoạt động bình thường
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: '200'
+ */
+
+/**
+ * @swagger
+ * /api/v3/growagarden/stock:
+ *   get:
+ *     summary: Lấy stock hiện tại
+ *     description: Trả về toàn bộ dữ liệu stock hiện có
+ *     responses:
+ *       200:
+ *         description: Dữ liệu stock
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ */
+
+/**
+ * @swagger
+ * /api/v3/growagarden/weather:
+ *   get:
+ *     summary: Lấy thời tiết hiện tại
+ *     description: Trả về dữ liệu thời tiết đang diễn ra trong game
+ *     responses:
+ *       200:
+ *         description: Dữ liệu weather
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ */
+
+/**
+ * @swagger
+ * /api/v3/growagarden/calculate:
+ *   get:
+ *     summary: Tính toán giá trị ước lượng hoặc thông tin fruit
+ *     description: Cung cấp Name, Weight, Variant, Mutation để tính toán
+ *     parameters:
+ *       - in: query
+ *         name: Name
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: Weight
+ *         required: true
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: Variant
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: Mutation
+ *         required: false
+ *         schema:
+ *           type: string
+ *           description: Danh sách Mutation, phân tách bằng dấu phẩy
+ *     responses:
+ *       200:
+ *         description: Kết quả tính toán
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ */
+
+/**
+ * @swagger
+ * /api/v3/growagarden/info/{item_id}:
+ *   get:
+ *     summary: Lấy thông tin chi tiết 1 item
+ *     parameters:
+ *       - in: path
+ *         name: item_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của item cần lấy
+ *     responses:
+ *       200:
+ *         description: Thông tin chi tiết của item
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ */
+
+/**
+ * @swagger
+ * /api/v3/growagarden/info:
+ *   get:
+ *     summary: Lấy danh sách item theo type
+ *     parameters:
+ *       - in: query
+ *         name: type
+ *         required: false
+ *         schema:
+ *           type: string
+ *           description: Loại item: seed, gear, egg, cosmetic, event
+ *     responses:
+ *       200:
+ *         description: Danh sách item
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ */
+
+/**
+ * @swagger
+ * /api/v3/growagarden/image/{item_id}:
+ *   get:
+ *     summary: Lấy ảnh item
+ *     parameters:
+ *       - in: path
+ *         name: item_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của item cần lấy ảnh
+ *     responses:
+ *       200:
+ *         description: Trả về ảnh item
+ *         content:
+ *           image/png:
+ *             schema:
+ *               type: string
+ *               format: binary
+ */
+
+/**
+ * @swagger
+ * /api/v3/growagarden/currentevent:
+ *   get:
+ *     summary: Lấy sự kiện hiện tại
+ *     description: Trả về dữ liệu sự kiện đang diễn ra, bao gồm icon đã rehost
+ *     responses:
+ *       200:
+ *         description: Dữ liệu event hiện tại
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ */
 
 app.set('trust proxy', 1);
 // Middleware
@@ -129,23 +307,16 @@ app.get('/stocks', (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'home.html'));
 });
-app.get('/docs', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
 // API
 app.get('/api/health', limiter, (req, res) => {
   res.json({ status: '200' });
 });
-
 app.get('/api/v3/growagarden/stock', limiter, (req, res) => {
   res.json(latestData);
 });
-
 app.get('/api/v3/growagarden/weather', limiter, (req, res) => {
   res.json(newData.weather);
 });
-
 app.get('/api/v3/growagarden/calculate', limiter, async (req, res) => {
   try {
     const { Name, Weight, Variant, Mutation } = req.query;
