@@ -26,22 +26,24 @@ let newData = { weather: [] };
 
 // Helpers
 function normalizeName(name) {
+  if (!name) return 'unknown'; // fallback nếu name undefined/null
   return name.trim().toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, '_');
 }
 
 function cleanItems(items) {
   return items.map(item => {
-    let iconUrl = item.icon || '';
+    let iconUrl = item?.icon || '';
+    const itemId = item?.item_id || normalizeName(item?.name ?? item?.display_name ?? 'unknown');
+
     if (iconUrl.startsWith('https://api.joshlei.com/v2/growagarden/image/')) {
-      const itemId = item.item_id || normalizeName(item.name || item.display_name);
       iconUrl = `https://api-yvj3.onrender.com/api/v3/growagarden/image/${itemId}`;
     }
 
     return {
       ...item,
-      quantity: item.quantity || 0,
+      quantity: item?.quantity || 0,
       icon: iconUrl,
-      Date_End: item.Date_End || new Date(Date.now() + 300000).toISOString(),
+      Date_End: item?.Date_End || new Date(Date.now() + 300000).toISOString(),
     };
   });
 }
@@ -55,12 +57,14 @@ function updateStockData(data) {
 }
 
 function updateWeatherData(data) {
-  if (data.weather) {
+  if (data?.weather) {
     const weatherObj = {};
     for (const key in data.weather) {
       if (key === "timestamp") continue;
       const item = data.weather[key];
-      weatherObj[item.weather_id] = cleanItems([item])[0]; // dùng mảng 1 phần tử
+      // Nếu item là undefined/null, skip
+      if (!item) continue;
+      weatherObj[item.weather_id ?? `unknown_${key}`] = cleanItems([item])[0]; // wrap thành mảng 1 phần tử
     }
     weatherObj.timestamp = Date.now();
     newData.weather = weatherObj;
@@ -96,6 +100,7 @@ function startPolling() {
     }
   }, 60000);
 }
+
 app.set('trust proxy', 1);
 // Middleware
 app.use(cors());
@@ -131,6 +136,7 @@ app.get('/api/v3/growagarden/stock', limiter, (req, res) => {
 app.get('/api/v3/growagarden/weather', limiter, (req, res) => {
   res.json(newData.weather);
 });
+
 app.get('/api/v3/growagarden/calculate', limiter, async (req, res) => {
   try {
     const { Name, Weight, Variant, Mutation } = req.query;
@@ -161,7 +167,6 @@ app.get('/api/v3/growagarden/info/:item_id', limiter, async (req, res) => {
     const { item_id } = req.params;
     const item = await client.items.get(item_id); // Gọi API jstudio
 
-    // Nếu item có icon, thì rewrite sang domain rehost
     if (item?.icon) {
       item.icon = item.icon.replace(
         /^https:\/\/api\.joshlei\.com\/v2\/growagarden\/image\//,
@@ -180,7 +185,6 @@ app.get('/api/v3/growagarden/info', limiter, async (req, res) => {
   try {
     const { type } = req.query;
 
-    // Chuẩn hoá type (chấp nhận số nhiều)
     const aliasMap = {
       seeds: 'seed',
       eggs: 'egg',
@@ -218,12 +222,12 @@ app.get('/api/v3/growagarden/info', limiter, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch items list' });
   }
 });
+
 app.get('/api/v3/growagarden/image/:item_id', limiter, async (req, res) => {
   try {
     const { item_id } = req.params;
-    if (!item_id) {
-      return res.status(400).json({ error: 'Missing item_id' });
-    }
+    if (!item_id) return res.status(400).json({ error: 'Missing item_id' });
+
     const imageUrl = client.images.getUrl(item_id);
     const response = await axios.get(imageUrl, { responseType: 'stream' });
     res.setHeader("Content-Type", response.headers["content-type"] || "image/png");
@@ -238,7 +242,6 @@ app.get('/api/v3/growagarden/currentevent', limiter, async (req, res) => {
   try {
     const currentEvent = await client.getCurrentEvent();
 
-    // Clone object để tránh mutate dữ liệu gốc
     const modifiedEvent = {
       ...currentEvent,
       current: {
@@ -258,7 +261,8 @@ app.get('/api/v3/growagarden/currentevent', limiter, async (req, res) => {
     res.status(500).json({ error: 'Failed to get current event' });
   }
 });
-// Proxy ảnh
+
+// Proxy ảnh (duplicate route giữ nguyên)
 app.get('/api/v3/growagarden/image/:item_id', async (req, res) => {
   const { item_id } = req.params;
   try {
