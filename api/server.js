@@ -1,12 +1,11 @@
 import express from 'express';
-import { WebSocketServer } from 'ws';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import axios from 'axios';
 import jstudio from 'jstudio';
 import { logger } from 'console-wizard';
-import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,7 +13,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const client = jstudio.connect('js_4ece47b66df9cf728ed9a0508e82c9b66af86e5a988e5461bcd0e487eaead8a2');
 
-// In-memory data store
+// In-memory data
 let latestData = {
   gearStock: [],
   seedsStock: [],
@@ -23,39 +22,31 @@ let latestData = {
   cosmeticsStock: [],
 };
 
-let newData = {
-  weather: [] // Array to hold multiple weather entries
-};
+let newData = { weather: [] };
 
-// Helper functions
+// Helpers
 function normalizeName(name) {
   return name.trim().toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, '_');
 }
 
-function combineItemsByName(items) {
-  const combined = {};
-  for (const item of items) {
-    const name = item.name || item.display_name; // Handle both 'name' and 'display_name'
-    combined[name] = (combined[name] || 0) + (item.quantity || 0);
-  }
-  return Object.entries(combined).map(([name, quantity]) => ({
-    name,
-    quantity,
-    item_id: normalizeName(name)
-  }));
-}
-
 function cleanItems(items) {
-  return items.map(item => ({
-    ...item,
-    name: item.name || item.display_name, // Normalize name field
-    quantity: item.quantity || 0,
-    icon: item.icon || '',
-    Date_End: item.Date_End || new Date(Date.now() + 300000).toISOString() // Default Date_End
-  }));
+  return items.map(item => {
+    let iconUrl = item.icon || '';
+    if (iconUrl.startsWith('https://api.joshlei.com/v2/growagarden/image/')) {
+      const itemId = item.item_id || normalizeName(item.name || item.display_name);
+      iconUrl = `https://api-yvj3.onrender.com/api/v2/growagarden/image/${itemId}`;
+    }
+
+    return {
+      ...item,
+      name: item.name || item.display_name,
+      quantity: item.quantity || 0,
+      icon: iconUrl,
+      Date_End: item.Date_End || new Date(Date.now() + 300000).toISOString(),
+    };
+  });
 }
 
-// Data update functions
 function updateStockData(data) {
   if (data.gear_stock) latestData.gearStock = cleanItems(data.gear_stock);
   if (data.seed_stock) latestData.seedsStock = cleanItems(data.seed_stock);
@@ -66,37 +57,28 @@ function updateStockData(data) {
 
 function updateWeatherData(data) {
   if (data.weather) {
-    const entry = {
-      timestamp: Date.now(),
-      ...data.weather
-    };
+    const entry = { timestamp: Date.now(), ...data.weather };
     newData.weather.push(entry);
-
-    // Limit to 100 most recent entries
-    if (newData.weather.length > 100) {
-      newData.weather.shift(); // Remove oldest
-    }
+    if (newData.weather.length > 100) newData.weather.shift();
   }
 }
 
-// Initialize data and set up jstudio listeners
+// Init data
 async function initializeData() {
   try {
-    // Fetch initial stock data
     const stockData = await client.stocks.all();
-    logger.success('Kết nối đến API Stock thành công'); // Debug
+    logger.success('✅ Kết nối Stock thành công');
     updateStockData(stockData);
 
-    // Fetch initial weather data
     const weatherData = await client.weather.all();
-    logger.success('Kết nối đến API Weather thành công'); // Debug
+    logger.success('✅ Kết nối Weather thành công');
     updateWeatherData(weatherData);
-  } catch (error) {
-    logger.error('Error initializing data:', error);
+  } catch (err) {
+    logger.error('❌ Lỗi khi khởi tạo:', err);
   }
 }
 
-// Fallback: Polling if jstudio doesn't support real-time events
+// Poll fallback
 function startPolling() {
   setInterval(async () => {
     try {
@@ -105,10 +87,10 @@ function startPolling() {
 
       const weatherData = await client.weather.all();
       updateWeatherData(weatherData);
-    } catch (error) {
-      logger.error('Error polling data:', error);
+    } catch (err) {
+      logger.error('❌ Lỗi polling:', err);
     }
-  }, 60000); // Poll every 60 seconds
+  }, 60000);
 }
 
 // Middleware
@@ -116,11 +98,10 @@ app.use(cors());
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
-// Rate Limiting
 const limiter = rateLimit({
   windowMs: 60 * 1000,
   max: 5,
-  message: { error: 'Too many requests, please try again later.' }
+  message: { error: 'Too many requests, please try again later.' },
 });
 
 // Routes
@@ -134,6 +115,7 @@ app.get('/docs', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// API
 app.get('/api', limiter, (req, res) => {
   res.json({ status: '200' });
 });
@@ -146,10 +128,27 @@ app.get('/api/weather', limiter, (req, res) => {
   res.json(newData.weather);
 });
 
-// Start server and initialize data
+// Proxy ảnh
+app.get('/api/v2/growagarden/image/:item_id', async (req, res) => {
+  const { item_id } = req.params;
+  try {
+    const response = await axios.get(
+      `https://api.joshlei.com/v2/growagarden/image/${item_id}`,
+      { responseType: 'arraybuffer' }
+    );
+
+    res.set('Content-Type', response.headers['content-type'] || 'image/png');
+    res.send(response.data);
+  } catch (err) {
+    logger.error(`❌ Lỗi tải ảnh cho ${item_id}:`, err.message);
+    res.status(500).send('Không tải được ảnh');
+  }
+});
+
+// Start server
 const PORT = process.env.PORT || 443;
 app.listen(PORT, '0.0.0.0', () => {
-  logger.info(`🚀 API server running on port ${PORT}`);
-  initializeData(); // Initialize data on server start
-  startPolling(); // Start polling as fallback
+  logger.info(`🚀 API server chạy ở cổng ${PORT}`);
+  initializeData();
+  startPolling();
 });
