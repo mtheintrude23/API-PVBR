@@ -168,9 +168,7 @@ async function fetchActiveWeather() {
           description: w.description || '',
           icon: w.icon || '',
           active: w.active,
-          end_duration_unix: (w.last_seen && w.duration && !isNaN(parseInt(w.last_seen)) && !isNaN(parseInt(w.duration)))
-            ? parseInt(w.last_seen) + parseInt(w.duration)
-            : Math.floor(Date.now() / 1000) + 3600
+          end_duration_unix: w.end_duration_unix
         };
       })
       .filter(w => w !== null);
