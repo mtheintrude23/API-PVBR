@@ -160,9 +160,9 @@ async function fetchActiveWeather() {
       activeList.map(async (w) => {
         let weather = {
           item_id: w.weather_id || '',
-          display_name: w.display_name || '',
-          icon: w.icon || '',
-          description: w.description || '',   // Nếu API đã có description thì lấy luôn
+          display_name: w.weather_name || '',
+          description: w.description || '',
+          icon: w.icon || '',  // Nếu API đã có description thì lấy luôn
           active: true,
           start_time_unix: w.start_time_unix || Math.floor(Date.now() / 1000),
           end_duration_unix: w.end_duration_unix || Math.floor(Date.now() / 1000) + 3600
@@ -173,7 +173,6 @@ async function fetchActiveWeather() {
           try {
             const effect = await fetchWeatherEffects(weather.weather_id);
             weather.description = (effect && effect.description) ? effect.description : 'No description available';
-            weather.display_name = (effect && effect.display_name) ? effect.display_name: 'UnKnown';
           } catch (e) {
             console.warn(`Could not fetch effect for ${weather.item_id}:`, e.message);
           }
