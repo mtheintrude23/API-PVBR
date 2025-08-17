@@ -7,13 +7,6 @@ const defaultDurations = {
   cosmetic: 14400000 // 4 giờ
 };
 
-let nextRestockTimes = {
-  seed: null,
-  gear: null,
-  egg: null,
-  cosmetic: null
-};
-
 // Mock data for testing when API fails
 function mockStockData() {
   return {
