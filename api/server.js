@@ -62,9 +62,18 @@ function updateWeatherData(data) {
     for (const key in data.weather) {
       if (key === "timestamp") continue;
       const item = data.weather[key];
-      // Nếu item là undefined/null, skip
       if (!item) continue;
-      weatherObj[item.weather_id ?? `unknown_${key}`] = cleanItems([item])[0]; // wrap thành mảng 1 phần tử
+
+      // Rehost icon của weather nếu có
+      let iconUrl = item.icon || '';
+      if (iconUrl.startsWith('https://api.joshlei.com/v2/growagarden/image/')) {
+        iconUrl = `https://api-yvj3.onrender.com/api/v3/growagarden/image/${item.weather_id ?? key}`;
+      }
+
+      weatherObj[item.weather_id ?? `unknown_${key}`] = {
+        ...item,
+        icon: iconUrl
+      };
     }
     weatherObj.timestamp = Date.now();
     newData.weather = weatherObj;
