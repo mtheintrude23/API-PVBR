@@ -240,7 +240,7 @@ function startPolling() {
  *         required: false
  *         schema:
  *           type: string
- *           description: Loại item: seed, gear, egg, cosmetic, event
+ *           description: "Loại item: seed, gear, egg, cosmetic, event"
  *     responses:
  *       200:
  *         description: Danh sách item
@@ -249,7 +249,6 @@ function startPolling() {
  *             schema:
  *               type: object
  */
-
 /**
  * @swagger
  * /api/v3/growagarden/image/{item_id}:
