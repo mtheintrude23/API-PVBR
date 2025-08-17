@@ -142,8 +142,6 @@ function renderWeatherCards(weathers) {
     container.appendChild(card);
   });
 }
-let activeWeathers = [];
-
 async function fetchActiveWeather() {
   try {
     const response = await fetch('https://api.joshlei.com/v2/growagarden/weather', {
