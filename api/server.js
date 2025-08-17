@@ -155,6 +155,13 @@ app.get('/api/v3/growagarden/info/:item_id', limiter, async (req, res) => {
   try {
     const { item_id } = req.params;
     const item = await client.items.get(item_id); // Gọi API jstudio
+
+    // Nếu có imageUrl thì rewrite về domain server bạn
+    if (item.imageUrl) {
+      const fileName = item.imageUrl.split('/').pop(); // lấy phần cuối cùng sau /
+      item.imageUrl = `https://api-yvj3.onrender.com/api/v3/growagarden/image/${fileName}`;
+    }
+
     res.json(item);
   } catch (error) {
     logger.error(`Error fetching item info: ${error.message}`);
