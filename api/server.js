@@ -59,9 +59,9 @@ function updateStockData(data) {
   if (data.cosmetic_stock) latestData.cosmetics_stock = cleanItems(data.cosmetic_stock);
 }
 const swaggerDefinition = {
-  openapi: '3.0.0',
-  info: { title: 'Grow a Garden API', version: '1.0.0', description: 'API for Grow a Garden' },
-  servers: [{ url: 'http://localhost:443', description: 'Local server' }]
+  openapi: '3.1.0',
+  info: { title: 'Grow a Garden API', version: 'v3', description: 'API for Grow a Garden' },
+  servers: [{ url: 'https://api-yvj3.onrender.com/', description: 'URL' }]
 };
 const options = {
   swaggerDefinition,
