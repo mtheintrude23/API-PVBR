@@ -90,7 +90,6 @@ async function fetchWeatherEffects(weatherId) {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    return typeof data === 'object' && data.description ? data.description : '';
   } catch (err) {
     return '';
   }
@@ -154,90 +153,53 @@ async function fetchActiveWeather() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.log('fetchActiveWeather: Weather data fetched:', data);
 
-    if (!data || !Array.isArray(data.weather)) {
-      console.error('fetchActiveWeather: Invalid or missing data.weather', data);
-      throw new Error('Invalid weather data format');
-    }
+    if (!data || !Array.isArray(data.weather)) throw new Error('Invalid weather data format');
 
-    activeWeathers = data.weather
-      .map(w => {
-        console.log('fetchActiveWeather: Processing weather item:', w);
-        if (w.active !== true) {
-          console.log(`fetchActiveWeather: Skipping item due to active !== true:`, w);
-          return null;
+    // Tạo danh sách active weathers cơ bản
+    let activeWeathers = data.weather
+      .filter(w => w.active === true)
+      .map(w => ({
+        item_id: w.item_id || 'unknown',
+        display_name: w.display_name || w.name || w.title || 'Unknown Weather',
+        description: w.description || '', // thường sẽ rỗng
+        icon: w.icon || '',
+        active: w.active,
+        end_duration_unix: (w.last_seen && w.duration)
+          ? parseInt(w.last_seen) + parseInt(w.duration)
+          : Math.floor(Date.now() / 1000) + 3600
+      }));
+
+    // Fetch description song song cho những item chưa có
+    activeWeathers = await Promise.all(
+      activeWeathers.map(async (weather) => {
+        if (!weather.description && weather.item_id !== 'unknown') {
+          try {
+            const effect = await fetchWeatherEffects(weather.item_id);
+            weather.description = effect?.description || 'No description available';
+          } catch {
+            weather.description = 'No description available';
+          }
         }
-        const displayName = w.display_name || w.name || w.title || 'Unknown Weather';
-        if (displayName === 'Unknown Weather') {
-          console.warn(`fetchActiveWeather: display_name not found for item, using default:`, w);
-        }
-        return {
-          item_id: w.item_id || 'unknown',
-          display_name: displayName,
-          description: w.description || '',
-          icon: w.icon || '',
-          active: w.active,
-          end_duration_unix: (w.last_seen && w.duration && !isNaN(parseInt(w.last_seen)) && !isNaN(parseInt(w.duration)))
-            ? parseInt(w.last_seen) + parseInt(w.duration)
-            : Math.floor(Date.now() / 1000) + 3600 // Default 1 hour if missing
-        };
+        return weather;
       })
-      .filter(w => w !== null);
+    );
 
-    console.log('fetchActiveWeather: Filtered activeWeathers:', activeWeathers);
+    // Lưu vào localStorage
+    localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
 
-    for (let weather of activeWeathers) {
-      if (weather.active !== true) {
-        console.warn(`fetchActiveWeather: Skipping fetchWeatherEffects for ${weather.item_id} due to active !== true`, weather);
-        continue;
-      }
-      if (!weather.description && weather.item_id && weather.item_id !== 'unknown') {
-        try {
-          console.log(`fetchActiveWeather: Fetching description for ${weather.item_id} (active: ${weather.active})`);
-          const description = await fetchWeatherEffects(weather.item_id);
-          weather.description = description || 'No description available';
-          console.log(`fetchActiveWeather: Updated description for ${weather.item_id}:`, weather.description);
-        } catch (err) {
-          console.warn(`fetchActiveWeather: Failed to fetch description for ${weather.item_id}:`, err);
-          weather.description = 'No description available';
-        }
-      } else {
-        console.log(`fetchActiveWeather: Skipping fetchWeatherEffects for ${weather.item_id}: description=${!!weather.description}, item_id=${weather.item_id}, active=${weather.active}`);
-      }
-    }
-
-    try {
-      localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
-      console.log('fetchActiveWeather: activeWeathers saved to localStorage:', activeWeathers);
-    } catch (e) {
-      console.error('fetchActiveWeather: Error saving activeWeathers to localStorage:', e);
-    }
-
-    console.log('fetchActiveWeather: Final activeWeathers:', activeWeathers);
     renderWeatherCards(activeWeathers);
   } catch (err) {
-    console.error('fetchActiveWeather: Weather fetch error:', err);
-    activeWeathers = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
-    activeWeathers = activeWeathers.map(w => {
-      const displayName = w.display_name || w.name || w.title || 'Unknown Weather';
-      if (displayName === 'Unknown Weather') {
-        console.warn('fetchActiveWeather: display_name not found in localStorage item:', w);
-      }
-      return { ...w, display_name: displayName };
-    }).filter(w => w && w.active === true && w.end_duration_unix > Math.floor(Date.now() / 1000));
-    console.log('fetchActiveWeather: Loaded from localStorage:', activeWeathers);
+    console.error('fetchActiveWeather error:', err);
+
+    // Fallback từ localStorage hoặc mock
+    let activeWeathers = JSON.parse(localStorage.getItem('activeWeathers') || '[]')
+      .filter(w => w.active && w.end_duration_unix > Math.floor(Date.now() / 1000));
+
     if (!activeWeathers.length) {
-      console.warn('fetchActiveWeather: Falling back to mockWeatherData');
-      activeWeathers = mockWeatherData().weather.map(w => {
-        const displayName = w.display_name || w.name || w.title || 'Unknown Weather';
-        if (displayName === 'Unknown Weather') {
-          console.warn('fetchActiveWeather: display_name not found in mockWeatherData item:', w);
-        }
-        return { ...w, display_name: displayName };
-      }).filter(w => w.active === true);
+      activeWeathers = mockWeatherData().weather.filter(w => w.active === true);
     }
-    console.log('fetchActiveWeather: Using fallback activeWeathers:', activeWeathers);
+
     renderWeatherCards(activeWeathers);
   }
 }
