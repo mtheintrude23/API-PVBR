@@ -240,14 +240,15 @@ function startPolling() {
  *         required: false
  *         schema:
  *           type: string
- *           description: "Loại item: seed, gear, egg, cosmetic, event"
+ *           description: "Loại item: seed, gear, egg, cosmetic, event, weather"
+ *           enum: ["seed, gear, egg, cosmetic, event, weather"]
  *     responses:
  *       200:
  *         description: Danh sách item
  *         content:
  *           application/json:
  *             schema:
- *               type: object
+ *               type: array
  */
 /**
  * @swagger
