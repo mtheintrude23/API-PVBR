@@ -34,7 +34,7 @@ function cleanItems(items) {
     let iconUrl = item.icon || '';
     if (iconUrl.startsWith('https://api.joshlei.com/v2/growagarden/image/')) {
       const itemId = item.item_id || normalizeName(item.name || item.display_name);
-      iconUrl = `https://api-yvj3.onrender.com/api/v2/growagarden/image/${itemId}`;
+      iconUrl = `https://api-yvj3.onrender.com/api/v3/growagarden/image/${itemId}`;
     }
 
     return {
@@ -115,20 +115,20 @@ app.get('/docs', (req, res) => {
 });
 
 // API
-app.get('/api', limiter, (req, res) => {
+app.get('/api/health', limiter, (req, res) => {
   res.json({ status: '200' });
 });
 
-app.get('/api/stock', limiter, (req, res) => {
+app.get('/api/v3/growagarden/stock', limiter, (req, res) => {
   res.json(latestData);
 });
 
-app.get('/api/weather', limiter, (req, res) => {
+app.get('/api/v3/growagarden/weather', limiter, (req, res) => {
   res.json(newData.weather);
 });
 
 // Proxy ảnh
-app.get('/api/v2/growagarden/image/:item_id', async (req, res) => {
+app.get('/api/v3/growagarden/image/:item_id', async (req, res) => {
   const { item_id } = req.params;
   try {
     const response = await axios.get(
