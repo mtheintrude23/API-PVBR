@@ -126,7 +126,106 @@ app.get('/api/v3/growagarden/stock', limiter, (req, res) => {
 app.get('/api/v3/growagarden/weather', limiter, (req, res) => {
   res.json(newData.weather);
 });
+app.get('/api/v3/growagarden/calculate', limiter, async (req, res) => {
+  try {
+    const { Name, Weight, Variant, Mutation } = req.query;
 
+    if (!Name || !Weight) {
+      return res.status(400).json({ error: 'Missing required fields: Name, Weight' });
+    }
+
+    const result = await client.calculator.calculate({
+      Name,
+      Weight,
+      Variant: Variant || '',
+      Mutation: Mutation
+        ? Mutation.split(',').map(m => m.trim())
+        : []
+    });
+
+    res.json(result);
+  } catch (error) {
+    logger.error(`Error calculating item: ${error.message}`);
+    res.status(500).json({ error: 'Failed to calculate item' });
+  }
+});
+
+// API: Lấy thông tin chi tiết item
+app.get('/api/v3/growagarden/info/:item_id', limiter, async (req, res) => {
+  try {
+    const { item_id } = req.params;
+    const item = await client.items.get(item_id); // Gọi API jstudio
+    res.json(item);
+  } catch (error) {
+    logger.error(`Error fetching item info: ${error.message}`);
+    res.status(500).json({ error: 'Failed to fetch item info' });
+  }
+});
+app.get('/api/v3/growagarden/info', limiter, async (req, res) => {
+  try {
+    const { type } = req.query;
+
+    // Chuẩn hoá type (chấp nhận số nhiều)
+    const aliasMap = {
+      seeds: 'seed',
+      eggs: 'egg',
+      cosmetics: 'cosmetic',
+      events: 'event',
+    };
+    const allowed = new Set([
+      'seed', 'seeds',
+      'gear',
+      'egg', 'eggs',
+      'cosmetic', 'cosmetics',
+      'event', 'events'
+    ]);
+
+    let normalizedType;
+    if (typeof type === 'string' && type.trim()) {
+      const t = type.toLowerCase().trim();
+      if (!allowed.has(t)) {
+        return res.status(400).json({ error: 'Invalid type' });
+      }
+      normalizedType = aliasMap[t] || t;
+    }
+
+    const items = normalizedType
+      ? await client.items.all(normalizedType)
+      : await client.items.all();
+
+    res.json({
+      type: normalizedType || 'all',
+      count: Array.isArray(items) ? items.length : 0,
+      items: items || []
+    });
+  } catch (error) {
+    logger.error(`Error fetching items list: ${error.message}`);
+    res.status(500).json({ error: 'Failed to fetch items list' });
+  }
+});
+app.get('/api/v3/growagarden/image/:item_id', limiter, async (req, res) => {
+  try {
+    const { item_id } = req.params;
+    if (!item_id) {
+      return res.status(400).json({ error: 'Missing item_id' });
+    }
+
+    const imageUrl = client.images.getUrl(item_id);
+    res.json({ item_id, imageUrl });
+  } catch (error) {
+    logger.error(`Error fetching image URL: ${error.message}`);
+    res.status(500).json({ error: 'Failed to get image URL' });
+  }
+});
+app.get('/api/v3/growagarden/currentevent', limiter, async (req, res) => {
+  try {
+    const currentEvent = await client.getCurrentEvent();
+    res.json(currentEvent);
+  } catch (error) {
+    logger.error(`Error fetching current event: ${error.message}`);
+    res.status(500).json({ error: 'Failed to get current event' });
+  }
+});
 // Proxy ảnh
 app.get('/api/v3/growagarden/image/:item_id', async (req, res) => {
   const { item_id } = req.params;
