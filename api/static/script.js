@@ -98,9 +98,7 @@ async function fetchWeatherEffects(weatherId) {
 
 function renderWeatherCards(weathers) {
   const container = document.getElementById('weather-card-container');
-  if (!container) {
-    return;
-  }
+  if (!container) return;
   container.innerHTML = '';
 
   if (!Array.isArray(weathers) || weathers.length === 0) {
@@ -108,12 +106,12 @@ function renderWeatherCards(weathers) {
       <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
         <div class="flex justify-between items-center mb-2">
           <div class="flex items-center">
-            <h3 id="weather-name-0" class="text-lg font-medium text-gray-800 dark:text-white">Normal</h3>
+            <h3 class="text-lg font-medium text-gray-800 dark:text-white">Normal</h3>
           </div>
-          <span id="weather-timer-0" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">No active event</span>
+          <span class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">No active event</span>
         </div>
         <div class="flex items-center">
-          <span id="weather-status-0" class="px-3 py-1 text-sm rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">Inactive</span>
+          <span class="px-3 py-1 text-sm rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">Inactive</span>
         </div>
       </div>
     `;
@@ -121,24 +119,32 @@ function renderWeatherCards(weathers) {
   }
 
   weathers.forEach((weather, index) => {
-    if (!weather || !weather.display_name) {
-      return;
-    }
+    if (!weather) return;
+
+    const name = weather.display_name || "Unknown Weather";
+    const description = weather.description && weather.description.trim() !== ""
+      ? weather.description
+      : "No description available";
+
     const card = document.createElement('div');
     card.className = 'bg-white dark:bg-gray-800 rounded-lg p-4 shadow';
+
     card.innerHTML = `
       <div class="flex justify-between items-center mb-2">
         <div class="flex items-center">
-          ${weather.icon ? `<img src="${weather.icon}" class="w-6 h-6 mr-2 rounded-full" alt="${weather.display_name} icon" onerror="this.style.display='none'">` : ''}
-          <h3 id="weather-name-${index}" class="text-lg font-medium text-gray-800 dark:text-white">${weather.display_name || 'Unknown'}</h3>
+          ${weather.icon ? `<img src="${weather.icon}" class="w-6 h-6 mr-2 rounded-full" alt="${name} icon" onerror="this.style.display='none'">` : ''}
+          <h3 class="text-lg font-medium text-gray-800 dark:text-white">${name}</h3>
         </div>
-        <span id="weather-timer-${index}" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Ends in: Calculating...</span>
+        <span id="weather-timer-${index}" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+          Ends in: Calculating...
+        </span>
       </div>
       <div class="flex items-center">
-        <span id="weather-status-${index}" class="px-3 py-1 text-sm rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Active</span>
-        <p class="ml-3 text-gray-600 dark:text-gray-300">${weather.description || 'No description available'}</p>
+        <span class="px-3 py-1 text-sm rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Active</span>
+        <p class="ml-3 text-gray-600 dark:text-gray-300">${description}</p>
       </div>
     `;
+
     container.appendChild(card);
   });
 }
@@ -154,32 +160,41 @@ async function fetchActiveWeather() {
 
     if (!data || !Array.isArray(data.weather)) throw new Error('Invalid weather data format');
 
-    activeWeathers = data.weather
-      .filter(w => w.active === true)
-      .map(w => ({
-        item_id: w.item_id || 'unknown',
-        display_name: w.display_name || w.name || w.title || 'Unknown Weather',
-        description: w.description || '',
-        icon: w.icon || '',
-        active: w.active,
-        end_duration_unix: (w.last_seen && w.duration)
-          ? parseInt(w.last_seen) + parseInt(w.duration)
-          : Math.floor(Date.now() / 1000) + 3600
-      }));
+    // Lọc active = true và lấy dữ liệu cơ bản
+    const activeList = data.weather.filter(w => w.active === true);
 
     activeWeathers = await Promise.all(
-      activeWeathers.map(async (weather) => {
+      activeList.map(async (w) => {
+        let weather = {
+          item_id: w.item_id || 'unknown',
+          display_name: w.display_name || 'Unknown Weather',
+          icon: w.icon || '',
+          description: w.description || '',   // Nếu API đã có description thì lấy luôn
+          active: true,
+          start_time_unix: w.start_time_unix || Math.floor(Date.now() / 1000),
+          end_duration_unix: w.end_duration_unix || Math.floor(Date.now() / 1000) + 3600
+        };
+
+        // Nếu chưa có description và item_id hợp lệ thì gọi fetchEffect
         if (!weather.description && weather.item_id !== 'unknown') {
-          const effect = await fetchWeatherEffects(weather.item_id);
-          weather.description = (effect && effect.description) ? effect.description : 'No description available';
+          try {
+            const effect = await fetchWeatherEffects(weather.item_id);
+            weather.description = (effect && effect.description) ? effect.description : 'No description available';
+          } catch (e) {
+            console.warn(`Could not fetch effect for ${weather.item_id}:`, e.message);
+          }
         }
+
         return weather;
       })
     );
 
     localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
     renderWeatherCards(activeWeathers);
+
   } catch (err) {
+    console.error('Weather fetch error:', err.message);
+
     let cached = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
     activeWeathers = cached.filter(w => w.active && w.end_duration_unix > Math.floor(Date.now() / 1000));
 
