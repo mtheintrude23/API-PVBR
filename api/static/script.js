@@ -372,7 +372,7 @@ function updateAllTimers() {
   requestAnimationFrame(updateAllTimers);
 }
 
-function updateTable(type, items) {
+function updateTable(type, items = []) {
   const typeToIdMap = {
     seed: 'seed-varieties',
     gear: 'gear-categories',
@@ -380,32 +380,37 @@ function updateTable(type, items) {
     cosmetic: 'cosmetic-types'
   };
 
-  const total = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  const total = items.reduce((sum, { quantity = 0 }) => sum + quantity, 0);
   const countEl = document.getElementById(`${type}-count`);
   const labelEl = document.getElementById(typeToIdMap[type]);
   const body = document.getElementById(`${type}-table-body`);
 
-  if (!countEl || !labelEl || !body) {
-    console.error(`Element missing for ${type}: countEl=${!!countEl}, labelEl=${!!labelEl}, body=${!!body}`);
-    return;
-  }
+  if (!countEl || !labelEl || !body) return;
 
+  // Cập nhật số lượng
   countEl.textContent = total;
   labelEl.textContent = items.length;
   body.innerHTML = '';
-  items.sort((a, b) => a.display_name.localeCompare(b.display_name)).forEach(item => {
-    const icon = item.icon ? `<img src="${item.icon}" class="w-8 h-8 rounded-full mr-2" alt="${item.display_name}" onerror="this.style.display='none'">` : '';
+  items.sort((a, b) => a.display_name.localeCompare(b.display_name));
+  for (const { display_name, quantity = 0, icon } of items) {
     const tr = document.createElement('tr');
     tr.className = "border-b border-gray-200 dark:border-gray-700";
+
     tr.innerHTML = `
       <td class="px-4 py-3 whitespace-nowrap">
-        <div class="flex items-center">${icon}<span class="text-gray-800 dark:text-white">${item.display_name}</span></div>
+        <div class="flex items-center">
+          ${icon ? `<img src="${icon}" 
+                      class="w-8 h-8 rounded-full mr-2" 
+                      alt="${display_name}" 
+                      onerror="this.remove()">` : ''}
+          <span class="text-gray-800 dark:text-white">${display_name}</span>
+        </div>
       </td>
-      <td class="px-4 py-3 text-gray-800 dark:text-white">${item.quantity}</td>
+      <td class="px-4 py-3 text-gray-800 dark:text-white">${quantity}</td>
     `;
+
     body.appendChild(tr);
-  });
-  console.log(`Table updated for ${type}: ${items.length} items, total quantity: ${total}`); // Debug log
+  }
 }
 
 function toggleDarkLightMode(isDark) {
