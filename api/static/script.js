@@ -330,41 +330,26 @@ async function fetchCosmeticStock() {
 }
 
 function updateRestockTime(type, items) {
-  // Kiểm tra type hợp lệ
-  if (!stockTypes.includes(type)) {
-    console.error(`Invalid stock type: ${type}`);
-    return;
-  }
-
-  // Kiểm tra items là mảng và không null/undefined
-  if (!Array.isArray(items)) {
-    items = [];
-  }
+  if (!stockTypes.includes(type)) return;
+  if (!Array.isArray(items)) items = [];
 
   if (items.length > 0) {
     try {
-      // Kiểm tra Date_End hợp lệ
       const earliestEnd = items.reduce((min, i) => {
-        if (!i.Date_End) {
-          return min;
-        }
+        if (!i.Date_End) return min;
         const d = new Date(i.Date_End);
-        if (isNaN(d.getTime())) {
-          return min;
-        }
+        if (isNaN(d.getTime())) return min;
         return d < min ? d : min;
       }, new Date(items[0].Date_End));
 
-      // Kiểm tra earliestEnd hợp lệ
       if (isNaN(earliestEnd.getTime())) {
         nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
       } else {
         nextRestockTimes[type] = earliestEnd.toISOString();
       }
 
-      // Lưu items vào localStorage, loại bỏ Date_End
       const stripped = items
-        .filter(item => item.display_name) // Đảm bảo có display_name
+        .filter(item => item.display_name)
         .map(({ Date_End, ...rest }) => rest)
         .sort((a, b) => a.display_name.localeCompare(b.display_name));
       localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
@@ -375,34 +360,29 @@ function updateRestockTime(type, items) {
     nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
   }
 
-  // Lưu nextRestockTimes vào localStorage
   try {
     localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-  } catch (e) {
-  }
+  } catch (e) {}
 
-  // Cập nhật last-updated trên giao diện
   const lastUpdatedEl = document.getElementById('last-updated');
   if (lastUpdatedEl) {
     lastUpdatedEl.textContent = new Date().toLocaleString();
-  } else {
   }
 }
 
 function updateAllTimers() {
   const now = new Date();
-  
+
   stockTypes.forEach(type => {
     const endTime = nextRestockTimes[type] ? new Date(nextRestockTimes[type]) : null;
     const remaining = endTime ? Math.max(0, endTime - now) : defaultDurations[type];
     createOrUpdateTimer(type, remaining);
 
-    if (remaining <= 1000) {
-      console.log(`Restock time reached for ${type}, fetching new data`); // Debug log
+    if (remaining <= 0) {
       const newEnd = new Date(now.getTime() + defaultDurations[type]);
       nextRestockTimes[type] = newEnd.toISOString();
       localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-      
+
       if (type === 'seed' || type === 'gear') {
         fetchSeedGearStock();
       } else if (type === 'egg') {
