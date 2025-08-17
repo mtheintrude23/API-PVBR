@@ -15,11 +15,11 @@ const client = jstudio.connect('js_4ece47b66df9cf728ed9a0508e82c9b66af86e5a988e5
 
 // In-memory data
 let latestData = {
-  gearStock: [],
-  seedsStock: [],
-  eggStock: [],
-  eventStock: [],
-  cosmeticsStock: [],
+  gear_stock: [],
+  seed_stock: [],
+  egg_stock: [],
+  eventshop_tock: [],
+  cosmetics_stock: [],
 };
 
 let newData = { weather: [] };
@@ -56,9 +56,14 @@ function updateStockData(data) {
 
 function updateWeatherData(data) {
   if (data.weather) {
-    const entry = { timestamp: Date.now(), ...data.weather };
-    newData.weather.push(entry);
-    if (newData.weather.length > 100) newData.weather.shift();
+    const weatherObj = {};
+    for (const key in data.weather) {
+      if (key === "timestamp") continue;
+      const item = data.weather[key];
+      weatherObj[item.weather_id] = cleanItems(item);
+    }
+    weatherObj.timestamp = Date.now();
+    newData.weather = weatherObj;
   }
 }
 
