@@ -136,7 +136,7 @@ function renderWeatherCards(weathers) {
       </div>
       <div class="flex items-center">
         <span id="weather-status-${index}" class="px-3 py-1 text-sm rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Active</span>
-        <p class="ml-3 text-gray-600 dark:text-gray-300">${weather.description || 'No description available'}</p>
+        <p class="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">${Array.isArray(weather.description) ? weather.description.join("\n") : weather.description || 'No description available'}</p>
       </div>
     `;
     container.appendChild(card);
@@ -164,7 +164,7 @@ async function fetchActiveWeather() {
         const displayName = w.display_name || w.name || w.title || 'Unknown Weather';
         return {
           item_id: w.weather_id || w.item_id || 'unknown',
-          display_name: displayName,
+          display_name: w.weather_name,
           description: w.description || '',
           icon: w.icon || '',
           active: w.active,
@@ -176,8 +176,8 @@ async function fetchActiveWeather() {
       .filter(w => w !== null);
 
     for (let weather of activeWeathers) {
-      if (!weather.description && weather.item_id && weather.item_id !== 'unknown') {
-        weather.description = await fetchWeatherEffects(weather.item_id) || 'No description available';
+      if (!weather.description && weather.weather_id && weather.weather_id !== 'unknown') {
+        weather.description = await fetchWeatherEffects(weather.weather_id) || 'No description available';
       }
     }
 
@@ -193,7 +193,7 @@ async function fetchActiveWeather() {
     activeWeathers = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
     activeWeathers = activeWeathers.map(w => ({
       ...w,
-      display_name: w.display_name || w.name || w.title || 'Unknown Weather',
+      display_name: w.weather_name || w.name || w.title || 'Unknown Weather',
       item_id: w.weather_id || w.item_id || 'unknown'
     })).filter(w => w && w.active === true && w.end_duration_unix > Math.floor(Date.now() / 1000));
     if (!activeWeathers.length) {
@@ -346,73 +346,35 @@ async function fetchCosmeticStock(isInitial = false) {
 }
 
 function updateRestockTime(type, items) {
-  if (!stockTypes.includes(type)) {
-    console.error(`updateRestockTime: Invalid stock type: ${type}`);
-    return;
-  }
-
   const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
   const now = Date.now();
+  let earliest = null;
 
-  if (!Array.isArray(items) || items.length === 0) {
-    const savedTime = stored[type] && new Date(stored[type]);
-    if (savedTime && savedTime > now) {
-      nextRestockTimes[type] = savedTime.toISOString();
-    } else {
-      nextRestockTimes[type] = new Date(now + defaultDurations[type]).toISOString();
-    }
-    try {
-      localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-    } catch (e) {
-      console.error(`updateRestockTime: Error saving restockEndTimes to localStorage:`, e);
-    }
-    return;
-  }
-
-  try {
-    const earliestEnd = items.reduce((min, i) => {
-      if (!i.Date_End) {
-        return min;
-      }
-      const d = new Date(i.Date_End);
-      if (isNaN(d.getTime())) {
-        return min;
-      }
-      return d < min ? d : min;
-    }, new Date(items[0].Date_End));
-
-    if (isNaN(earliestEnd.getTime())) {
-      const savedTime = stored[type] && new Date(stored[type]);
-      if (savedTime && savedTime > now) {
-        nextRestockTimes[type] = savedTime.toISOString();
-      } else {
-        nextRestockTimes[type] = new Date(now + defaultDurations[type]).toISOString();
-      }
-    } else {
-      nextRestockTimes[type] = earliestEnd.toISOString();
-    }
-
-    const stripped = items
-      .filter(item => item.display_name)
-      .map(({ Date_End, ...rest }) => rest)
-      .sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
-    localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
-  } catch (e) {
-    console.error(`updateRestockTime: Error processing items for ${type}:`, e);
-    const savedTime = stored[type] && new Date(stored[type]);
-    if (savedTime && savedTime > now) {
-      nextRestockTimes[type] = savedTime.toISOString();
-    } else {
-      nextRestockTimes[type] = new Date(now + defaultDurations[type]).toISOString();
+  if (Array.isArray(items) && items.length > 0) {
+    const validDates = items
+      .map(i => i.Date_End ? new Date(i.Date_End).getTime() : null)
+      .filter(t => t && !isNaN(t));
+    if (validDates.length) {
+      earliest = new Date(Math.min(...validDates));
     }
   }
 
-  try {
-    localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-  } catch (e) {
-    console.error(`updateRestockTime: Error saving restockEndTimes to localStorage:`, e);
+  if (!earliest && stored[type] && new Date(stored[type]).getTime() > now) {
+    earliest = new Date(stored[type]);
   }
 
+  if (!earliest) {
+    earliest = new Date(now + defaultDurations[type]);
+  }
+
+  nextRestockTimes[type] = earliest.toISOString();
+  localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+
+  // Tính remaining để hiển thị
+  const remainingMs = Math.max(0, earliest.getTime() - now);
+  createOrUpdateTimer(type, remainingMs);
+
+  // Update last updated time
   const lastUpdatedEl = document.getElementById('last-updated');
   if (lastUpdatedEl) {
     lastUpdatedEl.textContent = new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' });
