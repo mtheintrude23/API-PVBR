@@ -80,7 +80,7 @@ const LIGHT_THEME = 'light';
 
 async function fetchWeatherEffects(weatherId) {
   if (!weatherId) {
-    return '';
+    return null;
   }
   try {
     const response = await fetch(`https://api.joshlei.com/v2/growagarden/info/${weatherId}`, {
@@ -90,8 +90,9 @@ async function fetchWeatherEffects(weatherId) {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
+    return data; // ⚡ Quan trọng: trả về kết quả API
   } catch (err) {
-    return '';
+    return null;
   }
 }
 
@@ -144,6 +145,8 @@ function renderWeatherCards(weathers) {
     container.appendChild(card);
   });
 }
+let activeWeathers = [];
+
 async function fetchActiveWeather() {
   try {
     const response = await fetch('https://api.joshlei.com/v2/growagarden/weather', {
@@ -156,13 +159,12 @@ async function fetchActiveWeather() {
 
     if (!data || !Array.isArray(data.weather)) throw new Error('Invalid weather data format');
 
-    // Tạo danh sách active weathers cơ bản
-    let activeWeathers = data.weather
+    activeWeathers = data.weather
       .filter(w => w.active === true)
       .map(w => ({
         item_id: w.item_id || 'unknown',
         display_name: w.display_name || w.name || w.title || 'Unknown Weather',
-        description: w.description || '', // thường sẽ rỗng
+        description: w.description || '',
         icon: w.icon || '',
         active: w.active,
         end_duration_unix: (w.last_seen && w.duration)
@@ -170,31 +172,21 @@ async function fetchActiveWeather() {
           : Math.floor(Date.now() / 1000) + 3600
       }));
 
-    // Fetch description song song cho những item chưa có
     activeWeathers = await Promise.all(
       activeWeathers.map(async (weather) => {
         if (!weather.description && weather.item_id !== 'unknown') {
-          try {
-            const effect = await fetchWeatherEffects(weather.item_id);
-            weather.description = effect?.description || 'No description available';
-          } catch {
-            weather.description = 'No description available';
-          }
+          const effect = await fetchWeatherEffects(weather.item_id);
+          weather.description = (effect && effect.description) ? effect.description : 'No description available';
         }
         return weather;
       })
     );
 
-    // Lưu vào localStorage
     localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
-
     renderWeatherCards(activeWeathers);
   } catch (err) {
-    console.error('fetchActiveWeather error:', err);
-
-    // Fallback từ localStorage hoặc mock
-    let activeWeathers = JSON.parse(localStorage.getItem('activeWeathers') || '[]')
-      .filter(w => w.active && w.end_duration_unix > Math.floor(Date.now() / 1000));
+    let cached = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
+    activeWeathers = cached.filter(w => w.active && w.end_duration_unix > Math.floor(Date.now() / 1000));
 
     if (!activeWeathers.length) {
       activeWeathers = mockWeatherData().weather.filter(w => w.active === true);
@@ -203,22 +195,13 @@ async function fetchActiveWeather() {
     renderWeatherCards(activeWeathers);
   }
 }
-
 function updateWeatherTimer() {
-  if (!Array.isArray(activeWeathers) || !activeWeathers.length) {
-    return;
-  }
+  if (!Array.isArray(activeWeathers) || !activeWeathers.length) return;
 
   let hasChanges = false;
   activeWeathers = activeWeathers.filter((weather, index) => {
     const timerEl = document.getElementById(`weather-timer-${index}`);
-    if (!timerEl) {
-      return false;
-    }
-
-    if (!weather || !weather.end_duration_unix) {
-      return false;
-    }
+    if (!timerEl || !weather || !weather.end_duration_unix) return false;
 
     const now = Math.floor(Date.now() / 1000);
     const remaining = Math.max(0, weather.end_duration_unix - now);
@@ -242,9 +225,7 @@ function updateWeatherTimer() {
     renderWeatherCards(activeWeathers);
     try {
       localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
-    } catch (e) {
-      console.error('Error saving activeWeathers to localStorage:', e);
-    }
+    } catch (e) {}
   }
 }
 
