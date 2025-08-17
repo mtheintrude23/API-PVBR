@@ -99,13 +99,11 @@ async function fetchWeatherEffects(weatherId) {
 function renderWeatherCards(weathers) {
   const container = document.getElementById('weather-card-container');
   if (!container) {
-    console.error('Weather card container not found');
     return;
   }
   container.innerHTML = '';
 
   if (!Array.isArray(weathers) || weathers.length === 0) {
-    console.warn('renderWeatherCards: No valid weathers array, rendering default card');
     container.innerHTML = `
       <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
         <div class="flex justify-between items-center mb-2">
@@ -124,7 +122,6 @@ function renderWeatherCards(weathers) {
 
   weathers.forEach((weather, index) => {
     if (!weather || !weather.display_name) {
-      console.warn(`renderWeatherCards: Invalid weather object at index ${index}`, weather);
       return;
     }
     const card = document.createElement('div');
