@@ -180,7 +180,7 @@ async function fetchActiveWeather() {
       activeList.map(async (w) => {
         let weather = {
           item_id: w.weather_id || 'unknown',
-          display_name: w.display_name || 'Unknown Weather',
+          display_name: w.weather_name || 'Unknown Weather',
           icon: w.icon || '',
           description: w.description || '',   // Nếu API đã có description thì lấy luôn
           active: true,
