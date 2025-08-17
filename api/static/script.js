@@ -1,17 +1,34 @@
 const stockTypes = ['seed', 'gear', 'egg', 'cosmetic'];
 
 const defaultDurations = {
-  seed: 300000, // 5 phút
-  gear: 300000, // 5 phút
-  egg: 1800000, // 30 phút
-  cosmetic: 14400000 // 4 giờ
+  seed: 300000, // 5 minutes
+  gear: 300000, // 5 minutes
+  egg: 1800000, // 30 minutes
+  cosmetic: 14400000 // 4 hours
 };
+
 let nextRestockTimes = {
   seed: null,
   gear: null,
   egg: null,
   cosmetic: null
 };
+
+const timerFlags = {}; // Ngăn reset nhiều lần
+let activeWeathers = [];
+let lastFetchTimestamp = 0;
+let lastTimerUpdate = 0;
+const DARK_THEME = 'dark';
+const LIGHT_THEME = 'light';
+
+// Khởi tạo nếu chưa có
+stockTypes.forEach(type => {
+  if (!nextRestockTimes[type]) {
+    nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
+  }
+  timerFlags[type] = false; // Khởi tạo timerFlags
+});
+
 // Mock data for testing when API fails
 function mockStockData() {
   return {
@@ -54,31 +71,40 @@ function mockWeatherData() {
   return {
     weather: [
       {
-        weather_name: "Rainy",
+        item_id: "rainy",
+        display_name: "Rainy",
         active: true,
         icon: "https://uxwing.com/wp-content/themes/uxwing/download/weather/rainy-icon.png",
-        effects: ["Plants grow 20% faster", "Watering consumption reduced"],
-        end_duration_unix: Math.floor(Date.now() / 1000) + 1800
+        description: "Plants grow faster in the rain!",
+        duration: "1800",
+        last_seen: Math.floor(Date.now() / 1000).toString()
       },
       {
-        weather_name: "Sunny",
+        item_id: "sunny",
+        display_name: "Sunny",
         active: true,
         icon: "https://uxwing.com/wp-content/themes/uxwing/download/weather/sun-icon.png",
-        effects: ["Harvest yield increased by 10%"],
-        end_duration_unix: Math.floor(Date.now() / 1000) + 3600
+        description: "Bright sun boosts your harvest!",
+        duration: "3600",
+        last_seen: Math.floor(Date.now() / 1000).toString()
+      },
+      {
+        item_id: "nightevent",
+        display_name: "Night Event",
+        active: true,
+        icon: "https://api.joshlei.com/v2/growagarden/image/nightevent",
+        description: "Your fruit can become MOONLIT!",
+        duration: "600",
+        last_seen: Math.floor(Date.now() / 1000).toString()
       }
     ]
   };
 }
 
-let activeWeathers = [];
-let lastFetchTimestamp = 0;
-const DARK_THEME = 'dark';
-const LIGHT_THEME = 'light';
-
 async function fetchWeatherEffects(weatherId) {
   if (!weatherId) {
-    return null;
+    console.error('fetchWeatherEffects: weatherId is undefined or empty');
+    return '';
   }
   try {
     const response = await fetch(`https://api.joshlei.com/v2/growagarden/info/${weatherId}`, {
@@ -88,28 +114,34 @@ async function fetchWeatherEffects(weatherId) {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    return data; // ⚡ Quan trọng: trả về kết quả API
+    console.log(`fetchWeatherEffects: API response for ${weatherId}:`, data);
+    return typeof data === 'object' && data.description ? data.description : '';
   } catch (err) {
-    return null;
+    console.error(`Error fetching description for weather ${weatherId}:`, err);
+    return '';
   }
 }
 
 function renderWeatherCards(weathers) {
   const container = document.getElementById('weather-card-container');
-  if (!container) return;
+  if (!container) {
+    console.error('Weather card container not found');
+    return;
+  }
   container.innerHTML = '';
 
   if (!Array.isArray(weathers) || weathers.length === 0) {
+    console.warn('renderWeatherCards: No valid weathers array, rendering default card');
     container.innerHTML = `
       <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
         <div class="flex justify-between items-center mb-2">
           <div class="flex items-center">
-            <h3 class="text-lg font-medium text-gray-800 dark:text-white">Normal</h3>
+            <h3 id="weather-name-0" class="text-lg font-medium text-gray-800 dark:text-white">Normal</h3>
           </div>
-          <span class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">No active event</span>
+          <span id="weather-timer-0" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">No active event</span>
         </div>
         <div class="flex items-center">
-          <span class="px-3 py-1 text-sm rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">Inactive</span>
+          <span id="weather-status-0" class="px-3 py-1 text-sm rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">Inactive</span>
         </div>
       </div>
     `;
@@ -117,35 +149,29 @@ function renderWeatherCards(weathers) {
   }
 
   weathers.forEach((weather, index) => {
-    if (!weather) return;
-
-    const name = weather.display_name || "Unknown Weather";
-    const description = weather.description && weather.description.trim() !== ""
-      ? weather.description
-      : "No description available";
-
+    if (!weather || !weather.display_name) {
+      console.warn(`renderWeatherCards: Invalid weather object at index ${index}`, weather);
+      return;
+    }
     const card = document.createElement('div');
     card.className = 'bg-white dark:bg-gray-800 rounded-lg p-4 shadow';
-
     card.innerHTML = `
       <div class="flex justify-between items-center mb-2">
         <div class="flex items-center">
-          ${weather.icon ? `<img src="${weather.icon}" class="w-6 h-6 mr-2 rounded-full" alt="${name} icon" onerror="this.style.display='none'">` : ''}
-          <h3 class="text-lg font-medium text-gray-800 dark:text-white">${name}</h3>
+          ${weather.icon ? `<img src="${weather.icon}" class="w-6 h-6 mr-2 rounded-full" alt="${weather.display_name} icon" onerror="this.style.display='none'">` : ''}
+          <h3 id="weather-name-${index}" class="text-lg font-medium text-gray-800 dark:text-white">${weather.display_name}</h3>
         </div>
-        <span id="weather-timer-${index}" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-          Ends in: Calculating...
-        </span>
+        <span id="weather-timer-${index}" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Ends in: Calculating...</span>
       </div>
       <div class="flex items-center">
-        <span class="px-3 py-1 text-sm rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Active</span>
-        <p class="ml-3 text-gray-600 dark:text-gray-300">${description}</p>
+        <span id="weather-status-${index}" class="px-3 py-1 text-sm rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Active</span>
+        <p class="ml-3 text-gray-600 dark:text-gray-300">${weather.description || 'No description available'}</p>
       </div>
     `;
-
     container.appendChild(card);
   });
 }
+
 async function fetchActiveWeather() {
   try {
     const response = await fetch('https://api.joshlei.com/v2/growagarden/weather', {
@@ -155,66 +181,118 @@ async function fetchActiveWeather() {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
+    console.log('fetchActiveWeather: Weather data fetched:', data);
 
-    if (!data || !Array.isArray(data.weather)) throw new Error('Invalid weather data format');
-
-    // Lọc active = true và lấy dữ liệu cơ bản
-    const activeList = data.weather.filter(w => w.active === true);
-
-    activeWeathers = await Promise.all(
-      activeList.map(async (w) => {
-        let weather = {
-          item_id: w.weather_id || '',
-          display_name: w.weather_name || '',
-          description: '',
-          icon: w.icon || '',  // Nếu API đã có description thì lấy luôn
-          active: true,
-          start_time_unix: w.start_time_unix || Math.floor(Date.now() / 1000),
-          end_duration_unix: w.end_duration_unix || Math.floor(Date.now() / 1000) + 3600
-        };
-
-        // Nếu chưa có description và item_id hợp lệ thì gọi fetchEffect
-        if (!weather.description && weather.weather_id !== 'unknown') {
-          try {
-            const effect = await fetchWeatherEffects(weather.weather_id);
-            weather.description = effect.description || 'No description available';
-          } catch (e) {
-            console.warn(`Could not fetch effect for ${weather.item_id}:`, e.message);
-          }
-        }
-
-        return weather;
-      })
-    );
-
-    localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
-    renderWeatherCards(activeWeathers);
-
-  } catch (err) {
-    console.error('Weather fetch error:', err.message);
-
-    let cached = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
-    activeWeathers = cached.filter(w => w.active && w.end_duration_unix > Math.floor(Date.now() / 1000));
-
-    if (!activeWeathers.length) {
-      activeWeathers = mockWeatherData().weather.filter(w => w.active === true);
+    if (!data || !Array.isArray(data.weather)) {
+      console.error('fetchActiveWeather: Invalid or missing data.weather', data);
+      throw new Error('Invalid weather data format');
     }
 
+    activeWeathers = data.weather
+      .map(w => {
+        console.log('fetchActiveWeather: Processing weather item:', w);
+        if (w.active !== true) {
+          console.log(`fetchActiveWeather: Skipping item due to active !== true:`, w);
+          return null;
+        }
+        const displayName = w.display_name || w.name || w.title || 'Unknown Weather';
+        if (displayName === 'Unknown Weather') {
+          console.warn(`fetchActiveWeather: display_name not found for item, using default:`, w);
+        }
+        return {
+          item_id: w.weather_id || w.item_id || 'unknown',
+          display_name: displayName,
+          description: w.description || '',
+          icon: w.icon || '',
+          active: w.active,
+          end_duration_unix: (w.last_seen && w.duration && !isNaN(parseInt(w.last_seen)) && !isNaN(parseInt(w.duration)))
+            ? parseInt(w.last_seen) + parseInt(w.duration)
+            : Math.floor(Date.now() / 1000) + 3600 // Default 1 hour if missing
+        };
+      })
+      .filter(w => w !== null);
+
+    console.log('fetchActiveWeather: Filtered activeWeathers:', activeWeathers);
+
+    for (let weather of activeWeathers) {
+      if (weather.active !== true) {
+        console.warn(`fetchActiveWeather: Skipping fetchWeatherEffects for ${weather.item_id} due to active !== true`, weather);
+        continue;
+      }
+      if (!weather.description && weather.item_id && weather.item_id !== 'unknown') {
+        try {
+          console.log(`fetchActiveWeather: Fetching description for ${weather.item_id} (active: ${weather.active})`);
+          const effect = await fetchWeatherEffects(weather.item_id);
+          weather.description = effect || 'No description available';
+          console.log(`fetchActiveWeather: Updated description for ${weather.item_id}:`, weather.description);
+        } catch (e) {
+          console.warn(`fetchActiveWeather: Failed to fetch description for ${weather.item_id}:`, e);
+          weather.description = 'No description available';
+        }
+      } else {
+        console.log(`fetchActiveWeather: Skipping fetchWeatherEffects for ${weather.item_id}: description=${!!weather.description}, item_id=${weather.item_id}, active=${weather.active}`);
+      }
+    }
+
+    try {
+      localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
+      console.log('fetchActiveWeather: activeWeathers saved to localStorage:', activeWeathers);
+    } catch (e) {
+      console.error('fetchActiveWeather: Error saving activeWeathers to localStorage:', e);
+    }
+
+    console.log('fetchActiveWeather: Final activeWeathers:', activeWeathers);
+    renderWeatherCards(activeWeathers);
+  } catch (err) {
+    console.error('fetchActiveWeather: Weather fetch error:', err);
+    activeWeathers = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
+    activeWeathers = activeWeathers.map(w => {
+      const displayName = w.display_name || w.name || w.title || 'Unknown Weather';
+      if (displayName === 'Unknown Weather') {
+        console.warn('fetchActiveWeather: display_name not found in localStorage item:', w);
+      }
+      return { ...w, display_name: displayName, item_id: w.weather_id || w.item_id || 'unknown' };
+    }).filter(w => w && w.active === true && w.end_duration_unix > Math.floor(Date.now() / 1000));
+    console.log('fetchActiveWeather: Loaded from localStorage:', activeWeathers);
+    if (!activeWeathers.length) {
+      console.warn('fetchActiveWeather: Falling back to mockWeatherData');
+      activeWeathers = mockWeatherData().weather.map(w => {
+        const displayName = w.display_name || w.name || w.title || 'Unknown Weather';
+        if (displayName === 'Unknown Weather') {
+          console.warn('fetchActiveWeather: display_name not found in mockWeatherData item:', w);
+        }
+        return { ...w, display_name: displayName, item_id: w.weather_id || w.item_id || 'unknown' };
+      }).filter(w => w.active === true);
+    }
+    console.log('fetchActiveWeather: Using fallback activeWeathers:', activeWeathers);
     renderWeatherCards(activeWeathers);
   }
 }
+
 function updateWeatherTimer() {
-  if (!Array.isArray(activeWeathers) || !activeWeathers.length) return;
+  if (!Array.isArray(activeWeathers) || !activeWeathers.length) {
+    console.warn('updateWeatherTimer: No active weathers to update');
+    return;
+  }
 
   let hasChanges = false;
+  const now = Math.floor(Date.now() / 1000);
   activeWeathers = activeWeathers.filter((weather, index) => {
     const timerEl = document.getElementById(`weather-timer-${index}`);
-    if (!timerEl || !weather || !weather.end_duration_unix) return false;
+    if (!timerEl) {
+      console.warn(`updateWeatherTimer: Timer element not found for index ${index}`);
+      return false;
+    }
 
-    const now = Math.floor(Date.now() / 1000);
+    if (!weather || !weather.end_duration_unix) {
+      console.warn(`updateWeatherTimer: Invalid weather object at index ${index}`, weather);
+      return false;
+    }
+
     const remaining = Math.max(0, weather.end_duration_unix - now);
 
     if (remaining <= 0) {
+      console.log(`updateWeatherTimer: Weather ${weather.display_name} has expired`);
       hasChanges = true;
       return false;
     }
@@ -230,113 +308,218 @@ function updateWeatherTimer() {
   });
 
   if (hasChanges) {
+    console.log('updateWeatherTimer: Weather list changed, re-rendering cards');
     renderWeatherCards(activeWeathers);
     try {
       localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
-    } catch (e) {}
+      console.log('updateWeatherTimer: activeWeathers updated in localStorage:', activeWeathers);
+    } catch (e) {
+      console.error('Error saving activeWeathers to localStorage:', e);
+    }
   }
 }
 
-const timerFlags = {}; // ngăn reset nhiều lần
-
-// Khởi tạo nếu chưa có
-stockTypes.forEach(type => {
-  if (!nextRestockTimes[type]) {
-    nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
-  }
-});
-
-// --- FORMAT TIME ---
 function formatTime(ms) {
   const totalSeconds = Math.floor(ms / 1000);
   const seconds = totalSeconds % 60;
   const minutes = Math.floor(totalSeconds / 60) % 60;
   const hours = Math.floor(totalSeconds / 3600);
   return hours > 0
-    ? `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`
-    : `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    ? `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+    : `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-// --- UPDATE TIMER ELEMENT ---
 function createOrUpdateTimer(type, remaining) {
   const el = document.getElementById(`${type}-timer`);
-  if (!el) return;
+  if (!el) {
+    console.warn(`createOrUpdateTimer: Timer element for ${type} not found`);
+    return;
+  }
   el.textContent = `Next update: ${formatTime(remaining)}`;
   el.className = remaining <= 10000
     ? "text-sm text-yellow-500 animate-pulse"
     : "text-sm text-white";
 }
 
-// --- FETCH DATA FUNCTIONS ---
-async function fetchSeedGearStock() {
+async function fetchEggStock(isInitial = false) {
+  const now = Date.now();
+  if (!isInitial && now - lastFetchTimestamp < 30000) {
+    console.log('fetchEggStock: Skipping due to recent fetch');
+    return;
+  }
+  lastFetchTimestamp = now;
+
   try {
-    const res = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
-      headers: { 'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272' }
+    const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
+      headers: {
+        'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
+      }
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    updateTable('seed', data.seed_stock || []);
-    updateTable('gear', data.gear_stock || []);
-    updateRestockTime('seed', data.seed_stock || []);
-    updateRestockTime('gear', data.gear_stock || []);
-  } catch(e) {
-    const mock = mockStockData();
-    updateTable('seed', mock.seed_stock);
-    updateTable('gear', mock.gear_stock);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    console.log('fetchEggStock: Egg stock data fetched:', data);
+    const items = Array.isArray(data.egg_stock) ? data.egg_stock : [];
+    updateTable('egg', items);
+    updateRestockTime('egg', items);
+  } catch (e) {
+    console.error('fetchEggStock: Fetch egg stock failed:', e);
+    const mockData = mockStockData();
+    updateTable('egg', mockData.egg_stock);
+    updateRestockTime('egg', mockData.egg_stock);
   }
 }
 
-async function fetchEggStock() {
+async function fetchSeedGearStock(isInitial = false) {
+  const now = Date.now();
+  if (!isInitial && now - lastFetchTimestamp < 30000) {
+    console.log('fetchSeedGearStock: Skipping due to recent fetch');
+    return;
+  }
+  lastFetchTimestamp = now;
+
   try {
-    const res = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
-      headers: { 'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272' }
+    const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
+      headers: {
+        'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
+      }
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    updateTable('egg', data.egg_stock || []);
-    updateRestockTime('egg', data.egg_stock || []);
-  } catch(e) {
-    updateTable('egg', mockStockData().egg_stock);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    console.log('fetchSeedGearStock: Seed and Gear stock data fetched:', data);
+    
+    const seedItems = Array.isArray(data.seed_stock) ? data.seed_stock : [];
+    const gearItems = Array.isArray(data.gear_stock) ? data.gear_stock : [];
+    
+    updateTable('seed', seedItems);
+    updateTable('gear', gearItems);
+    
+    updateRestockTime('seed', seedItems);
+    updateRestockTime('gear', gearItems);
+  } catch (e) {
+    console.error('fetchSeedGearStock: Fetch seed and gear stock failed:', e);
+    const mockData = mockStockData();
+    updateTable('seed', mockData.seed_stock);
+    updateTable('gear', mockData.gear_stock);
+    updateRestockTime('seed', mockData.seed_stock);
+    updateRestockTime('gear', mockData.gear_stock);
   }
 }
 
-async function fetchCosmeticStock() {
+async function fetchCosmeticStock(isInitial = false) {
+  const now = Date.now();
+  if (!isInitial && now - lastFetchTimestamp < 30000) {
+    console.log('fetchCosmeticStock: Skipping due to recent fetch');
+    return;
+  }
+  lastFetchTimestamp = now;
+
   try {
-    const res = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
-      headers: { 'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272' }
+    const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
+      headers: {
+        'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
+      }
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    updateTable('cosmetic', data.cosmetic_stock || []);
-    updateRestockTime('cosmetic', data.cosmetic_stock || []);
-  } catch(e) {
-    updateTable('cosmetic', mockStockData().cosmetic_stock);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    console.log('fetchCosmeticStock: Cosmetic stock data fetched:', data);
+    const items = Array.isArray(data.cosmetic_stock) ? data.cosmetic_stock : [];
+    updateTable('cosmetic', items);
+    updateRestockTime('cosmetic', items);
+  } catch (e) {
+    console.error('fetchCosmeticStock: Fetch cosmetic stock failed:', e);
+    const mockData = mockStockData();
+    updateTable('cosmetic', mockData.cosmetic_stock);
+    updateRestockTime('cosmetic', mockData.cosmetic_stock);
   }
 }
 
-// --- UPDATE RESTOCK TIME ---
 function updateRestockTime(type, items) {
-  if (!stockTypes.includes(type)) return;
-  if (!Array.isArray(items)) items = [];
-
-  let earliestEnd = items.length > 0
-    ? items.reduce((min, i) => i.Date_End ? (new Date(i.Date_End) < min ? new Date(i.Date_End) : min) : min, new Date(items[0].Date_End))
-    : new Date(Date.now() + defaultDurations[type]);
-
-  if (isNaN(earliestEnd.getTime())) {
-    earliestEnd = new Date(Date.now() + defaultDurations[type]);
+  if (!stockTypes.includes(type)) {
+    console.error(`updateRestockTime: Invalid stock type: ${type}`);
+    return;
   }
 
-  nextRestockTimes[type] = earliestEnd.toISOString();
-  localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+  const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
+  const now = Date.now();
+
+  if (!Array.isArray(items) || items.length === 0) {
+    console.warn(`updateRestockTime: No items for ${type}, checking localStorage or setting default`);
+    const savedTime = stored[type] && new Date(stored[type]);
+    if (savedTime && savedTime > now) {
+      nextRestockTimes[type] = savedTime.toISOString();
+    } else {
+      nextRestockTimes[type] = new Date(now + defaultDurations[type]).toISOString();
+    }
+    try {
+      localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+    } catch (e) {
+      console.error(`updateRestockTime: Error saving restockEndTimes to localStorage:`, e);
+    }
+    return;
+  }
+
+  try {
+    const earliestEnd = items.reduce((min, i) => {
+      if (!i.Date_End) {
+        console.warn(`updateRestockTime: Missing Date_End for item in ${type}:`, i);
+        return min;
+      }
+      const d = new Date(i.Date_End);
+      if (isNaN(d.getTime())) {
+        console.warn(`updateRestockTime: Invalid Date_End for item in ${type}:`, i.Date_End);
+        return min;
+      }
+      return d < min ? d : min;
+    }, new Date(items[0].Date_End));
+
+    if (isNaN(earliestEnd.getTime())) {
+      console.warn(`updateRestockTime: Invalid earliestEnd for ${type}, checking localStorage or using default`);
+      const savedTime = stored[type] && new Date(stored[type]);
+      if (savedTime && savedTime > now) {
+        nextRestockTimes[type] = savedTime.toISOString();
+      } else {
+        nextRestockTimes[type] = new Date(now + defaultDurations[type]).toISOString();
+      }
+    } else {
+      nextRestockTimes[type] = earliestEnd.toISOString();
+    }
+
+    const stripped = items
+      .filter(item => item.display_name)
+      .map(({ Date_End, ...rest }) => rest)
+      .sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
+    localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
+  } catch (e) {
+    console.error(`updateRestockTime: Error processing items for ${type}:`, e);
+    const savedTime = stored[type] && new Date(stored[type]);
+    if (savedTime && savedTime > now) {
+      nextRestockTimes[type] = savedTime.toISOString();
+    } else {
+      nextRestockTimes[type] = new Date(now + defaultDurations[type]).toISOString();
+    }
+  }
+
+  try {
+    localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+  } catch (e) {
+    console.error(`updateRestockTime: Error saving restockEndTimes to localStorage:`, e);
+  }
 
   const lastUpdatedEl = document.getElementById('last-updated');
-  if (lastUpdatedEl) lastUpdatedEl.textContent = new Date().toLocaleString();
+  if (lastUpdatedEl) {
+    lastUpdatedEl.textContent = new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' });
+  } else {
+    console.error('updateRestockTime: Element last-updated not found');
+  }
 }
 
-// --- UPDATE ALL TIMERS ---
 function updateAllTimers() {
-  const now = new Date();
+  const now = Date.now();
+  if (now - lastTimerUpdate < 1000) {
+    requestAnimationFrame(updateAllTimers);
+    return;
+  }
+  lastTimerUpdate = now;
 
   stockTypes.forEach(type => {
     const endTime = nextRestockTimes[type] ? new Date(nextRestockTimes[type]) : null;
@@ -345,25 +528,46 @@ function updateAllTimers() {
 
     if (remaining <= 0 && !timerFlags[type]) {
       timerFlags[type] = true;
+      console.log(`updateAllTimers: Restock time reached for ${type}, scheduling fetch`);
 
       const fetchFn = type === 'seed' || type === 'gear' ? fetchSeedGearStock
-                     : type === 'egg' ? fetchEggStock
-                     : fetchCosmeticStock;
+                    : type === 'egg' ? fetchEggStock
+                    : fetchCosmeticStock;
 
-      fetchFn().finally(() => {
-        const newEnd = new Date(Date.now() + defaultDurations[type]);
-        nextRestockTimes[type] = newEnd.toISOString();
-        localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-        timerFlags[type] = false;
-      });
+      if (now - lastFetchTimestamp >= 30000) {
+        fetchFn().finally(() => {
+          const newEnd = new Date(Date.now() + defaultDurations[type]);
+          nextRestockTimes[type] = newEnd.toISOString();
+          try {
+            localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+            console.log(`updateAllTimers: Updated restockEndTimes for ${type} in localStorage:`, nextRestockTimes[type]);
+          } catch (e) {
+            console.error(`updateAllTimers: Error saving restockEndTimes to localStorage:`, e);
+          }
+          timerFlags[type] = false;
+          console.log(`updateAllTimers: Reset timerFlags[${type}] to false`);
+        });
+      } else {
+        console.log(`updateAllTimers: Skipping fetch for ${type} due to recent fetch`);
+        timerFlags[type] = false; // Reset flag nếu không fetch
+      }
     }
   });
 
   requestAnimationFrame(updateAllTimers);
 }
 
+function updateTable(type, items) {
+  if (!stockTypes.includes(type)) {
+    console.error(`updateTable: Invalid stock type: ${type}`);
+    return;
+  }
 
-function updateTable(type, items = []) {
+  if (!Array.isArray(items)) {
+    console.warn(`updateTable: Items for ${type} is not an array, using empty array`);
+    items = [];
+  }
+
   const typeToIdMap = {
     seed: 'seed-varieties',
     gear: 'gear-categories',
@@ -371,37 +575,36 @@ function updateTable(type, items = []) {
     cosmetic: 'cosmetic-types'
   };
 
-  const total = items.reduce((sum, { quantity = 0 }) => sum + quantity, 0);
+  const total = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
   const countEl = document.getElementById(`${type}-count`);
   const labelEl = document.getElementById(typeToIdMap[type]);
   const body = document.getElementById(`${type}-table-body`);
 
-  if (!countEl || !labelEl || !body) return;
+  if (!countEl || !labelEl || !body) {
+    console.warn(`updateTable: Element missing for ${type}: countEl=${!!countEl}, labelEl=${!!labelEl}, body=${!!body}`);
+    return;
+  }
 
-  // Cập nhật số lượng
   countEl.textContent = total;
   labelEl.textContent = items.length;
   body.innerHTML = '';
-  items.sort((a, b) => a.display_name.localeCompare(b.display_name));
-  for (const { display_name, quantity = 0, icon } of items) {
+  items.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || '')).forEach(item => {
+    if (!item.display_name) {
+      console.warn(`updateTable: Missing display_name for item in ${type}:`, item);
+      return;
+    }
+    const icon = item.icon ? `<img src="${item.icon}" class="w-8 h-8 rounded-full mr-2" alt="${item.display_name}" onerror="this.style.display='none'">` : '';
     const tr = document.createElement('tr');
     tr.className = "border-b border-gray-200 dark:border-gray-700";
-
     tr.innerHTML = `
       <td class="px-4 py-3 whitespace-nowrap">
-        <div class="flex items-center">
-          ${icon ? `<img src="${icon}" 
-                      class="w-8 h-8 rounded-full mr-2" 
-                      alt="${display_name}" 
-                      onerror="this.remove()">` : ''}
-          <span class="text-gray-800 dark:text-white">${display_name}</span>
-        </div>
+        <div class="flex items-center">${icon}<span class="text-gray-800 dark:text-white">${item.display_name}</span></div>
       </td>
-      <td class="px-4 py-3 text-gray-800 dark:text-white">${quantity}</td>
+      <td class="px-4 py-3 text-gray-800 dark:text-white">${item.quantity || 0}</td>
     `;
-
     body.appendChild(tr);
-  }
+  });
+  console.log(`updateTable: Table updated for ${type}: ${items.length} items, total quantity: ${total}`);
 }
 
 function toggleDarkLightMode(isDark) {
@@ -424,12 +627,28 @@ function restoreFromLocalStorage() {
     stockTypes.forEach(type => {
       const storedData = localStorage.getItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`);
       if (storedData) {
-        console.log(`Restoring ${type} from localStorage`); // Debug log
+        console.log(`restoreFromLocalStorage: Restoring ${type} from localStorage`);
         updateTable(type, JSON.parse(storedData));
       }
     });
+
+    const storedWeathers = localStorage.getItem('activeWeathers');
+    if (storedWeathers) {
+      console.log('restoreFromLocalStorage: Restoring activeWeathers from localStorage');
+      activeWeathers = JSON.parse(storedWeathers);
+      const now = Math.floor(Date.now() / 1000);
+      activeWeathers = activeWeathers.map(w => {
+        const displayName = w.display_name || w.name || w.title || 'Unknown Weather';
+        if (displayName === 'Unknown Weather') {
+          console.warn('restoreFromLocalStorage: display_name not found in localStorage item:', w);
+        }
+        return { ...w, display_name: displayName, item_id: w.weather_id || w.item_id || 'unknown' };
+      }).filter(weather => weather && weather.active === true && weather.end_duration_unix > now);
+      console.log('restoreFromLocalStorage: Filtered activeWeathers:', activeWeathers);
+      renderWeatherCards(activeWeathers);
+    }
   } catch (e) {
-    console.error("Error restoring from localStorage:", e);
+    console.error('restoreFromLocalStorage: Error restoring from localStorage:', e);
   }
 }
 
@@ -438,17 +657,29 @@ function startCountdown() {
   const now = new Date();
 
   stockTypes.forEach(type => {
-    const savedTime = stored[type];
-    nextRestockTimes[type] = (savedTime && new Date(savedTime) > now)
-      ? savedTime
-      : new Date(now.getTime() + defaultDurations[type]).toISOString();
+    const savedTime = stored[type] && new Date(stored[type]);
+    // Chỉ sử dụng savedTime nếu nó còn hợp lệ (chưa hết hạn)
+    if (savedTime && !isNaN(savedTime.getTime()) && savedTime > now) {
+      nextRestockTimes[type] = savedTime.toISOString();
+      console.log(`startCountdown: Restored restock time for ${type} from localStorage:`, nextRestockTimes[type]);
+    } else {
+      nextRestockTimes[type] = new Date(now.getTime() + defaultDurations[type]).toISOString();
+      console.log(`startCountdown: Set default restock time for ${type}:`, nextRestockTimes[type]);
+    }
   });
+
+  try {
+    localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+    console.log('startCountdown: Saved restockEndTimes to localStorage:', nextRestockTimes);
+  } catch (e) {
+    console.error('startCountdown: Error saving restockEndTimes to localStorage:', e);
+  }
 
   updateAllTimers();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM loaded, initializing...'); // Debug log
+  console.log('DOM loaded, initializing...');
   const toggleSwitch = document.getElementById('theme-toggle');
   const currentTheme = localStorage.getItem('theme') || LIGHT_THEME;
   document.documentElement.setAttribute('data-theme', currentTheme);
@@ -464,20 +695,22 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(fetchActiveWeather, 60000);
   setInterval(updateWeatherTimer, 1000);
   startCountdown();
-  fetchSeedGearStock();
-  fetchEggStock();
-  fetchCosmeticStock();
+  fetchSeedGearStock(true);
+  fetchEggStock(true);
+  fetchCosmeticStock(true);
 
-  // Làm mới stock định kỳ
   setInterval(() => {
-    console.log('Periodic stock refresh triggered'); // Debug log
+    console.log('Periodic stock refresh triggered');
     fetchSeedGearStock();
     fetchEggStock();
     fetchCosmeticStock();
-  }, 300000);
+  }, 60000);
 });
 
-// Cleanup on page unload
 window.addEventListener('beforeunload', () => {
-  localStorage.setItem('lastTheme', document.documentElement.getAttribute('data-theme'));
+  try {
+    localStorage.setItem('lastTheme', document.documentElement.getAttribute('data-theme'));
+  } catch (e) {
+    console.error('Error saving lastTheme to localStorage:', e);
+  }
 });
