@@ -6,7 +6,12 @@ const defaultDurations = {
   egg: 1800000, // 30 phút
   cosmetic: 14400000 // 4 giờ
 };
-
+let nextRestockTimes = {
+  seed: null,
+  gear: null,
+  egg: null,
+  cosmetic: null
+};
 // Mock data for testing when API fails
 function mockStockData() {
   return {
@@ -232,7 +237,6 @@ function updateWeatherTimer() {
   }
 }
 
-const nextRestockTimes = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
 const timerFlags = {}; // ngăn reset nhiều lần
 
 // Khởi tạo nếu chưa có
