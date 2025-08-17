@@ -88,7 +88,7 @@ async function fetchWeatherEffects(weatherId) {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    return typeof data === 'object' && data.description ? data.description : '';
+    return data
   } catch (err) {
     console.error(`Error fetching description for weather ${weatherId}:`, err);
     return '';
@@ -136,7 +136,7 @@ function renderWeatherCards(weathers) {
       </div>
       <div class="flex items-center">
         <span id="weather-status-${index}" class="px-3 py-1 text-sm rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Active</span>
-        <p class="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">${Array.isArray(weather.description) ? weather.description.join("\n") : weather.description || 'No description available'}</p>
+        <p class="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">${Array.isArray(weather.description) ? weather.description.join("\n") : weather.description.join("\n") || ' No description available'}</p>
       </div>
     `;
     container.appendChild(card);
