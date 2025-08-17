@@ -18,7 +18,7 @@ let latestData = {
   gear_stock: [],
   seed_stock: [],
   egg_stock: [],
-  eventshop_tock: [],
+  eventshop_stock: [],
   cosmetics_stock: [],
 };
 
@@ -47,11 +47,11 @@ function cleanItems(items) {
 }
 
 function updateStockData(data) {
-  if (data.gear_stock) latestData.gearStock = cleanItems(data.gear_stock);
-  if (data.seed_stock) latestData.seedsStock = cleanItems(data.seed_stock);
-  if (data.egg_stock) latestData.eggStock = cleanItems(data.egg_stock);
-  if (data.eventshop_stock) latestData.eventStock = cleanItems(data.eventshop_stock);
-  if (data.cosmetic_stock) latestData.cosmeticsStock = cleanItems(data.cosmetic_stock);
+  if (data.gear_stock) latestData.gear_stock = cleanItems(data.gear_stock);
+  if (data.seed_stock) latestData.seed_stock = cleanItems(data.seed_stock);
+  if (data.egg_stock) latestData.egg_stock = cleanItems(data.egg_stock);
+  if (data.eventshop_stock) latestData.eventshop_stock = cleanItems(data.eventshop_stock);
+  if (data.cosmetic_stock) latestData.cosmetics_stock = cleanItems(data.cosmetic_stock);
 }
 
 function updateWeatherData(data) {
@@ -60,7 +60,7 @@ function updateWeatherData(data) {
     for (const key in data.weather) {
       if (key === "timestamp") continue;
       const item = data.weather[key];
-      weatherObj[item.weather_id] = cleanItems(item);
+      weatherObj[item.weather_id] = cleanItems([item])[0]; // dùng mảng 1 phần tử
     }
     weatherObj.timestamp = Date.now();
     newData.weather = weatherObj;
