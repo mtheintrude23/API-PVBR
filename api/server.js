@@ -232,7 +232,22 @@ app.get('/api/v3/growagarden/image/:item_id', limiter, async (req, res) => {
 app.get('/api/v3/growagarden/currentevent', limiter, async (req, res) => {
   try {
     const currentEvent = await client.getCurrentEvent();
-    res.json(currentEvent);
+
+    // Clone object để tránh mutate dữ liệu gốc
+    const modifiedEvent = {
+      ...currentEvent,
+      current: {
+        ...currentEvent.current,
+        icon: currentEvent.current?.icon
+          ? currentEvent.current.icon.replace(
+              /^https:\/\/api\.joshlei\.com\/v2\/growagarden\/image\//,
+              "https://api-yvj3.onrender.com/api/v3/growagarden/image/"
+            )
+          : null
+      }
+    };
+
+    res.json(modifiedEvent);
   } catch (error) {
     logger.error(`Error fetching current event: ${error.message}`);
     res.status(500).json({ error: 'Failed to get current event' });
