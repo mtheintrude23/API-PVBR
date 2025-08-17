@@ -156,10 +156,12 @@ app.get('/api/v3/growagarden/info/:item_id', limiter, async (req, res) => {
     const { item_id } = req.params;
     const item = await client.items.get(item_id); // Gọi API jstudio
 
-    // Nếu có imageUrl thì rewrite về domain server bạn
-    if (item.imageUrl) {
-      const fileName = item.imageUrl.split('/').pop(); // lấy phần cuối cùng sau /
-      item.imageUrl = `https://api-yvj3.onrender.com/api/v3/growagarden/image/${fileName}`;
+    // Nếu item có icon, thì rewrite sang domain rehost
+    if (item?.icon) {
+      item.icon = item.icon.replace(
+        /^https:\/\/api\.joshlei\.com\/v2\/growagarden\/image\//,
+        'https://api-yvj3.onrender.com/api/v3/growagarden/image/'
+      );
     }
 
     res.json(item);
@@ -168,6 +170,7 @@ app.get('/api/v3/growagarden/info/:item_id', limiter, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch item info' });
   }
 });
+
 app.get('/api/v3/growagarden/info', limiter, async (req, res) => {
   try {
     const { type } = req.query;
