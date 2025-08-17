@@ -177,7 +177,7 @@ async function fetchActiveWeather() {
         if (!weather.description && weather.weather_id !== 'unknown') {
           try {
             const effect = await fetchWeatherEffects(weather.weather_id);
-            weather.description = effect.description : 'No description available';
+            weather.description = effect.description || 'No description available';
           } catch (e) {
             console.warn(`Could not fetch effect for ${weather.item_id}:`, e.message);
           }
