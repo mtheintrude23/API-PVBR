@@ -39,7 +39,6 @@ function cleanItems(items) {
 
     return {
       ...item,
-      name: item.name || item.display_name,
       quantity: item.quantity || 0,
       icon: iconUrl,
       Date_End: item.Date_End || new Date(Date.now() + 300000).toISOString(),
