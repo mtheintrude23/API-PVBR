@@ -165,7 +165,7 @@ async function fetchActiveWeather() {
         return {
           item_id: w.weather_id || w.item_id || 'unknown',
           display_name: w.weather_name,
-          description: w.description || '',
+          description: '',
           icon: w.icon || '',
           active: w.active,
           end_duration_unix: w.end_duration_unix
@@ -175,7 +175,8 @@ async function fetchActiveWeather() {
 
     for (let weather of activeWeathers) {
       if (!weather.description && weather.weather_id && weather.weather_id !== 'unknown') {
-        weather.description = await fetchWeatherEffects(weather.weather_id) || 'No description available';
+        const eff = await fetchWeatherEffects(weather.weather_id)
+        weather.description = eff.description || 'No description available';
       }
     }
 
