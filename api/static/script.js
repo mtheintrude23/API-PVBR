@@ -121,24 +121,42 @@ function renderWeatherCards(weathers) {
   }
 
   weathers.forEach((weather, index) => {
-    if (!weather || !weather.display_name) {
-      return;
-    }
+    if (!weather || !weather.display_name) return;
+
     const card = document.createElement('div');
     card.className = 'bg-white dark:bg-gray-800 rounded-lg p-4 shadow';
-    card.innerHTML = `
-      <div class="flex justify-between items-center mb-2">
-        <div class="flex items-center">
-          ${weather.icon ? `<img src="${weather.icon}" class="w-6 h-6 mr-2 rounded-full" alt="${weather.display_name} icon" onerror="this.style.display='none'">` : ''}
-          <h3 id="weather-name-${index}" class="text-lg font-medium text-gray-800 dark:text-white">${weather.display_name}</h3>
-        </div>
-        <span id="weather-timer-${index}" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Ends in: Calculating...</span>
-      </div>
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'flex justify-between items-center mb-2';
+    header.innerHTML = `
       <div class="flex items-center">
-        <span id="weather-status-${index}" class="px-3 py-1 text-sm rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Active</span>
-        <p class="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">${Array.isArray(weather.description) ? weather.description.join("\n") : (weather.description || ' No description available')}</p>
+        ${weather.icon ? `<img src="${weather.icon}" class="w-6 h-6 mr-2 rounded-full" alt="${weather.display_name} icon" onerror="this.style.display='none'">` : ''}
+        <h3 id="weather-name-${index}" class="text-lg font-medium text-gray-800 dark:text-white">${weather.display_name}</h3>
       </div>
+      <span id="weather-timer-${index}" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Ends in: Calculating...</span>
     `;
+    card.appendChild(header);
+
+    // Status
+    const statusWrapper = document.createElement('div');
+    statusWrapper.className = 'flex items-center mb-2';
+    statusWrapper.innerHTML = `
+      <span id="weather-status-${index}" class="px-3 py-1 text-sm rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Active</span>
+    `;
+    card.appendChild(statusWrapper);
+
+    // Description
+    const descWrapper = document.createElement('div');
+    descWrapper.className = 'flex items-center';
+    const descP = document.createElement('p');
+    descP.className = 'text-gray-600 dark:text-gray-300 whitespace-pre-wrap';
+    descP.textContent = Array.isArray(weather.description)
+      ? weather.description.join("\n")
+      : (weather.description || 'No description available');
+    descWrapper.appendChild(descP);
+    card.appendChild(descWrapper);
+
     container.appendChild(card);
   });
 }
@@ -146,62 +164,57 @@ function renderWeatherCards(weathers) {
 async function fetchActiveWeather() {
   try {
     const response = await fetch('https://api.joshlei.com/v2/growagarden/weather', {
-      headers: { 'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272' }
+      headers: {
+        'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
+      }
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
 
-    if (!data || !Array.isArray(data.weather)) {
-      console.error('fetchActiveWeather: Invalid or missing data.weather', data);
-      throw new Error('Invalid weather data format');
-    }
+    if (!data || !Array.isArray(data.weather)) throw new Error('Invalid weather data format');
 
-    activeWeathers = data.weather
-      .map(w => {
-        if (w.active !== true) {
-          return null;
-        }
-        const displayName = w.display_name || w.name || w.title || 'Unknown Weather';
-        return {
-          item_id: w.weather_id || w.item_id || 'unknown',
-          display_name: w.weather_name,
-          description: '',
+    // Lọc active = true và lấy dữ liệu cơ bản
+    const activeList = data.weather.filter(w => w.active === true);
+
+    activeWeathers = await Promise.all(
+      activeList.map(async (w) => {
+        let weather = {
+          item_id: w.weather_id || 'unknown',
+          display_name: w.display_name || 'Unknown Weather',
           icon: w.icon || '',
-          active: w.active,
-          end_duration_unix: w.end_duration_unix
+          description: w.description || '',   // Nếu API đã có description thì lấy luôn
+          active: true,
+          start_time_unix: w.start_time_unix || Math.floor(Date.now() / 1000),
+          end_duration_unix: w.end_duration_unix || Math.floor(Date.now() / 1000) + 3600
         };
+
+        // Nếu chưa có description và item_id hợp lệ thì gọi fetchEffect
+        if (!weather.description && weather.weather_id !== 'unknown') {
+          try {
+            const effect = await fetchWeatherEffects(weather.weather_id);
+            weather.description = effect.description || 'No description available';
+          } catch (e) {
+            console.warn(`Could not fetch effect for ${weather.weather_id}:`, e.message);
+          }
+        }
+
+        return weather;
       })
-      .filter(w => w !== null);
+    );
 
-    for (let weather of activeWeathers) {
-      if (!weather.description && weather.weather_id && weather.weather_id !== 'unknown') {
-        const eff = await fetchWeatherEffects(weather.weather_id)
-        weather.description = eff.description || 'No description available';
-      }
-    }
-
-    try {
-      localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
-    } catch (e) {
-      console.error('fetchActiveWeather: Error saving activeWeathers to localStorage:', e);
-    }
-
+    localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
     renderWeatherCards(activeWeathers);
+
   } catch (err) {
-    console.error('fetchActiveWeather: Weather fetch error:', err);
-    activeWeathers = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
-    activeWeathers = activeWeathers.map(w => ({
-      ...w,
-      display_name: w.weather_name || w.name || w.title || 'Unknown Weather',
-      item_id: w.weather_id || w.item_id || 'unknown'
-    })).filter(w => w && w.active === true && w.end_duration_unix > Math.floor(Date.now() / 1000));
+    console.error('Weather fetch error:', err.message);
+
+    let cached = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
+    activeWeathers = cached.filter(w => w.active && w.end_duration_unix > Math.floor(Date.now() / 1000));
+
     if (!activeWeathers.length) {
-      activeWeathers = mockWeatherData().weather.map(w => ({
-        ...w,
-        display_name: w.display_name || w.name || w.title || 'Unknown Weather',
-        item_id: w.weather_id || w.item_id || 'unknown'
-      })).filter(w => w.active === true);
+      activeWeathers = mockWeatherData().weather.filter(w => w.active === true);
     }
+
     renderWeatherCards(activeWeathers);
   }
 }
