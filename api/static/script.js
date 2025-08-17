@@ -166,8 +166,8 @@ async function fetchActiveWeather() {
     activeWeathers = await Promise.all(
       activeList.map(async (w) => {
         let weather = {
-          item_id: w.item_id || 'unknown',
-          display_name: w.display_name || 'Unknown Weather',
+          item_id: w.weather_id || '',
+          display_name: w.display_name || '',
           icon: w.icon || '',
           description: w.description || '',   // Nếu API đã có description thì lấy luôn
           active: true,
@@ -176,10 +176,11 @@ async function fetchActiveWeather() {
         };
 
         // Nếu chưa có description và item_id hợp lệ thì gọi fetchEffect
-        if (!weather.description && weather.item_id !== 'unknown') {
+        if (!weather.description && weather.weather_id !== 'unknown') {
           try {
-            const effect = await fetchWeatherEffects(weather.item_id);
+            const effect = await fetchWeatherEffects(weather.weather_id);
             weather.description = (effect && effect.description) ? effect.description : 'No description available';
+            weather.display_name = (effect && effect.display_name) ? effect.display_name: 'UnKnown';
           } catch (e) {
             console.warn(`Could not fetch effect for ${weather.item_id}:`, e.message);
           }
