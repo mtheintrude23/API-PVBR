@@ -216,14 +216,16 @@ app.get('/api/v3/growagarden/image/:item_id', limiter, async (req, res) => {
     if (!item_id) {
       return res.status(400).json({ error: 'Missing item_id' });
     }
-
     const imageUrl = client.images.getUrl(item_id);
-    res.json({ item_id, imageUrl });
+    const response = await axios.get(imageUrl, { responseType: 'stream' });
+    res.setHeader("Content-Type", response.headers["content-type"] || "image/png");
+    response.data.pipe(res);
   } catch (error) {
-    logger.error(`Error fetching image URL: ${error.message}`);
-    res.status(500).json({ error: 'Failed to get image URL' });
+    logger.error(`Error rehosting image: ${error.message}`);
+    res.status(500).json({ error: 'Failed to rehost image' });
   }
 });
+
 app.get('/api/v3/growagarden/currentevent', limiter, async (req, res) => {
   try {
     const currentEvent = await client.getCurrentEvent();
