@@ -239,128 +239,105 @@ function updateWeatherTimer() {
   }
 }
 
+const nextRestockTimes = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
+const timerFlags = {}; // ngăn reset nhiều lần
+
+// Khởi tạo nếu chưa có
+stockTypes.forEach(type => {
+  if (!nextRestockTimes[type]) {
+    nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
+  }
+});
+
+// --- FORMAT TIME ---
 function formatTime(ms) {
   const totalSeconds = Math.floor(ms / 1000);
   const seconds = totalSeconds % 60;
   const minutes = Math.floor(totalSeconds / 60) % 60;
   const hours = Math.floor(totalSeconds / 3600);
   return hours > 0
-    ? `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-    : `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    ? `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`
+    : `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
 }
 
+// --- UPDATE TIMER ELEMENT ---
 function createOrUpdateTimer(type, remaining) {
   const el = document.getElementById(`${type}-timer`);
-  if (!el) {
-    console.error(`Timer element for ${type} not found`);
-    return;
-  }
+  if (!el) return;
   el.textContent = `Next update: ${formatTime(remaining)}`;
   el.className = remaining <= 10000
     ? "text-sm text-yellow-500 animate-pulse"
     : "text-sm text-white";
 }
 
+// --- FETCH DATA FUNCTIONS ---
 async function fetchSeedGearStock() {
   try {
-    const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
-      headers: {
-        'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
-      }
+    const res = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
+      headers: { 'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272' }
     });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    
-    const seedItems = data.seed_stock || [];
-    const gearItems = data.gear_stock || [];
-    
-    updateTable('seed', seedItems);
-    updateTable('gear', gearItems);
-    
-    updateRestockTime('seed', seedItems);
-    updateRestockTime('gear', gearItems);
-  } catch (e) {
-    const mockData = mockStockData();
-    updateTable('seed', mockData.seed_stock);
-    updateTable('gear', mockData.gear_stock);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    updateTable('seed', data.seed_stock || []);
+    updateTable('gear', data.gear_stock || []);
+    updateRestockTime('seed', data.seed_stock || []);
+    updateRestockTime('gear', data.gear_stock || []);
+  } catch(e) {
+    const mock = mockStockData();
+    updateTable('seed', mock.seed_stock);
+    updateTable('gear', mock.gear_stock);
   }
 }
 
 async function fetchEggStock() {
   try {
-    const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
-      headers: {
-        'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
-      }
+    const res = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
+      headers: { 'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272' }
     });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    const items = data.egg_stock || [];
-    updateTable('egg', items);
-    updateRestockTime('egg', items);
-  } catch (e) {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    updateTable('egg', data.egg_stock || []);
+    updateRestockTime('egg', data.egg_stock || []);
+  } catch(e) {
     updateTable('egg', mockStockData().egg_stock);
   }
 }
 
 async function fetchCosmeticStock() {
   try {
-    const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
-      headers: {
-        'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
-      }
+    const res = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
+      headers: { 'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272' }
     });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    const items = data.cosmetic_stock || [];
-    updateTable('cosmetic', items);
-    updateRestockTime('cosmetic', items);
-  } catch (e) {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    updateTable('cosmetic', data.cosmetic_stock || []);
+    updateRestockTime('cosmetic', data.cosmetic_stock || []);
+  } catch(e) {
     updateTable('cosmetic', mockStockData().cosmetic_stock);
   }
 }
 
+// --- UPDATE RESTOCK TIME ---
 function updateRestockTime(type, items) {
   if (!stockTypes.includes(type)) return;
   if (!Array.isArray(items)) items = [];
 
-  if (items.length > 0) {
-    try {
-      const earliestEnd = items.reduce((min, i) => {
-        if (!i.Date_End) return min;
-        const d = new Date(i.Date_End);
-        if (isNaN(d.getTime())) return min;
-        return d < min ? d : min;
-      }, new Date(items[0].Date_End));
+  let earliestEnd = items.length > 0
+    ? items.reduce((min, i) => i.Date_End ? (new Date(i.Date_End) < min ? new Date(i.Date_End) : min) : min, new Date(items[0].Date_End))
+    : new Date(Date.now() + defaultDurations[type]);
 
-      if (isNaN(earliestEnd.getTime())) {
-        nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
-      } else {
-        nextRestockTimes[type] = earliestEnd.toISOString();
-      }
-
-      const stripped = items
-        .filter(item => item.display_name)
-        .map(({ Date_End, ...rest }) => rest)
-        .sort((a, b) => a.display_name.localeCompare(b.display_name));
-      localStorage.setItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`, JSON.stringify(stripped));
-    } catch (e) {
-      nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
-    }
-  } else {
-    nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
+  if (isNaN(earliestEnd.getTime())) {
+    earliestEnd = new Date(Date.now() + defaultDurations[type]);
   }
 
-  try {
-    localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-  } catch (e) {}
+  nextRestockTimes[type] = earliestEnd.toISOString();
+  localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
 
   const lastUpdatedEl = document.getElementById('last-updated');
-  if (lastUpdatedEl) {
-    lastUpdatedEl.textContent = new Date().toLocaleString();
-  }
+  if (lastUpdatedEl) lastUpdatedEl.textContent = new Date().toLocaleString();
 }
 
+// --- UPDATE ALL TIMERS ---
 function updateAllTimers() {
   const now = new Date();
 
@@ -369,23 +346,25 @@ function updateAllTimers() {
     const remaining = endTime ? Math.max(0, endTime - now) : defaultDurations[type];
     createOrUpdateTimer(type, remaining);
 
-    if (remaining <= 0) {
-      const newEnd = new Date(now.getTime() + defaultDurations[type]);
-      nextRestockTimes[type] = newEnd.toISOString();
-      localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+    if (remaining <= 0 && !timerFlags[type]) {
+      timerFlags[type] = true;
 
-      if (type === 'seed' || type === 'gear') {
-        fetchSeedGearStock();
-      } else if (type === 'egg') {
-        fetchEggStock();
-      } else if (type === 'cosmetic') {
-        fetchCosmeticStock();
-      }
+      const fetchFn = type === 'seed' || type === 'gear' ? fetchSeedGearStock
+                     : type === 'egg' ? fetchEggStock
+                     : fetchCosmeticStock;
+
+      fetchFn().finally(() => {
+        const newEnd = new Date(Date.now() + defaultDurations[type]);
+        nextRestockTimes[type] = newEnd.toISOString();
+        localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+        timerFlags[type] = false;
+      });
     }
   });
 
   requestAnimationFrame(updateAllTimers);
 }
+
 
 function updateTable(type, items = []) {
   const typeToIdMap = {
@@ -498,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchSeedGearStock();
     fetchEggStock();
     fetchCosmeticStock();
-  }, 60000);
+  }, 300000);
 });
 
 // Cleanup on page unload
