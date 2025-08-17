@@ -78,7 +78,7 @@ async function initializeData() {
     logger.success('✅ Kết nối Weather thành công');
     updateWeatherData(weatherData);
   } catch (err) {
-    logger.error('❌ Lỗi khi khởi tạo:', err);
+    logger.error(`❌ Lỗi khi khởi tạo: ${err}`);
   }
 }
 
