@@ -1,6 +1,7 @@
 
 import express from 'express';
 import cors from 'cors';
+import fs from "fs";
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -408,12 +409,21 @@ app.get('/api/v3/growagarden/image/:item_id', limiter, async (req, res) => {
     if (!item_id) return res.status(400).json({ error: 'Missing item_id' });
 
     const imageUrl = client.images.getUrl(item_id);
+
     const response = await axios.get(imageUrl, { responseType: 'stream' });
+
     res.setHeader("Content-Type", response.headers["content-type"] || "image/png");
     response.data.pipe(res);
   } catch (error) {
-    logger.error(`Error rehosting image: ${error.message}`);
-    res.status(500).json({ error: 'Failed to rehost image' });
+    const status = error.response?.status;
+    if (status === 404 || status === 500) {
+      const fallbackPath = path.join(__dirname, "assets", "Logo.png");
+      res.setHeader("Content-Type", "image/png");
+      fs.createReadStream(fallbackPath).pipe(res);
+    } else {
+      logger.error(`Error rehosting image: ${error.message}`);
+      res.status(500).json({ error: 'Failed to rehost image' });
+    }
   }
 });
 
