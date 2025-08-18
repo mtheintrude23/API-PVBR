@@ -363,35 +363,47 @@ async function fetchCosmeticStock(isInitial = false) {
 }
 
 function updateRestockTime(type, items) {
-  const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
   const now = Date.now();
   let earliest = null;
 
+  // Ưu tiên Date_End từ API
   if (Array.isArray(items) && items.length > 0) {
     const validDates = items
       .map(i => i.Date_End ? new Date(i.Date_End).getTime() : null)
-      .filter(t => t && !isNaN(t));
+      .filter(t => t && !isNaN(t) && t > now);
     if (validDates.length) {
       earliest = new Date(Math.min(...validDates));
     }
   }
 
-  if (!earliest && stored[type] && new Date(stored[type]).getTime() > now) {
-    earliest = new Date(stored[type]);
+  // Nếu không có Date_End từ API, lấy từ localStorage
+  if (!earliest) {
+    const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
+    const savedTime = stored[type] ? new Date(stored[type]) : null;
+    if (savedTime && !isNaN(savedTime.getTime()) && savedTime.getTime() > now) {
+      earliest = savedTime;
+    }
   }
 
+  // Nếu vẫn không có, dùng default duration
   if (!earliest) {
     earliest = new Date(now + defaultDurations[type]);
   }
 
   nextRestockTimes[type] = earliest.toISOString();
-  localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+  console.log(`updateRestockTime: ${type} - Cập nhật nextRestockTimes: ${nextRestockTimes[type]}`);
+  try {
+    localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+  } catch (e) {
+    console.error(`updateRestockTime: Lỗi lưu restockEndTimes cho ${type}:`, e);
+    window.restockEndTimes = { ...nextRestockTimes };
+  }
 
-  // Tính remaining để hiển thị
+  // Cập nhật timer ngay lập tức
   const remainingMs = Math.max(0, earliest.getTime() - now);
   createOrUpdateTimer(type, remainingMs);
 
-  // Update last updated time
+  // Cập nhật thời gian last updated
   const lastUpdatedEl = document.getElementById('last-updated');
   if (lastUpdatedEl) {
     lastUpdatedEl.textContent = new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' });
@@ -433,6 +445,7 @@ function updateEggTimer(type) {
   const now = Date.now();
   const endTime = nextRestockTimes[type] ? new Date(nextRestockTimes[type]) : null;
   const remaining = endTime && !isNaN(endTime.getTime()) ? Math.max(0, endTime - now) : 0;
+  console.log(`updateEggTimer: ${type} - Thời gian còn lại: ${remaining}ms, nextRestockTimes: ${nextRestockTimes[type]}`);
   createOrUpdateTimer(type, remaining);
 
   if (remaining <= 0 && !timerFlags[type]) {
@@ -443,12 +456,8 @@ function updateEggTimer(type) {
         lastFetchTimestamp = fetchTime;
         fetchEggStock().finally(() => {
           try {
-            const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
-            const savedTime = stored[type] ? new Date(stored[type]) : null;
-            // Ưu tiên thời gian từ localStorage nếu còn hợp lệ, nếu không thì chờ fetchEggStock cập nhật
-            if (!nextRestockTimes[type] || (savedTime && savedTime > fetchTime)) {
-              nextRestockTimes[type] = savedTime ? savedTime.toISOString() : new Date(fetchTime + defaultDurations[type]).toISOString();
-            }
+            // Không ghi đè nextRestockTimes[type] vì fetchEggStock đã cập nhật nó
+            console.log(`updateEggTimer: Sau fetchEggStock, nextRestockTimes[${type}]: ${nextRestockTimes[type]}`);
             try {
               localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
             } catch (e) {
@@ -456,7 +465,7 @@ function updateEggTimer(type) {
               window.restockEndTimes = { ...nextRestockTimes }; // Dự phòng in-memory
             }
           } catch (e) {
-            console.error(`updateEggTimer: Lỗi parse restockEndTimes cho ${type}:`, e);
+            console.error(`updateEggTimer: Lỗi xử lý restockEndTimes cho ${type}:`, e);
           } finally {
             timerFlags[type] = false;
           }
