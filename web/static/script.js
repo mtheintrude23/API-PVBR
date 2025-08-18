@@ -424,17 +424,25 @@ function updateEggTimer(type) {
   if (remaining <= 0 && !timerFlags[type]) {
     timerFlags[type] = true;
     setTimeout(() => {
-      if (now - lastFetchTimestamp >= 5000) {
+      const fetchTime = Date.now();
+      if (fetchTime - lastFetchTimestamp >= 5000) {
+        lastFetchTimestamp = fetchTime;
         fetchEggStock().finally(() => {
           try {
             const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
             const savedTime = stored[type] ? new Date(stored[type]) : null;
-            nextRestockTimes[type] = (savedTime && savedTime > now)
-              ? savedTime.toISOString()
-              : new Date(now + defaultDurations[type]).toISOString();
-            localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+            // Ưu tiên thời gian từ localStorage nếu còn hợp lệ, nếu không thì chờ fetchEggStock cập nhật
+            if (!nextRestockTimes[type] || (savedTime && savedTime > fetchTime)) {
+              nextRestockTimes[type] = savedTime ? savedTime.toISOString() : new Date(fetchTime + defaultDurations[type]).toISOString();
+            }
+            try {
+              localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+            } catch (e) {
+              console.error(`updateEggTimer: Lỗi lưu restockEndTimes cho ${type}:`, e);
+              window.restockEndTimes = { ...nextRestockTimes }; // Dự phòng in-memory
+            }
           } catch (e) {
-            console.error(`updateEggTimer: Error saving restockEndTimes for ${type}:`, e);
+            console.error(`updateEggTimer: Lỗi parse restockEndTimes cho ${type}:`, e);
           } finally {
             timerFlags[type] = false;
           }
