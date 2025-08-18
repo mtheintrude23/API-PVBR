@@ -311,36 +311,68 @@ app.get('/', (req, res) => {
 app.get('/api/health', limiter, async (req, res) => {
   const endpoints = [
     `https://api-yvj3.onrender.com/api/v3/growagarden/stock`,
-    `https://api-yvj3.onrender.com/api/v3/growagarden/image/cactus`,
-    `https://api-yvj3.onrender.com/api/v3/growagarden/weather`
+    `https://api-yvj3.onrender.com/api/v3/growagarden/image/test`,
+    `https://api-yvj3.onrender.com/api/v3/growagarden/merchant`
   ];
 
   try {
-    // Gọi tất cả endpoint song song
+    // Test tất cả endpoint song song
     const results = await Promise.allSettled(endpoints.map(url => axios.get(url)));
-
-    // Kiểm tra xem có endpoint nào fail không
     const hasFailure = results.some(r => r.status === "rejected");
 
-    if (!hasFailure) {
-      // Trả ảnh 200.png nếu tất cả ok
-      const okPath = path.join(__dirname, "assets", "200.png");
-      if (fs.existsSync(okPath)) {
-        res.setHeader("Content-Type", "image/png");
-        return fs.createReadStream(okPath).pipe(res);
-      }
-      return res.json({ status: "200 OK" });
-    } else {
-      // Trả ảnh 500.png nếu có lỗi
-      const errPath = path.join(__dirname, "assets", "500.png");
-      if (fs.existsSync(errPath)) {
-        res.setHeader("Content-Type", "image/png");
-        return fs.createReadStream(errPath).pipe(res);
-      }
-      return res.status(500).json({ status: "500 INTERNAL SERVER ERROR" });
+    const imgFile = hasFailure ? "500.png" : "200.png";
+    const imgPath = path.join(__dirname, "assets", imgFile);
+
+    // Nếu client muốn HTML (browser) → trả trang full screen
+    if (req.headers.accept && req.headers.accept.includes("text/html")) {
+      return res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <title>Health Check</title>
+          <style>
+            html, body {
+              margin: 0;
+              padding: 0;
+              width: 100%;
+              height: 100%;
+              background: black;
+            }
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: contain; /* hoặc cover */
+            }
+          </style>
+        </head>
+        <body>
+          <img src="data:image/png;base64,${fs.existsSync(imgPath) ? fs.readFileSync(imgPath).toString("base64") : ""}" alt="Health Status">
+        </body>
+        </html>
+      `);
     }
+
+    // Còn lại (API/tool) → trả ảnh raw stream
+    if (fs.existsSync(imgPath)) {
+      res.setHeader("Content-Type", "image/png");
+      return fs.createReadStream(imgPath).pipe(res);
+    }
+
+    return res
+      .status(hasFailure ? 500 : 200)
+      .json({ status: hasFailure ? "500 INTERNAL SERVER ERROR" : "200 OK" });
+
   } catch (err) {
     const errPath = path.join(__dirname, "assets", "500.png");
+    if (req.headers.accept && req.headers.accept.includes("text/html")) {
+      return res.send(`
+        <!DOCTYPE html>
+        <html><body style="margin:0;background:black;">
+        <img src="data:image/png;base64,${fs.existsSync(errPath) ? fs.readFileSync(errPath).toString("base64") : ""}" style="width:100%;height:100%;object-fit:contain;">
+        </body></html>
+      `);
+    }
     if (fs.existsSync(errPath)) {
       res.setHeader("Content-Type", "image/png");
       return fs.createReadStream(errPath).pipe(res);
