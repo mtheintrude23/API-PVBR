@@ -84,10 +84,10 @@ async function fetchWeatherEffects(weatherId) {
   }
   try {
     const url = `https://api.joshlei.com/v2/growagarden/info/${weatherId}`;
-    const jstudioKey = 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'; // Thay bằng key thực tế
+    const jstudio = 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'; // Thay bằng key thực tế
     const response = await fetch(url, {
       headers: {
-        'jstudio-key': jstudioKey,
+        'jstudio-key': jstudio,
         'Content-Type': 'application/json'
       }
     });
