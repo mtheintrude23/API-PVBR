@@ -310,9 +310,9 @@ app.get('/', (req, res) => {
 // API
 app.get('/api/health', limiter, async (req, res) => {
   const endpoints = [
-    `${req.protocol}://${req.get("host")}/api/v3/growagarden/stock`,
-    `${req.protocol}://${req.get("host")}/api/v3/growagarden/image/test`,
-    `${req.protocol}://${req.get("host")}/api/v3/growagarden/merchant`
+    `https://api-yvj3.onrender.com/api/v3/growagarden/stock`,
+    `https://api-yvj3.onrender.com/api/v3/growagarden/image/cactus`,
+    `https://api-yvj3.onrender.com/api/v3/growagarden/weather`
   ];
 
   try {
