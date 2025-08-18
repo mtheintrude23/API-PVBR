@@ -308,8 +308,45 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'home.html'));
 });
 // API
-app.get('/api/health', limiter, (req, res) => {
-  res.json({ status: '200' });
+app.get('/api/health', limiter, async (req, res) => {
+  const endpoints = [
+    `${req.protocol}://${req.get("host")}/api/v3/growagarden/stock`,
+    `${req.protocol}://${req.get("host")}/api/v3/growagarden/image/test`,
+    `${req.protocol}://${req.get("host")}/api/v3/growagarden/merchant`
+  ];
+
+  try {
+    // Gọi tất cả endpoint song song
+    const results = await Promise.allSettled(endpoints.map(url => axios.get(url)));
+
+    // Kiểm tra xem có endpoint nào fail không
+    const hasFailure = results.some(r => r.status === "rejected");
+
+    if (!hasFailure) {
+      // Trả ảnh 200.png nếu tất cả ok
+      const okPath = path.join(__dirname, "assets", "200.png");
+      if (fs.existsSync(okPath)) {
+        res.setHeader("Content-Type", "image/png");
+        return fs.createReadStream(okPath).pipe(res);
+      }
+      return res.json({ status: "200 OK" });
+    } else {
+      // Trả ảnh 500.png nếu có lỗi
+      const errPath = path.join(__dirname, "assets", "500.png");
+      if (fs.existsSync(errPath)) {
+        res.setHeader("Content-Type", "image/png");
+        return fs.createReadStream(errPath).pipe(res);
+      }
+      return res.status(500).json({ status: "500 INTERNAL SERVER ERROR" });
+    }
+  } catch (err) {
+    const errPath = path.join(__dirname, "assets", "500.png");
+    if (fs.existsSync(errPath)) {
+      res.setHeader("Content-Type", "image/png");
+      return fs.createReadStream(errPath).pipe(res);
+    }
+    res.status(500).json({ status: "failed", error: err.message });
+  }
 });
 app.get('/api/v3/growagarden/stock', limiter, (req, res) => {
   res.json(latestData);
