@@ -47,7 +47,7 @@ function cleanItems(items) {
       ...item,
       quantity: item?.quantity || 0,
       icon: iconUrl,
-      Date_End: item?.Date_End || new Date(Date.now() + 300000).toISOString(),
+      Date_End: item?.Date_End || new Date(Date.now() + 300000 + 7 * 60 * 60 * 1000).toISOString(),
     };
   });
 }
