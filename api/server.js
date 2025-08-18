@@ -501,9 +501,9 @@ app.get('/api/v3/growagarden/currentevent', limiter, async (req, res) => {
         ...currentEvent.current,
         icon: currentEvent.current?.icon
           ? currentEvent.current.icon.replace(
-              /^https:\/\/api\.joshlei\.com\/v2\/growagarden\/image\//,
-              "https://api-yvj3.onrender.com/api/v3/growagarden/image/"
-            )
+            /^https:\/\/api\.joshlei\.com\/v2\/growagarden\/image\//,
+            "https://api-yvj3.onrender.com/api/v3/growagarden/image/"
+          )
           : null
       }
     };
@@ -533,7 +533,7 @@ app.get('/api/v3/growagarden/image/:item_id', async (req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 443;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, '0.0.0.0', () => {
   logger.info(`🚀 API server chạy ở cổng ${PORT}`);
   initializeData();

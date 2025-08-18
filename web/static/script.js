@@ -384,6 +384,99 @@ function updateRestockTime(type, items) {
   }
 }
 
+function updateSeedGearTimer(type) {
+  const now = Date.now();
+  const endTime = nextRestockTimes[type] ? new Date(nextRestockTimes[type]) : null;
+  const remaining = endTime && !isNaN(endTime.getTime()) ? Math.max(0, endTime - now) : 0;
+  createOrUpdateTimer(type, remaining);
+
+  if (remaining <= 0 && !timerFlags[type]) {
+    timerFlags[type] = true;
+    setTimeout(() => {
+      if (now - lastFetchTimestamp >= 5000) {
+        fetchSeedGearStock().finally(() => {
+          try {
+            const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
+            const savedTime = stored[type] ? new Date(stored[type]) : null;
+            nextRestockTimes[type] = (savedTime && savedTime > now)
+              ? savedTime.toISOString()
+              : new Date(now + defaultDurations[type]).toISOString();
+            localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+          } catch (e) {
+            console.error(`updateSeedGearTimer: Error saving restockEndTimes for ${type}:`, e);
+          } finally {
+            timerFlags[type] = false;
+          }
+        });
+      } else {
+        timerFlags[type] = false;
+      }
+    }, 5000);
+  }
+}
+
+function updateEggTimer(type) {
+  const now = Date.now();
+  const endTime = nextRestockTimes[type] ? new Date(nextRestockTimes[type]) : null;
+  const remaining = endTime && !isNaN(endTime.getTime()) ? Math.max(0, endTime - now) : 0;
+  createOrUpdateTimer(type, remaining);
+
+  if (remaining <= 0 && !timerFlags[type]) {
+    timerFlags[type] = true;
+    setTimeout(() => {
+      if (now - lastFetchTimestamp >= 5000) {
+        fetchEggStock().finally(() => {
+          try {
+            const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
+            const savedTime = stored[type] ? new Date(stored[type]) : null;
+            nextRestockTimes[type] = (savedTime && savedTime > now)
+              ? savedTime.toISOString()
+              : new Date(now + defaultDurations[type]).toISOString();
+            localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+          } catch (e) {
+            console.error(`updateEggTimer: Error saving restockEndTimes for ${type}:`, e);
+          } finally {
+            timerFlags[type] = false;
+          }
+        });
+      } else {
+        timerFlags[type] = false;
+      }
+    }, 5000);
+  }
+}
+
+function updateCosmeticTimer(type) {
+  const now = Date.now();
+  const endTime = nextRestockTimes[type] ? new Date(nextRestockTimes[type]) : null;
+  const remaining = endTime && !isNaN(endTime.getTime()) ? Math.max(0, endTime - now) : 0;
+  createOrUpdateTimer(type, remaining);
+
+  if (remaining <= 0 && !timerFlags[type]) {
+    timerFlags[type] = true;
+    setTimeout(() => {
+      if (now - lastFetchTimestamp >= 5000) {
+        fetchCosmeticStock().finally(() => {
+          try {
+            const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
+            const savedTime = stored[type] ? new Date(stored[type]) : null;
+            nextRestockTimes[type] = (savedTime && savedTime > now)
+              ? savedTime.toISOString()
+              : new Date(now + defaultDurations[type]).toISOString();
+            localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+          } catch (e) {
+            console.error(`updateCosmeticTimer: Error saving restockEndTimes for ${type}:`, e);
+          } finally {
+            timerFlags[type] = false;
+          }
+        });
+      } else {
+        timerFlags[type] = false;
+      }
+    }, 5000);
+  }
+}
+
 function updateAllTimers() {
   const now = Date.now();
   if (now - lastTimerUpdate < 1000) {
@@ -392,45 +485,18 @@ function updateAllTimers() {
   }
   lastTimerUpdate = now;
 
-  stockTypes.forEach(type => {
-    const endTime = nextRestockTimes[type] ? new Date(nextRestockTimes[type]) : null;
-    const remaining = endTime && !isNaN(endTime.getTime()) ? Math.max(0, endTime - now) : 0;
-    createOrUpdateTimer(type, remaining);
-
-    // Khi hết giờ => đợi 5 giây rồi fetch
-    if (remaining <= 0 && !timerFlags[type]) {
-      timerFlags[type] = true;
-
-      setTimeout(() => {
-        const fetchFn = type === 'seed' || type === 'gear' ? fetchSeedGearStock
-                      : type === 'egg' ? fetchEggStock
-                      : fetchCosmeticStock;
-
-        fetchFn().finally(() => {
-          const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
-          const savedTime = stored[type] && new Date(stored[type]);
-          const now2 = Date.now();
-
-          if (savedTime && savedTime > now2) {
-            nextRestockTimes[type] = savedTime.toISOString();
-          } else {
-            nextRestockTimes[type] = new Date(now2 + defaultDurations[type]).toISOString();
-          }
-
-          try {
-            localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-          } catch (e) {
-            console.error(`updateAllTimers: Error saving restockEndTimes to localStorage:`, e);
-          }
-
-          timerFlags[type] = false;
-        });
-      }, 5000);
+  stockTypes.forEach((type) => {
+    if (type === 'seed' || type === 'gear') {
+      updateSeedGearTimer(type);
+    } else if (type === 'egg') {
+      updateEggTimer(type);
+    } else if (type === 'cosmetic') {
+      updateCosmeticTimer(type);
     }
   });
+
   requestAnimationFrame(updateAllTimers);
 }
-
 
 function updateTable(type, items) {
   if (!stockTypes.includes(type)) {
