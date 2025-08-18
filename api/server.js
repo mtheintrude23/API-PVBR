@@ -311,8 +311,8 @@ app.get('/', (req, res) => {
 app.get('/api/health', limiter, async (req, res) => {
   const endpoints = [
     `https://api-yvj3.onrender.com/api/v3/growagarden/stock`,
-    `https://api-yvj3.onrender.com/api/v3/growagarden/image/test`,
-    `https://api-yvj3.onrender.com/api/v3/growagarden/merchant`
+    `https://api-yvj3.onrender.com/api/v3/growagarden/image/cactus`,
+    `https://api-yvj3.onrender.com/api/v3/growagarden/weather`
   ];
 
   try {
