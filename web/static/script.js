@@ -381,9 +381,7 @@ async function updateRestockTimesFromAPI() {
 
         if (validDates.length) {
           earliest = new Date(Math.min(...validDates));
-
-          // 🔹 Chuyển UTC → giờ VN (GMT+7)
-          earliest = new Date(earliest.getTime() + 7 * 60 * 60 * 1000);
+          // 🔹 Không cần chuyển UTC → giờ VN, giữ nguyên UTC
         }
       }
 
@@ -414,8 +412,8 @@ async function updateRestockTimesFromAPI() {
     // Cập nhật "last updated"
     const lastUpdatedEl = document.getElementById('last-updated');
     if (lastUpdatedEl) {
-      lastUpdatedEl.textContent = new Date().toLocaleString('vi-VN', {
-        timeZone: 'Asia/Ho_Chi_Minh'
+      lastUpdatedEl.textContent = new Date().toLocaleString('en-US', {
+        timeZone: 'UTC' // 🔹 Sử dụng UTC thay vì Asia/Ho_Chi_Minh
       });
     }
   } catch (err) {
