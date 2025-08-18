@@ -6,6 +6,7 @@ const PORT = 10000;
 
 // phục vụ file tĩnh trong thư mục "web"
 app.use(express.static(path.join(__dirname, "web")));
+app.use('/static', express.static(path.join(__dirname, 'static')));
 
 // route /
 app.get("/", (req, res) => {
