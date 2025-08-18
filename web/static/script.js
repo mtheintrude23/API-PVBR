@@ -358,11 +358,13 @@ async function fetchStock(type) {
   if (type === "cosmetic") return fetchCosmeticStock();
 }
 async function updateRestockTimesFromAPI() {
+  const { DateTime } = luxon;
+
   try {
     const res = await fetch("https://api-yvj3.onrender.com/api/v3/growagarden/stock");
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     const data = await res.json();
-    const now = Date.now();
+    const now = DateTime.now().toMillis(); // 10:04 PM GMT+7 = 2025-08-18T15:04:00.000Z
 
     const typeMap = {
       seed: data.seed_stock,
@@ -376,45 +378,51 @@ async function updateRestockTimesFromAPI() {
 
       if (Array.isArray(items) && items.length > 0) {
         const validDates = items
-          .map(i => i.Date_End ? new Date(i.Date_End).getTime() : null)
+          .map(i => {
+            if (!i.Date_End) return null;
+            return DateTime.fromISO(i.Date_End)
+              .setZone('Asia/Ho_Chi_Minh')
+              .toMillis();
+          })
           .filter(t => t && !isNaN(t) && t > now);
 
         if (validDates.length) {
-          earliest = new Date(Math.min(...validDates));
-          // 🔹 Không cần chuyển UTC → giờ VN, giữ nguyên UTC
+          earliest = DateTime.fromMillis(Math.min(...validDates))
+            .setZone('Asia/Ho_Chi_Minh');
         }
       }
 
       if (earliest) {
-        nextRestockTimes[type] = earliest.toISOString();
+        const earliestFormatted = earliest.toISO({ includeOffset: true }); // YYYY-MM-DDTHH:mm:ss+07:00
+        nextRestockTimes[type] = earliestFormatted;
         console.log(
           `updateRestockTimesFromAPI: ${type} - nextRestockTimes: ${nextRestockTimes[type]}`
         );
       }
     });
 
-    // Lưu localStorage
     try {
       localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
     } catch (e) {
       console.error("updateRestockTimesFromAPI: Lỗi lưu restockEndTimes:", e);
-      window.restockEndTimes = { ...nextRestockTimes }; // dự phòng
+      window.restockEndTimes = { ...nextRestockTimes };
     }
 
-    // Cập nhật UI timer cho từng loại
     Object.entries(nextRestockTimes).forEach(([type, time]) => {
       if (time) {
-        const remainingMs = Math.max(0, new Date(time).getTime() - now);
+        const remainingMs = Math.max(
+          0,
+          DateTime.fromISO(time).toMillis() - now
+        );
         createOrUpdateTimer(type, remainingMs);
       }
     });
 
-    // Cập nhật "last updated"
     const lastUpdatedEl = document.getElementById('last-updated');
     if (lastUpdatedEl) {
-      lastUpdatedEl.textContent = new Date().toLocaleString('en-US', {
-        timeZone: 'UTC' // 🔹 Sử dụng UTC thay vì Asia/Ho_Chi_Minh
-      });
+      lastUpdatedEl.textContent = DateTime.now()
+        .setZone('Asia/Ho_Chi_Minh')
+        .toFormat('yyyy-MM-dd HH:mm:ss'); // 2025-08-18 22:04:00
     }
   } catch (err) {
     console.error("updateRestockTimesFromAPI: Fetch thất bại:", err);
