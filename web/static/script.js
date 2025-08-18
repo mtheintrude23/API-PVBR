@@ -286,7 +286,7 @@ function createOrUpdateTimer(type, remaining) {
 
 async function fetchEggStock(isInitial = false) {
   const now = Date.now();
-  if (!isInitial && now - lastFetchTimestamp < 30000) {
+  if (!isInitial && now - lastFetchTimestamp < 5000) {
     return;
   }
   lastFetchTimestamp = now;
