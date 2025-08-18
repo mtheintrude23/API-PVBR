@@ -83,9 +83,7 @@ async function fetchWeatherEffects(weatherId) {
     return '';
   }
   try {
-    const response = await fetch(`https://api.joshlei.com/v2/growagarden/info/${weatherId}`, {
-      headers: { 'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272' }
-    });
+    const response = await fetch(`https://api-jvj3.onrender.com/api/v3/growagarden/info/${weatherId}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     return data
@@ -171,46 +169,48 @@ async function fetchActiveWeather() {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
 
-    if (!data || !Array.isArray(data.weather)) throw new Error('Invalid weather data format');
+    if (!data || typeof data !== 'object') throw new Error('Invalid weather data format');
 
-    // Lọc active = true và lấy dữ liệu cơ bản
-    const activeList = data.weather.filter(w => w.active === true);
+    // Bỏ timestamp, convert object → array
+    const weatherArray = Object.entries(data)
+      .filter(([key]) => key !== 'timestamp')
+      .map(([_, value]) => value);
+
+    // Lọc active = true
+    const activeList = weatherArray.filter(w => w.active === true);
 
     activeWeathers = await Promise.all(
       activeList.map(async (w) => {
         let weather = {
-          item_id: w.weather_id || 'unknown',
-          display_name: w.weather_name || 'Unknown Weather',
+          item_id: w.weather_id || '',
+          display_name: w.weather_name || '',
           icon: w.icon || '',
-          description: w.description || '',   // Nếu API đã có description thì lấy luôn
+          description: w.description || '', // thường rỗng
           active: true,
           start_time_unix: w.start_time_unix || Math.floor(Date.now() / 1000),
-          end_duration_unix: w.end_duration_unix || Math.floor(Date.now() / 1000) + 3600
+          end_duration_unix: w.end_duration_unix || Math.floor(Date.now() / 1000) + (w.duration || 3600)
         };
-
-        // Nếu chưa có description và item_id hợp lệ thì gọi fetchEffect
-        if (!weather.description && weather.weather_id !== 'unknown') {
+        if (weather.item_id !== 'unknown') {
           try {
-            const effect = await fetchWeatherEffects(weather.weather_id);
-            weather.description = effect.description || 'No description available';
+            const effect = await fetchWeatherEffects(weather.item_id);
+            if (effect && effect.description) {
+              weather.description = effect.description;
+            }
           } catch (e) {
-            console.warn(`Could not fetch effect for ${weather.weather_id}:`, e.message);
+            console.warn(`Could not fetch effect for ${weather.item_id}:`, e.message);
           }
         }
 
         return weather;
       })
     );
-
     localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
     renderWeatherCards(activeWeathers);
 
   } catch (err) {
     console.error('Weather fetch error:', err.message);
-
     let cached = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
     activeWeathers = cached.filter(w => w.active && w.end_duration_unix > Math.floor(Date.now() / 1000));
-
     if (!activeWeathers.length) {
       activeWeathers = mockWeatherData().weather.filter(w => w.active === true);
     }
@@ -218,6 +218,7 @@ async function fetchActiveWeather() {
     renderWeatherCards(activeWeathers);
   }
 }
+
 
 function updateWeatherTimer() {
   if (!Array.isArray(activeWeathers) || !activeWeathers.length) {
