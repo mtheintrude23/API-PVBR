@@ -296,7 +296,7 @@ app.use('/static', express.static(path.join(__dirname, 'static')));
 
 const limiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 5,
+  max: 500,
   message: { error: 'Too many requests, please try again later.' },
 });
 
