@@ -286,14 +286,12 @@ function createOrUpdateTimer(type, remaining) {
 
 async function fetchEggStock(isInitial = false) {
   const now = Date.now();
-  if (!isInitial && now - lastFetchTimestamp < 5000) {
-    return;
-  }
+  if (!isInitial && now - lastFetchTimestamp < 5000) return;
   lastFetchTimestamp = now;
 
   try {
     const url = `https://api.joshlei.com/v2/growagarden/stock`;
-    const jstudio = 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'; // Thay bằng key thực tế
+    const jstudio = 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'; 
     const response = await fetch(url, {
       headers: {
         'jstudio-key': jstudio,
@@ -304,20 +302,18 @@ async function fetchEggStock(isInitial = false) {
     const data = await response.json();
     const items = Array.isArray(data.egg_stock) ? data.egg_stock : [];
     updateTable('egg', items);
-    updateRestockTime('egg', items);
+
+    // ✅ restockTimes đã lo ở updateRestockTimesFromAPI, không gọi updateRestockTime nữa
   } catch (e) {
     console.error('fetchEggStock: Fetch egg stock failed:', e);
     const mockData = mockStockData();
     updateTable('egg', mockData.egg_stock);
-    updateRestockTime('egg', mockData.egg_stock);
   }
 }
 
 async function fetchSeedGearStock(isInitial = false) {
   const now = Date.now();
-  if (!isInitial && now - lastFetchTimestamp < 30000) {
-    return;
-  }
+  if (!isInitial && now - lastFetchTimestamp < 30000) return;
   lastFetchTimestamp = now;
 
   try {
@@ -328,23 +324,19 @@ async function fetchSeedGearStock(isInitial = false) {
     const gearItems = Array.isArray(data.gear_stock) ? data.gear_stock : [];
     updateTable('seed', seedItems);
     updateTable('gear', gearItems);
-    updateRestockTime('seed', seedItems);
-    updateRestockTime('gear', gearItems);
+
+    // ❌ Bỏ updateRestockTime → đã có updateRestockTimesFromAPI
   } catch (e) {
     console.error('fetchSeedGearStock: Fetch seed and gear stock failed:', e);
     const mockData = mockStockData();
     updateTable('seed', mockData.seed_stock);
     updateTable('gear', mockData.gear_stock);
-    updateRestockTime('seed', mockData.seed_stock);
-    updateRestockTime('gear', mockData.gear_stock);
   }
 }
 
 async function fetchCosmeticStock(isInitial = false) {
   const now = Date.now();
-  if (!isInitial && now - lastFetchTimestamp < 30000) {
-    return;
-  }
+  if (!isInitial && now - lastFetchTimestamp < 30000) return;
   lastFetchTimestamp = now;
 
   try {
@@ -353,119 +345,110 @@ async function fetchCosmeticStock(isInitial = false) {
     const data = await response.json();
     const items = Array.isArray(data.cosmetics_stock) ? data.cosmetics_stock : [];
     updateTable('cosmetic', items);
-    updateRestockTime('cosmetic', items);
+
   } catch (e) {
     console.error('fetchCosmeticStock: Fetch cosmetic stock failed:', e);
     const mockData = mockStockData();
     updateTable('cosmetic', mockData.cosmetic_stock);
-    updateRestockTime('cosmetic', mockData.cosmetic_stock);
   }
 }
-
-function updateRestockTime(type, items) {
-  const now = Date.now();
-  let earliest = null;
-
-  // Ưu tiên Date_End từ API
-  if (Array.isArray(items) && items.length > 0) {
-    const validDates = items
-      .map(i => i.Date_End ? new Date(i.Date_End).getTime() : null)
-      .filter(t => t && !isNaN(t) && t > now);
-    if (validDates.length) {
-      earliest = new Date(Math.min(...validDates));
-    }
-  }
-
-  // Nếu không có Date_End từ API, lấy từ localStorage
-  if (!earliest) {
-    const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
-    const savedTime = stored[type] ? new Date(stored[type]) : null;
-    if (savedTime && !isNaN(savedTime.getTime()) && savedTime.getTime() > now) {
-      earliest = savedTime;
-    }
-  }
-
-  // Nếu vẫn không có, dùng default duration
-  if (!earliest) {
-    earliest = new Date(now + defaultDurations[type]);
-  }
-
-  nextRestockTimes[type] = earliest.toISOString();
-  console.log(`updateRestockTime: ${type} - Cập nhật nextRestockTimes: ${nextRestockTimes[type]}`);
+async function fetchStock(type) {
+  if (type === "seed" || type === "gear") return fetchSeedGearStock();
+  if (type === "egg") return fetchEggStock();
+  if (type === "cosmetic") return fetchCosmeticStock();
+}
+async function updateRestockTimesFromAPI() {
   try {
-    localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-  } catch (e) {
-    console.error(`updateRestockTime: Lỗi lưu restockEndTimes cho ${type}:`, e);
-    window.restockEndTimes = { ...nextRestockTimes };
-  }
+    const res = await fetch("https://api-yvj3.onrender.com/api/v3/growagarden/stock");
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const data = await res.json();
+    const now = Date.now();
 
-  // Cập nhật timer ngay lập tức
-  const remainingMs = Math.max(0, earliest.getTime() - now);
-  createOrUpdateTimer(type, remainingMs);
+    const typeMap = {
+      seed: data.seed_stock,
+      gear: data.gear_stock,
+      egg: data.egg_stock,
+      cosmetic: data.cosmetics_stock
+    };
 
-  // Cập nhật thời gian last updated
-  const lastUpdatedEl = document.getElementById('last-updated');
-  if (lastUpdatedEl) {
-    lastUpdatedEl.textContent = new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' });
-  }
-}
+    Object.entries(typeMap).forEach(([type, items]) => {
+      let earliest = null;
 
-function updateSeedGearTimer(type) {
-  const now = Date.now();
-  const endTime = nextRestockTimes[type] ? new Date(nextRestockTimes[type]) : null;
-  const remaining = endTime && !isNaN(endTime.getTime()) ? Math.max(0, endTime - now) : 0;
-  createOrUpdateTimer(type, remaining);
+      if (Array.isArray(items) && items.length > 0) {
+        const validDates = items
+          .map(i => i.Date_End ? new Date(i.Date_End).getTime() : null)
+          .filter(t => t && !isNaN(t) && t > now);
 
-  if (remaining <= 0 && !timerFlags[type]) {
-    timerFlags[type] = true;
-    setTimeout(() => {
-      if (now - lastFetchTimestamp >= 5000) {
-        fetchSeedGearStock().finally(() => {
-          try {
-            const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
-            const savedTime = stored[type] ? new Date(stored[type]) : null;
-            nextRestockTimes[type] = (savedTime && savedTime > now)
-              ? savedTime.toISOString()
-              : new Date(now + defaultDurations[type]).toISOString();
-            localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-          } catch (e) {
-            console.error(`updateSeedGearTimer: Error saving restockEndTimes for ${type}:`, e);
-          } finally {
-            timerFlags[type] = false;
-          }
-        });
-      } else {
-        timerFlags[type] = false;
+        if (validDates.length) {
+          earliest = new Date(Math.min(...validDates));
+
+          // 🔹 Chuyển UTC → giờ VN (GMT+7)
+          earliest = new Date(earliest.getTime() + 7 * 60 * 60 * 1000);
+        }
       }
-    }, 5000);
+
+      if (earliest) {
+        nextRestockTimes[type] = earliest.toISOString();
+        console.log(
+          `updateRestockTimesFromAPI: ${type} - nextRestockTimes: ${nextRestockTimes[type]}`
+        );
+      }
+    });
+
+    // Lưu localStorage
+    try {
+      localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+    } catch (e) {
+      console.error("updateRestockTimesFromAPI: Lỗi lưu restockEndTimes:", e);
+      window.restockEndTimes = { ...nextRestockTimes }; // dự phòng
+    }
+
+    // Cập nhật UI timer cho từng loại
+    Object.entries(nextRestockTimes).forEach(([type, time]) => {
+      if (time) {
+        const remainingMs = Math.max(0, new Date(time).getTime() - now);
+        createOrUpdateTimer(type, remainingMs);
+      }
+    });
+
+    // Cập nhật "last updated"
+    const lastUpdatedEl = document.getElementById('last-updated');
+    if (lastUpdatedEl) {
+      lastUpdatedEl.textContent = new Date().toLocaleString('vi-VN', {
+        timeZone: 'Asia/Ho_Chi_Minh'
+      });
+    }
+  } catch (err) {
+    console.error("updateRestockTimesFromAPI: Fetch thất bại:", err);
   }
 }
-
-function updateEggTimer(type) {
+function updateTimer(type) {
   const now = Date.now();
   const endTime = nextRestockTimes[type] ? new Date(nextRestockTimes[type]) : null;
   const remaining = endTime && !isNaN(endTime.getTime()) ? Math.max(0, endTime - now) : 0;
-  console.log(`updateEggTimer: ${type} - Thời gian còn lại: ${remaining}ms, nextRestockTimes: ${nextRestockTimes[type]}`);
+
+  // cập nhật UI
   createOrUpdateTimer(type, remaining);
 
   if (remaining <= 0 && !timerFlags[type]) {
     timerFlags[type] = true;
+
     setTimeout(() => {
       const fetchTime = Date.now();
       if (fetchTime - lastFetchTimestamp >= 5000) {
         lastFetchTimestamp = fetchTime;
-        fetchEggStock().finally(() => {
+
+        fetchStock(type).finally(() => {
           try {
-            // Không ghi đè nextRestockTimes[type] vì fetchEggStock đã cập nhật nó
-            console.log(`updateEggTimer: Sau fetchEggStock, nextRestockTimes[${type}]: ${nextRestockTimes[type]}`);
-            try {
-              localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-            } catch (e) {
-              console.error(`updateEggTimer: Lỗi lưu restockEndTimes cho ${type}:`, e);
-              window.restockEndTimes = { ...nextRestockTimes }; // Dự phòng in-memory
+            // Nếu API fetch không set sẵn nextRestockTimes thì set thủ công
+            if (!nextRestockTimes[type] || new Date(nextRestockTimes[type]) <= now) {
+              nextRestockTimes[type] = new Date(now + defaultDurations[type] - 5000).toISOString();
             }
+
+            localStorage.setItem("restockEndTimes", JSON.stringify(nextRestockTimes));
           } catch (e) {
-            console.error(`updateEggTimer: Lỗi xử lý restockEndTimes cho ${type}:`, e);
+            console.error(`updateTimer: lỗi lưu restockEndTimes cho ${type}:`, e);
+            window.restockEndTimes = { ...nextRestockTimes }; // fallback in-memory
           } finally {
             timerFlags[type] = false;
           }
@@ -476,38 +459,6 @@ function updateEggTimer(type) {
     }, 5000);
   }
 }
-
-function updateCosmeticTimer(type) {
-  const now = Date.now();
-  const endTime = nextRestockTimes[type] ? new Date(nextRestockTimes[type]) : null;
-  const remaining = endTime && !isNaN(endTime.getTime()) ? Math.max(0, endTime - now) : 0;
-  createOrUpdateTimer(type, remaining);
-
-  if (remaining <= 0 && !timerFlags[type]) {
-    timerFlags[type] = true;
-    setTimeout(() => {
-      if (now - lastFetchTimestamp >= 5000) {
-        fetchCosmeticStock().finally(() => {
-          try {
-            const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
-            const savedTime = stored[type] ? new Date(stored[type]) : null;
-            nextRestockTimes[type] = (savedTime && savedTime > now)
-              ? savedTime.toISOString()
-              : new Date(now + defaultDurations[type]).toISOString();
-            localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-          } catch (e) {
-            console.error(`updateCosmeticTimer: Error saving restockEndTimes for ${type}:`, e);
-          } finally {
-            timerFlags[type] = false;
-          }
-        });
-      } else {
-        timerFlags[type] = false;
-      }
-    }, 5000);
-  }
-}
-
 function updateAllTimers() {
   const now = Date.now();
   if (now - lastTimerUpdate < 1000) {
@@ -516,15 +467,7 @@ function updateAllTimers() {
   }
   lastTimerUpdate = now;
 
-  stockTypes.forEach((type) => {
-    if (type === 'seed' || type === 'gear') {
-      updateSeedGearTimer(type);
-    } else if (type === 'egg') {
-      updateEggTimer(type);
-    } else if (type === 'cosmetic') {
-      updateCosmeticTimer(type);
-    }
-  });
+  stockTypes.forEach(type => updateTimer(type));
 
   requestAnimationFrame(updateAllTimers);
 }
