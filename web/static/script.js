@@ -292,7 +292,14 @@ async function fetchEggStock(isInitial = false) {
   lastFetchTimestamp = now;
 
   try {
-    const response = await fetch('https://api-yvj3.onrender.com/api/v3/growagarden/stock');
+    const url = `https://api.joshlei.com/v2/growagarden/stock`;
+    const jstudio = 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'; // Thay bằng key thực tế
+    const response = await fetch(url, {
+      headers: {
+        'jstudio-key': jstudio,
+        'Content-Type': 'application/json'
+      }
+    });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     const items = Array.isArray(data.egg_stock) ? data.egg_stock : [];
