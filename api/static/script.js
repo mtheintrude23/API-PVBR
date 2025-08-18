@@ -161,11 +161,7 @@ function renderWeatherCards(weathers) {
 
 async function fetchActiveWeather() {
   try {
-    const response = await fetch('https://api.joshlei.com/v2/growagarden/weather', {
-      headers: {
-        'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'
-      }
-    });
+    const response = await fetch('https://api-yvj3.onrender.com/api/v3/growagarden/weather');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
 
@@ -289,9 +285,7 @@ async function fetchEggStock(isInitial = false) {
   lastFetchTimestamp = now;
 
   try {
-    const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
-      headers: { 'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272' }
-    });
+    const response = await fetch('https://api-yvj3.onrender.com/api/v3/growagarden/stock');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     const items = Array.isArray(data.egg_stock) ? data.egg_stock : [];
@@ -313,9 +307,7 @@ async function fetchSeedGearStock(isInitial = false) {
   lastFetchTimestamp = now;
 
   try {
-    const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
-      headers: { 'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272' }
-    });
+    const response = await fetch('https://api-yvj3.onrender.com/api/v3/growagarden/stock');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     const seedItems = Array.isArray(data.seed_stock) ? data.seed_stock : [];
@@ -342,9 +334,7 @@ async function fetchCosmeticStock(isInitial = false) {
   lastFetchTimestamp = now;
 
   try {
-    const response = await fetch('https://api.joshlei.com/v2/growagarden/stock', {
-      headers: { 'jstudio-key': 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272' }
-    });
+    const response = await fetch('https://api-yvj3.onrender.com/api/v3/growagarden/stock');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     const items = Array.isArray(data.cosmetic_stock) ? data.cosmetic_stock : [];
@@ -407,36 +397,40 @@ function updateAllTimers() {
     const remaining = endTime && !isNaN(endTime.getTime()) ? Math.max(0, endTime - now) : 0;
     createOrUpdateTimer(type, remaining);
 
+    // Khi hết giờ => đợi 5 giây rồi fetch
     if (remaining <= 0 && !timerFlags[type]) {
       timerFlags[type] = true;
-      const fetchFn = type === 'seed' || type === 'gear' ? fetchSeedGearStock
-                    : type === 'egg' ? fetchEggStock
-                    : fetchCosmeticStock;
 
-      if (now - lastFetchTimestamp >= 30000) {
+      setTimeout(() => {
+        const fetchFn = type === 'seed' || type === 'gear' ? fetchSeedGearStock
+                      : type === 'egg' ? fetchEggStock
+                      : fetchCosmeticStock;
+
         fetchFn().finally(() => {
           const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
           const savedTime = stored[type] && new Date(stored[type]);
-          if (savedTime && savedTime > now) {
+          const now2 = Date.now();
+
+          if (savedTime && savedTime > now2) {
             nextRestockTimes[type] = savedTime.toISOString();
           } else {
-            nextRestockTimes[type] = new Date(now + defaultDurations[type]).toISOString();
+            nextRestockTimes[type] = new Date(now2 + defaultDurations[type]).toISOString();
           }
+
           try {
             localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
           } catch (e) {
             console.error(`updateAllTimers: Error saving restockEndTimes to localStorage:`, e);
           }
+
           timerFlags[type] = false;
         });
-      } else {
-        timerFlags[type] = false;
-      }
+      }, 5000);
     }
   });
-
   requestAnimationFrame(updateAllTimers);
 }
+
 
 function updateTable(type, items) {
   if (!stockTypes.includes(type)) {
