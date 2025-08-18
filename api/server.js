@@ -1,6 +1,7 @@
 
 import express from 'express';
 import cors from 'cors';
+import { DateTime } from 'luxon';
 import fs from "fs";
 import rateLimit from 'express-rate-limit';
 import path from 'path';
@@ -43,55 +44,31 @@ function cleanItems(items) {
       iconUrl = `https://api-yvj3.onrender.com/api/v3/growagarden/image/${itemId}`;
     }
 
-    // Xử lý Date_Start để đảm bảo GMT+7
-    let dateStart;
-    if (item?.Date_Start) {
-      // Nếu Date_Start tồn tại, chuyển từ UTC sang GMT+7
-      dateStart = new Date(new Date(item.Date_Start).getTime() + 7 * 60 * 60 * 1000);
-    } else {
-      // Nếu không có Date_Start, tạo mới với thời gian hiện tại, GMT+7
-      dateStart = new Date(Date.now() + 7 * 60 * 60 * 1000);
-    }
+    // Xử lý Date_Start và Date_End với Luxon
+    const toGMT7 = (dateStr, isEnd = false) => {
+      if (!dateStr) {
+        // Tạo thời gian mặc định ở GMT+7
+        return DateTime.now()
+          .setZone('Asia/Ho_Chi_Minh')
+          .plus({ milliseconds: isEnd ? 300000 : 0 })
+          .toISO({ includeOffset: true });
+      }
 
-    // Xử lý Date_End để đảm bảo GMT+7
-    let dateEnd;
-    if (item?.Date_End) {
-      // Nếu Date_End tồn tại, chuyển từ UTC sang GMT+7
-      dateEnd = new Date(new Date(item.Date_End).getTime() + 7 * 60 * 60 * 1000);
-    } else {
-      // Nếu không có Date_End, tạo mới với thời gian hiện tại + 5 phút, GMT+7
-      dateEnd = new Date(Date.now() + 300000 + 7 * 60 * 60 * 1000);
-    }
+      // Chuyển đổi thời gian đầu vào sang GMT+7
+      return DateTime.fromISO(dateStr)
+        .setZone('Asia/Ho_Chi_Minh')
+        .toISO({ includeOffset: true });
+    };
 
-    // Định dạng thời gian theo GMT+7
-    const dateStartFormatted = dateStart.toLocaleString('en-US', {
-      timeZone: 'Asia/Ho_Chi_Minh',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    }).replace(/,/, '').replace(/(\d+)\/(\d+)\/(\d+) (\d+):(\d+):(\d+)/, '$3-$1-$2T$4:$5:$6+07:00');
-
-    const dateEndFormatted = dateEnd.toLocaleString('en-US', {
-      timeZone: 'Asia/Ho_Chi_Minh',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    }).replace(/,/, '').replace(/(\d+)\/(\d+)\/(\d+) (\d+):(\d+):(\d+)/, '$3-$1-$2T$4:$5:$6+07:00');
+    const dateStart = toGMT7(item?.Date_Start, false);
+    const dateEnd = toGMT7(item?.Date_End, true);
 
     return {
       ...item,
       quantity: item?.quantity || 0,
       icon: iconUrl,
-      Date_Start: dateStartFormatted,
-      Date_End: dateEndFormatted,
+      Date_Start: dateStart,
+      Date_End: dateEnd,
     };
   });
 }
