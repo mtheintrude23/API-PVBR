@@ -83,7 +83,7 @@ async function fetchWeatherEffects(weatherId) {
     return '';
   }
   try {
-    const response = await fetch(`https://api-jvj3.onrender.com/api/v3/growagarden/info/${weatherId}`);
+    const response = await fetch(`https://api-yvj3.onrender.com/api/v3/growagarden/info/${weatherId}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     return data
