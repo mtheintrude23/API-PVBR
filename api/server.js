@@ -44,8 +44,8 @@ function cleanItems(items) {
       iconUrl = `https://api-yvj3.onrender.com/api/v3/growagarden/image/${itemId}`;
     }
 
-    const dateStart = item?.Date_Start, false);
-    const dateEnd = item?.Date_End, true;
+    const dateStart = item?.Date_Start;
+    const dateEnd = item?.Date_End;
 
     return {
       ...item,
