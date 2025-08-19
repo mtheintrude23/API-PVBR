@@ -278,12 +278,13 @@ function createOrUpdateTimer(type, remaining) {
   if (!el) {
     return;
   }
-  el.textContent = `Restock in: ${formatTime(remaining)}`;
-  el.className = remaining <= 10000
+  el.textContent = remaining !== undefined 
+    ? `Restock in: ${formatTime(remaining)}`
+    : "Next update: 00:00";
+  el.className = remaining !== undefined && remaining <= 10000
     ? "text-sm text-yellow-500 animate-pulse"
     : "text-sm text-white";
 }
-
 async function fetchEggStock(isInitial = false) {
   const now = Date.now();
   if (!isInitial && now - lastFetchTimestamp < 5000) return;
