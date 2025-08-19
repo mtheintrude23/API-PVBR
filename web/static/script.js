@@ -363,7 +363,7 @@ async function updateRestockTimesFromAPI() {
     const res = await fetch("https://api-yvj3.onrender.com/api/v3/growagarden/stock");
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     const data = await res.json();
-    const now = Math.floor(Date.now() / 1000); // Current time in Unix seconds
+    const now = DateTime.now(); // Current time in system timezone (or UTC if unspecified)
     const nextRestockTimes = {};
 
     const typeMap = {
@@ -379,20 +379,19 @@ async function updateRestockTimesFromAPI() {
       if (Array.isArray(items) && items.length > 0) {
         const validTimes = items
           .map(i => {
-            if (!i.end_date_unix) return null;
-            return i.end_date_unix;
+            if (!i.Date_End) return null;
+            return DateTime.fromISO(i.Date_End); // Keep original timezone from Date_End
           })
-          .filter(t => t && !isNaN(t) && t > now);
+          .filter(t => t && t.isValid && t > now);
 
         if (validTimes.length) {
-          earliest = Math.min(...validTimes);
-          const earliestDateTime = DateTime.fromSeconds(earliest);
-          nextRestockTimes[type] = earliestDateTime.toISO({ includeOffset: true });
+          earliest = validTimes.reduce((min, curr) => (curr < min ? curr : min));
+          nextRestockTimes[type] = earliest.toISO({ includeOffset: true });
         }
       }
 
       if (earliest) {
-        const remainingMs = (earliest - now) * 1000; // Convert to milliseconds
+        const remainingMs = earliest.diff(now).toMillis(); // Time remaining in milliseconds
         createOrUpdateTimer(type, remainingMs);
       }
     });
@@ -407,7 +406,7 @@ async function updateRestockTimesFromAPI() {
     const lastUpdatedEl = document.getElementById('last-updated');
     if (lastUpdatedEl) {
       lastUpdatedEl.textContent = DateTime.now()
-        .toFormat('yyyy-MM-dd HH:mm:ss');
+        .toFormat('yyyy-MM-dd HH:mm:ss'); // System timezone or UTC
     }
   } catch (err) {
     console.error("updateRestockTimesFromAPI: Fetch thất bại:", err);
