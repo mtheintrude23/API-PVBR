@@ -44,24 +44,8 @@ function cleanItems(items) {
       iconUrl = `https://api-yvj3.onrender.com/api/v3/growagarden/image/${itemId}`;
     }
 
-    // Xử lý Date_Start và Date_End với Luxon
-    const toGMT7 = (dateStr, isEnd = false) => {
-      if (!dateStr) {
-        // Tạo thời gian mặc định ở GMT+7
-        return DateTime.now()
-          .setZone('Asia/Ho_Chi_Minh')
-          .plus({ milliseconds: isEnd ? 300000 : 0 })
-          .toISO({ includeOffset: true });
-      }
-
-      // Chuyển đổi thời gian đầu vào sang GMT+7
-      return DateTime.fromISO(dateStr)
-        .setZone('Asia/Ho_Chi_Minh')
-        .toISO({ includeOffset: true });
-    };
-
-    const dateStart = toGMT7(item?.Date_Start, false);
-    const dateEnd = toGMT7(item?.Date_End, true);
+    const dateStart = item?.Date_Start, false);
+    const dateEnd = item?.Date_End, true;
 
     return {
       ...item,
