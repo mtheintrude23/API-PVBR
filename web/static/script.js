@@ -278,7 +278,7 @@ function createOrUpdateTimer(type, remaining) {
   if (!el) {
     return;
   }
-  el.textContent = `Next update: ${formatTime(remaining)}`;
+  el.textContent = `Restock in: ${formatTime(remaining)}`;
   el.className = remaining <= 10000
     ? "text-sm text-yellow-500 animate-pulse"
     : "text-sm text-white";
