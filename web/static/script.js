@@ -359,66 +359,58 @@ async function fetchStock(type) {
 async function updateRestockTimesFromAPI() {
   const { DateTime } = luxon;
 
-  if (!Array.isArray(activeRestocks) || !activeRestocks.length) {
-    return;
-  }
+  try {
+    const res = await fetch("https://api-yvj3.onrender.com/api/v3/growagarden/stock");
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const data = await res.json();
+    const now = Math.floor(Date.now() / 1000); // Current time in Unix seconds
+    const nextRestockTimes = {};
 
-  let hasChanges = false;
-  const now = Math.floor(Date.now() / 1000); // Current time in Unix seconds
-  const nextRestockTimes = {};
+    const typeMap = {
+      seed: data.seed_stock,
+      gear: data.gear_stock,
+      egg: data.egg_stock,
+      cosmetic: data.cosmetics_stock
+    };
 
-  const typeMap = {
-    seed: 'seed',
-    gear: 'gear',
-    egg: 'egg',
-    cosmetic: 'cosmetic'
-  };
+    Object.entries(typeMap).forEach(([type, items]) => {
+      let earliest = null;
 
-  Object.entries(typeMap).forEach(([type, typeKey]) => {
-    let earliest = null;
+      if (Array.isArray(items) && items.length > 0) {
+        const validTimes = items
+          .map(i => {
+            if (!i.end_date_unix) return null;
+            return i.end_date_unix;
+          })
+          .filter(t => t && !isNaN(t) && t > now);
 
-    const validTimes = activeRestocks
-      .filter(item => item && item.type === typeKey && item.end_date_unix && item.end_date_unix > now)
-      .map(item => item.end_date_unix);
+        if (validTimes.length) {
+          earliest = Math.min(...validTimes);
+          const earliestDateTime = DateTime.fromSeconds(earliest);
+          nextRestockTimes[type] = earliestDateTime.toISO({ includeOffset: true });
+        }
+      }
 
-    if (validTimes.length) {
-      earliest = Math.min(...validTimes);
-      const earliestDateTime = DateTime.fromSeconds(earliest).setZone('Asia/Ho_Chi_Minh');
-      nextRestockTimes[type] = earliestDateTime.toISO({ includeOffset: true });
-    }
+      if (earliest) {
+        const remainingMs = (earliest - now) * 1000; // Convert to milliseconds
+        createOrUpdateTimer(type, remainingMs);
+      }
+    });
 
-    if (earliest) {
-      const remainingMs = (earliest - now) * 1000; // Convert to milliseconds
-      createOrUpdateTimer(type, remainingMs);
-    }
-  });
-
-  activeRestocks = activeRestocks.filter(item => {
-    if (!item || !item.end_date_unix || !item.type) {
-      return false;
-    }
-    const remaining = Math.max(0, item.end_date_unix - now);
-    if (remaining <= 0) {
-      hasChanges = true;
-      return false;
-    }
-    return true;
-  });
-
-  if (hasChanges) {
     try {
-      localStorage.setItem('activeRestocks', JSON.stringify(activeRestocks));
+      localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
     } catch (e) {
-      console.error('updateRestockTimesFromAPI: Error saving activeRestocks to localStorage:', e);
-      window.activeRestocks = [...activeRestocks];
+      console.error("updateRestockTimesFromAPI: Lỗi lưu restockEndTimes:", e);
+      window.restockEndTimes = { ...nextRestockTimes };
     }
-  }
 
-  const lastUpdatedEl = document.getElementById('last-updated');
-  if (lastUpdatedEl) {
-    lastUpdatedEl.textContent = DateTime.now()
-      .setZone('Asia/Ho_Chi_Minh')
-      .toFormat('yyyy-MM-dd HH:mm:ss');
+    const lastUpdatedEl = document.getElementById('last-updated');
+    if (lastUpdatedEl) {
+      lastUpdatedEl.textContent = DateTime.now()
+        .toFormat('yyyy-MM-dd HH:mm:ss');
+    }
+  } catch (err) {
+    console.error("updateRestockTimesFromAPI: Fetch thất bại:", err);
   }
 }
 function updateTimer(type) {
