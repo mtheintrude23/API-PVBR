@@ -359,72 +359,66 @@ async function fetchStock(type) {
 async function updateRestockTimesFromAPI() {
   const { DateTime } = luxon;
 
-  try {
-    const res = await fetch("https://api-yvj3.onrender.com/api/v3/growagarden/stock");
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
-    const data = await res.json();
-    const now = DateTime.now().toMillis(); // 10:04 PM GMT+7 = 2025-08-18T15:04:00.000Z
+  if (!Array.isArray(activeRestocks) || !activeRestocks.length) {
+    return;
+  }
 
-    const typeMap = {
-      seed: data.seed_stock,
-      gear: data.gear_stock,
-      egg: data.egg_stock,
-      cosmetic: data.cosmetics_stock
-    };
+  let hasChanges = false;
+  const now = Math.floor(Date.now() / 1000); // Current time in Unix seconds
+  const nextRestockTimes = {};
 
-    Object.entries(typeMap).forEach(([type, items]) => {
-      let earliest = null;
+  const typeMap = {
+    seed: 'seed',
+    gear: 'gear',
+    egg: 'egg',
+    cosmetic: 'cosmetic'
+  };
 
-      if (Array.isArray(items) && items.length > 0) {
-        const validDates = items
-          .map(i => {
-            if (!i.Date_End) return null;
-            return DateTime.fromISO(i.Date_End)
-              .setZone('Asia/Ho_Chi_Minh')
-              .toMillis();
-          })
-          .filter(t => t && !isNaN(t) && t > now);
+  Object.entries(typeMap).forEach(([type, typeKey]) => {
+    let earliest = null;
 
-        if (validDates.length) {
-          earliest = DateTime.fromMillis(Math.min(...validDates))
-            .setZone('Asia/Ho_Chi_Minh');
-        }
-      }
+    const validTimes = activeRestocks
+      .filter(item => item && item.type === typeKey && item.end_date_unix && item.end_date_unix > now)
+      .map(item => item.end_date_unix);
 
-      if (earliest) {
-        const earliestFormatted = earliest.toISO({ includeOffset: true }); // YYYY-MM-DDTHH:mm:ss+07:00
-        nextRestockTimes[type] = earliestFormatted;
-        console.log(
-          `updateRestockTimesFromAPI: ${type} - nextRestockTimes: ${nextRestockTimes[type]}`
-        );
-      }
-    });
+    if (validTimes.length) {
+      earliest = Math.min(...validTimes);
+      const earliestDateTime = DateTime.fromSeconds(earliest).setZone('Asia/Ho_Chi_Minh');
+      nextRestockTimes[type] = earliestDateTime.toISO({ includeOffset: true });
+    }
 
+    if (earliest) {
+      const remainingMs = (earliest - now) * 1000; // Convert to milliseconds
+      createOrUpdateTimer(type, remainingMs);
+    }
+  });
+
+  activeRestocks = activeRestocks.filter(item => {
+    if (!item || !item.end_date_unix || !item.type) {
+      return false;
+    }
+    const remaining = Math.max(0, item.end_date_unix - now);
+    if (remaining <= 0) {
+      hasChanges = true;
+      return false;
+    }
+    return true;
+  });
+
+  if (hasChanges) {
     try {
-      localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
+      localStorage.setItem('activeRestocks', JSON.stringify(activeRestocks));
     } catch (e) {
-      console.error("updateRestockTimesFromAPI: Lỗi lưu restockEndTimes:", e);
-      window.restockEndTimes = { ...nextRestockTimes };
+      console.error('updateRestockTimesFromAPI: Error saving activeRestocks to localStorage:', e);
+      window.activeRestocks = [...activeRestocks];
     }
+  }
 
-    Object.entries(nextRestockTimes).forEach(([type, time]) => {
-      if (time) {
-        const remainingMs = Math.max(
-          0,
-          DateTime.fromISO(time).toMillis() - now
-        );
-        createOrUpdateTimer(type, remainingMs);
-      }
-    });
-
-    const lastUpdatedEl = document.getElementById('last-updated');
-    if (lastUpdatedEl) {
-      lastUpdatedEl.textContent = DateTime.now()
-        .setZone('Asia/Ho_Chi_Minh')
-        .toFormat('yyyy-MM-dd HH:mm:ss'); // 2025-08-18 22:04:00
-    }
-  } catch (err) {
-    console.error("updateRestockTimesFromAPI: Fetch thất bại:", err);
+  const lastUpdatedEl = document.getElementById('last-updated');
+  if (lastUpdatedEl) {
+    lastUpdatedEl.textContent = DateTime.now()
+      .setZone('Asia/Ho_Chi_Minh')
+      .toFormat('yyyy-MM-dd HH:mm:ss');
   }
 }
 function updateTimer(type) {
