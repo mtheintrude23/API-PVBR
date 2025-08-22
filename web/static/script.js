@@ -33,36 +33,36 @@ stockTypes.forEach(type => {
 function mockStockData() {
   return {
     seed_stock: [
-      { display_name: "Carrot", quantity: 16, icon: "https://api.joshlei.com/v2/growagarden/image/carrot", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Strawberry", quantity: 6, icon: "https://api.joshlei.com/v2/growagarden/image/strawberry", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Watermelon", quantity: 4, icon: "https://api.joshlei.com/v2/growagarden/image/watermelon", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Tomato", quantity: 2, icon: "https://api.joshlei.com/v2/growagarden/image/tomato", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Blueberry", quantity: 5, icon: "https://api.joshlei.com/v2/growagarden/image/blueberry", Date_End: new Date(Date.now() + 300000).toISOString() }
+      { display_name: "Carrot", quantity: 16, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/carrot", Date_End: new Date(Date.now() + 300000).toISOString() },
+      { display_name: "Strawberry", quantity: 6, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/strawberry", Date_End: new Date(Date.now() + 300000).toISOString() },
+      { display_name: "Watermelon", quantity: 4, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/watermelon", Date_End: new Date(Date.now() + 300000).toISOString() },
+      { display_name: "Tomato", quantity: 2, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/tomato", Date_End: new Date(Date.now() + 300000).toISOString() },
+      { display_name: "Blueberry", quantity: 5, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/blueberry", Date_End: new Date(Date.now() + 300000).toISOString() }
     ],
     gear_stock: [
-      { display_name: "Trading Ticket", quantity: 2, icon: "https://api.joshlei.com/v2/growagarden/image/trading_ticket", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Cleaning Spray", quantity: 2, icon: "https://api.joshlei.com/v2/growagarden/image/cleaning_spray", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Favorite Tool", quantity: 3, icon: "https://api.joshlei.com/v2/growagarden/image/favorite_tool", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Recall Wrench", quantity: 2, icon: "https://api.joshlei.com/v2/growagarden/image/recall_wrench", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Watering Can", quantity: 2, icon: "https://api.joshlei.com/v2/growagarden/image/watering_can", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Harvest Tool", quantity: 3, icon: "https://api.joshlei.com/v2/growagarden/image/harvest_tool", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Trowel", quantity: 3, icon: "https://api.joshlei.com/v2/growagarden/image/trowel", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Godly Sprinkler", quantity: 1, icon: "https://api.joshlei.com/v2/growagarden/image/godly_sprinkler", Date_End: new Date(Date.now() + 300000).toISOString() }
+      { display_name: "Trading Ticket", quantity: 2, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/trading_ticket", Date_End: new Date(Date.now() + 300000).toISOString() },
+      { display_name: "Cleaning Spray", quantity: 2, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/cleaning_spray", Date_End: new Date(Date.now() + 300000).toISOString() },
+      { display_name: "Favorite Tool", quantity: 3, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/favorite_tool", Date_End: new Date(Date.now() + 300000).toISOString() },
+      { display_name: "Recall Wrench", quantity: 2, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/recall_wrench", Date_End: new Date(Date.now() + 300000).toISOString() },
+      { display_name: "Watering Can", quantity: 2, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/watering_can", Date_End: new Date(Date.now() + 300000).toISOString() },
+      { display_name: "Harvest Tool", quantity: 3, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/harvest_tool", Date_End: new Date(Date.now() + 300000).toISOString() },
+      { display_name: "Trowel", quantity: 3, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/trowel", Date_End: new Date(Date.now() + 300000).toISOString() },
+      { display_name: "Godly Sprinkler", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/godly_sprinkler", Date_End: new Date(Date.now() + 300000).toISOString() }
     ],
     egg_stock: [
-      { display_name: "Common Egg", quantity: 1, icon: "https://api.joshlei.com/v2/growagarden/image/common_egg", Date_End: new Date(Date.now() + 1800000).toISOString() },
-      { display_name: "Common Egg", quantity: 1, icon: "https://api.joshlei.com/v2/growagarden/image/common_egg", Date_End: new Date(Date.now() + 1800000).toISOString() },
-      { display_name: "Rare Summer Egg", quantity: 1, icon: "https://api.joshlei.com/v2/growagarden/image/rare_summer_egg", Date_End: new Date(Date.now() + 1800000).toISOString() }
+      { display_name: "Common Egg", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/common_egg", Date_End: new Date(Date.now() + 1800000).toISOString() },
+      { display_name: "Common Egg", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/common_egg", Date_End: new Date(Date.now() + 1800000).toISOString() },
+      { display_name: "Rare Summer Egg", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/rare_summer_egg", Date_End: new Date(Date.now() + 1800000).toISOString() }
     ],
     cosmetic_stock: [
-      { display_name: "Lemonade Stand", quantity: 1, icon: "https://api.joshlei.com/v2/growagarden/image/lemonade_stand", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Wheelbarrow", quantity: 1, icon: "https://api.joshlei.com/v2/growagarden/image/wheelbarrow", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Small Circle Tile", quantity: 5, icon: "https://api.joshlei.com/v2/growagarden/image/small_circle_tile", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Torch", quantity: 3, icon: "https://api.joshlei.com/v2/growagarden/image/torch", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Small Wood Flooring", quantity: 5, icon: "https://api.joshlei.com/v2/growagarden/image/small_wood_flooring", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Compost Bin", quantity: 1, icon: "https://api.joshlei.com/v2/growagarden/image/compost_bin", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Small Stone Table", quantity: 1, icon: "https://api.joshlei.com/v2/growagarden/image/small_stone_table", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Bookshelf", quantity: 1, icon: "https://api.joshlei.com/v2/growagarden/image/bookshelf", Date_End: new Date(Date.now() + 14400000).toISOString() }
+      { display_name: "Lemonade Stand", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/lemonade_stand", Date_End: new Date(Date.now() + 14400000).toISOString() },
+      { display_name: "Wheelbarrow", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/wheelbarrow", Date_End: new Date(Date.now() + 14400000).toISOString() },
+      { display_name: "Small Circle Tile", quantity: 5, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/small_circle_tile", Date_End: new Date(Date.now() + 14400000).toISOString() },
+      { display_name: "Torch", quantity: 3, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/torch", Date_End: new Date(Date.now() + 14400000).toISOString() },
+      { display_name: "Small Wood Flooring", quantity: 5, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/small_wood_flooring", Date_End: new Date(Date.now() + 14400000).toISOString() },
+      { display_name: "Compost Bin", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/compost_bin", Date_End: new Date(Date.now() + 14400000).toISOString() },
+      { display_name: "Small Stone Table", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/small_stone_table", Date_End: new Date(Date.now() + 14400000).toISOString() },
+      { display_name: "Bookshelf", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/bookshelf", Date_End: new Date(Date.now() + 14400000).toISOString() }
     ]
   };
 }
@@ -72,7 +72,7 @@ function mockWeatherData() {
     weather: [
       { item_id: "rainy", display_name: "Rainy", active: true, icon: "https://uxwing.com/wp-content/themes/uxwing/download/weather/rainy-icon.png", description: "Plants grow faster in the rain!", duration: "1800", last_seen: Math.floor(Date.now() / 1000).toString() },
       { item_id: "sunny", display_name: "Sunny", active: true, icon: "https://uxwing.com/wp-content/themes/uxwing/download/weather/sun-icon.png", description: "Bright sun boosts your harvest!", duration: "3600", last_seen: Math.floor(Date.now() / 1000).toString() },
-      { item_id: "nightevent", display_name: "Night Event", active: true, icon: "https://api.joshlei.com/v2/growagarden/image/nightevent", description: "Your fruit can become MOONLIT!", duration: "600", last_seen: Math.floor(Date.now() / 1000).toString() }
+      { item_id: "nightevent", display_name: "Night Event", active: true, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/nightevent", description: "Your fruit can become MOONLIT!", duration: "600", last_seen: Math.floor(Date.now() / 1000).toString() }
     ]
   };
 }
@@ -83,7 +83,7 @@ async function fetchWeatherEffects(weatherId) {
     return '';
   }
   try {
-    const url = `https://api.joshlei.com/v2/growagarden/info/${weatherId}`;
+    const url = `https://api-yvj3.onrender.com/api/v3/growagarden/info/${weatherId}`;
     const jstudio = 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'; // Thay bằng key thực tế
     const response = await fetch(url, {
       headers: {
