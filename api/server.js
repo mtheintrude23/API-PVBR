@@ -67,7 +67,7 @@ function updateStockData(data) {
 const swaggerDefinition = {
   openapi: '3.1.0',
   info: { title: 'Grow a Garden API', version: 'v3', description: 'API for Grow a Garden' },
-  servers: [{ url: 'https://api-yvj3.onrender.com/', description: 'URL' }]
+  servers: [{ url: 'https://api-tmyd.onrender.com/', description: 'URL' }]
 };
 const options = {
   swaggerDefinition,
@@ -86,7 +86,7 @@ function updateWeatherData(data) {
       // Rehost icon của weather nếu có
       let iconUrl = item.icon || '';
       if (iconUrl.startsWith('https://api.joshlei.com/v2/growagarden/image/')) {
-        iconUrl = `https://api-yvj3.onrender.com/api/v3/growagarden/image/${item.weather_id ?? key}`;
+        iconUrl = `https://api-tmyd.onrender.com/api/v3/growagarden/image/${item.weather_id ?? key}`;
       }
 
       weatherObj[item.weather_id ?? `unknown_${key}`] = {
@@ -310,9 +310,9 @@ const limiter = rateLimit({
 // API
 app.get('/api/health', limiter, async (req, res) => {
   const endpoints = [
-    `https://api-yvj3.onrender.com/api/v3/growagarden/stock`,
-    `https://api-yvj3.onrender.com/api/v3/growagarden/image/cactus`,
-    `https://api-yvj3.onrender.com/api/v3/growagarden/weather`
+    `https://api-tmyd.onrender.com/api/v3/growagarden/stock`,
+    `https://api-tmyd.onrender.com/api/v3/growagarden/image/cactus`,
+    `https://api-tmyd.onrender.com/api/v3/growagarden/weather`
   ];
 
   try {
@@ -419,7 +419,7 @@ app.get('/api/v3/growagarden/info/:item_id', limiter, async (req, res) => {
     if (item?.icon) {
       item.icon = item.icon.replace(
         /^https:\/\/api\.joshlei\.com\/v2\/growagarden\/image\//,
-        'https://api-yvj3.onrender.com/api/v3/growagarden/image/'
+        'https://api-tmyd.onrender.com/api/v3/growagarden/image/'
       );
     }
 
@@ -507,7 +507,7 @@ app.get('/api/v3/growagarden/currentevent', limiter, async (req, res) => {
         icon: currentEvent.current?.icon
           ? currentEvent.current.icon.replace(
             /^https:\/\/api\.joshlei\.com\/v2\/growagarden\/image\//,
-            "https://api-yvj3.onrender.com/api/v3/growagarden/image/"
+            "https://api-tmyd.onrender.com/api/v3/growagarden/image/"
           )
           : null
       }
