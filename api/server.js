@@ -497,16 +497,26 @@ app.get('/api/v3/growagarden/info', limiter, async (req, res) => {
       ? await client.items.all(normalizedType)
       : await client.items.all();
 
+    // 🔥 Rehost icon từ domain của bạn
+    const host = `${req.protocol}://${req.get("host")}`;
+    const updatedItems = (items || []).map(item => {
+      return {
+        ...item,
+        icon: `${host}/api/v3/growagarden/image/${item.id}`
+      };
+    });
+
     res.json({
       type: normalizedType || 'all',
-      count: Array.isArray(items) ? items.length : 0,
-      items: items || []
+      count: updatedItems.length,
+      items: updatedItems
     });
   } catch (error) {
     logger.error(`Error fetching items list: ${error.message}`);
     res.status(500).json({ error: 'Failed to fetch items list' });
   }
 });
+
 
 app.get('/api/v3/growagarden/image/:item_id', limiter, async (req, res) => {
   try {
