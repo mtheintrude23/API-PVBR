@@ -338,7 +338,7 @@ app.use(
 const limiter = rateLimit({
   windowMs: 60 * 1000,
   max: 500,
-  message: { error: 'Too many requests, please try again later.' },
+  message: { error: '429: Too many requests, please try again later.' },
 });
 
 // Routes
