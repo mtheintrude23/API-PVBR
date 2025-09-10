@@ -502,7 +502,7 @@ app.get('/api/v3/growagarden/info', limiter, async (req, res) => {
     const updatedItems = (items || []).map(item => {
       return {
         ...item,
-        icon: `${host}/api/v3/growagarden/image/${item.id}`
+        icon: `${host}/api/v3/growagarden/image/${item.item_id}`
       };
     });
 
