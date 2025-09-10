@@ -41,7 +41,7 @@ function cleanItems(items) {
     const itemId = item?.item_id || normalizeName(item?.name ?? item?.display_name ?? 'unknown');
 
     if (iconUrl.startsWith('https://api.joshlei.com/v2/growagarden/image/')) {
-      iconUrl = `https://api-yvj3.onrender.com/api/v3/growagarden/image/${itemId}`;
+      iconUrl = `https://api-tmyd.onrender.com/api/v3/growagarden/image/${itemId}`;
     }
 
     const dateStart = item?.Date_Start;
@@ -103,11 +103,11 @@ function updateWeatherData(data) {
 async function initializeData() {
   try {
     const stockData = await client.stocks.all();
-    logger.success('✅ Kết nối Stock thành công');
+    logger.success('✅ Kết nối Stock API Joshlei SDK thành công');
     updateStockData(stockData);
 
     const weatherData = await client.weather.all();
-    logger.success('✅ Kết nối Weather thành công');
+    logger.success('✅ Kết nối Weather API Joshlei SDK thành công');
     updateWeatherData(weatherData);
   } catch (err) {
     logger.error(`❌ Lỗi khi khởi tạo: ${err}`);
@@ -130,9 +130,29 @@ function startPolling() {
 }
 /**
  * @swagger
+ * tags:
+ *   - name: Health
+ *     description: Kiểm tra tình trạng API
+ *   - name: Stock
+ *     description: Các API liên quan tới stock
+ *   - name: Weather
+ *     description: Các API liên quan tới thời tiết
+ *   - name: Calculation
+ *     description: Tính toán giá trị fruit
+ *   - name: Info
+ *     description: Thông tin item
+ *   - name: Image
+ *     description: Ảnh item
+ *   - name: Event
+ *     description: Sự kiện trong game
+ */
+
+/**
+ * @swagger
  * /api/health:
  *   get:
  *     summary: Health check
+ *     tags: [Health]
  *     description: Kiểm tra API còn hoạt động hay không
  *     responses:
  *       200:
@@ -152,6 +172,7 @@ function startPolling() {
  * /api/v3/growagarden/stock:
  *   get:
  *     summary: Lấy stock hiện tại
+ *     tags: [Stock]
  *     description: Trả về toàn bộ dữ liệu stock hiện có
  *     responses:
  *       200:
@@ -167,6 +188,7 @@ function startPolling() {
  * /api/v3/growagarden/weather:
  *   get:
  *     summary: Lấy thời tiết hiện tại
+ *     tags: [Weather]
  *     description: Trả về dữ liệu thời tiết đang diễn ra trong game
  *     responses:
  *       200:
@@ -182,6 +204,7 @@ function startPolling() {
  * /api/v3/growagarden/calculate:
  *   get:
  *     summary: Tính toán giá trị ước lượng hoặc thông tin fruit
+ *     tags: [Calculation]
  *     description: Cung cấp Name, Weight, Variant, Mutation để tính toán
  *     parameters:
  *       - in: query
@@ -219,6 +242,7 @@ function startPolling() {
  * /api/v3/growagarden/info/{item_id}:
  *   get:
  *     summary: Lấy thông tin chi tiết 1 item
+ *     tags: [Info]
  *     parameters:
  *       - in: path
  *         name: item_id
@@ -240,6 +264,7 @@ function startPolling() {
  * /api/v3/growagarden/info:
  *   get:
  *     summary: Lấy danh sách item theo type
+ *     tags: [Info]
  *     parameters:
  *       - in: query
  *         name: type
@@ -247,7 +272,7 @@ function startPolling() {
  *         schema:
  *           type: string
  *           description: "Loại item: seed, gear, egg, cosmetic, event, weather"
- *           enum: ["seed, gear, egg, cosmetic, event, weather"]
+ *           enum: ["seed", "gear", "egg", "cosmetic", "event", "weather"]
  *     responses:
  *       200:
  *         description: Danh sách item
@@ -255,12 +280,16 @@ function startPolling() {
  *           application/json:
  *             schema:
  *               type: array
+ *               items:
+ *                 type: object
  */
+
 /**
  * @swagger
  * /api/v3/growagarden/image/{item_id}:
  *   get:
  *     summary: Lấy ảnh item
+ *     tags: [Image]
  *     parameters:
  *       - in: path
  *         name: item_id
@@ -283,6 +312,7 @@ function startPolling() {
  * /api/v3/growagarden/currentevent:
  *   get:
  *     summary: Lấy sự kiện hiện tại
+ *     tags: [Event]
  *     description: Trả về dữ liệu sự kiện đang diễn ra, bao gồm icon đã rehost
  *     responses:
  *       200:
