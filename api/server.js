@@ -328,7 +328,13 @@ app.set('trust proxy', 1);
 app.use(cors());
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/static', express.static(path.join(__dirname, 'static')));
-
+app.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customSiteTitle: "Grow a Garden API Docs", // 👈 Đổi title tab ở đây
+  })
+);
 const limiter = rateLimit({
   windowMs: 60 * 1000,
   max: 500,
