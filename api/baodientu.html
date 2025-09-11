@@ -7,6 +7,21 @@
     <title>VietNam Today - Báo Điện Tử</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @keyframes scroll-left {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+
+        .animate-scroll {
+          display: inline-block;
+          padding-left: 100%; /* đệm để text trượt mượt */
+          animation: scroll-left 20s linear infinite;
+          white-space: nowrap;
+        }
         @font-face {
             font-family: 'SPP';
             src: url('./SPP/SPP-Regular.woff2') format('woff2');
@@ -158,7 +173,7 @@
             <div class="flex items-center">
                 <span class="breaking-news bg-red-600 text-white px-3 py-1 rounded font-bold text-sm mr-4">TIN NÓNG</span>
                 <div class="flex-1 overflow-hidden relative">
-                    <div id="news-ticker" class="whitespace-nowrap animate-scroll"></div>
+                    <div id="news-ticker" class="animate-scroll"></div>
                 </div>
             </div>
         </div>
