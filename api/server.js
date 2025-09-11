@@ -344,7 +344,7 @@ const limiter = rateLimit({
 // Routes
 
 // API
-app.get("/news", (req, res) => {
+app.get("/vietnam-today", (req, res) => {
   res.sendFile(path.join(__dirname, "baodientu.html")); 
   // news.html là file HTML bạn đã có sẵn
 });
