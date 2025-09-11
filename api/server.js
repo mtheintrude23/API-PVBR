@@ -344,64 +344,7 @@ const limiter = rateLimit({
 // Routes
 
 // API
-// ======= XỬ LÝ 404 =======
-app.use((req, res, next) => {
-  res.status(404).send(`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error Page</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <style>
-        .gradient-text {
-            background: linear-gradient(90deg, #ef4444, #f97316);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-    </style>
-</head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center">
-    <div class="max-w-md w-full p-8 bg-white rounded-xl shadow-lg text-center" data-aos="fade-up">
-        <div class="mb-6">
-            <i data-feather="alert-triangle" class="w-16 h-16 text-red-500 mx-auto"></i>
-        </div>
-        <h1 class="text-3xl font-bold gradient-text mb-2">404 Error</h1>
-        <h2 class="text-xl font-semibold text-gray-700 mb-4">Page Not Found</h2>
-        
-        <div class="bg-gray-100 p-4 rounded-lg mb-6 text-left">
-            <div class="flex items-center mb-2">
-                <i data-feather="alert-circle" class="w-5 h-5 text-yellow-500 mr-2"></i>
-                <span class="font-medium">Warning:</span>
-            </div>
-            <p class="text-gray-600">Target URL returned error 404: Not Found</p>
-            <p class="text-gray-500 text-sm mt-2">Cannot GET ${req.originalUrl}</p>
-        </div>
 
-        <div class="space-y-4">
-            <a href="/docs" class="block w-full px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg font-medium hover:opacity-90 transition">
-                Go to Homepage
-            </a>
-            <button onclick="window.history.back()" class="w-full px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition">
-                Go Back
-            </button>
-        </div>
-    </div>
-
-    <script>
-        AOS.init();
-        feather.replace();
-    </script>
-</body>
-</html>
-  `);
-});
 app.get('/api/health', limiter, async (req, res) => {
   const endpoints = [
     `https://api-tmyd.onrender.com/api/v3/growagarden/stock`,
@@ -640,7 +583,64 @@ app.get('/api/v3/growagarden/image/:item_id', async (req, res) => {
     res.status(500).send('Không tải được ảnh');
   }
 });
+// ======= XỬ LÝ 404 =======
+app.use((req, res, next) => {
+  res.status(404).send(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(90deg, #ef4444, #f97316);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full p-8 bg-white rounded-xl shadow-lg text-center" data-aos="fade-up">
+        <div class="mb-6">
+            <i data-feather="alert-triangle" class="w-16 h-16 text-red-500 mx-auto"></i>
+        </div>
+        <h1 class="text-3xl font-bold gradient-text mb-2">404 Error</h1>
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Page Not Found</h2>
+        
+        <div class="bg-gray-100 p-4 rounded-lg mb-6 text-left">
+            <div class="flex items-center mb-2">
+                <i data-feather="alert-circle" class="w-5 h-5 text-yellow-500 mr-2"></i>
+                <span class="font-medium">Warning:</span>
+            </div>
+            <p class="text-gray-600">Target URL returned error 404: Not Found</p>
+            <p class="text-gray-500 text-sm mt-2">Cannot GET ${req.originalUrl}</p>
+        </div>
 
+        <div class="space-y-4">
+            <a href="/docs" class="block w-full px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg font-medium hover:opacity-90 transition">
+                Go to Homepage
+            </a>
+            <button onclick="window.location.href='/docs'" class="w-full px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition">
+                Go Back
+            </button>
+        </div>
+    </div>
+
+    <script>
+        AOS.init();
+        feather.replace();
+    </script>
+</body>
+</html>
+  `);
+});
 // Start server
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, '0.0.0.0', () => {
