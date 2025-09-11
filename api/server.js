@@ -344,10 +344,10 @@ const limiter = rateLimit({
 // Routes
 
 // API
-/*app.get("/vietnam-today", (req, res) => {
+app.get("/vietnam-today", (req, res) => {
   res.sendFile(path.join(__dirname, "baodientu.html")); 
   // news.html là file HTML bạn đã có sẵn
-});*/
+});
 
 app.get('/api/health', limiter, async (req, res) => {
   const endpoints = [
