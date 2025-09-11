@@ -385,7 +385,7 @@ app.use((req, res, next) => {
         </div>
 
         <div class="space-y-4">
-            <a href="/" class="block w-full px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg font-medium hover:opacity-90 transition">
+            <a href="/docs" class="block w-full px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg font-medium hover:opacity-90 transition">
                 Go to Homepage
             </a>
             <button onclick="window.history.back()" class="w-full px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition">
