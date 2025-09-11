@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,94 +9,109 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @keyframes scroll-left {
-          0% {
-            transform: translateX(100%);
-          }
-          100% {
-            transform: translateX(-100%);
-          }
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
         }
 
         .animate-scroll {
-          display: inline-block;
-          padding-left: 100%; /* đệm để text trượt mượt */
-          animation: scroll-left 60s linear infinite;
-          white-space: nowrap;
+            display: inline-block;
+            padding-left: 100%;
+            /* đệm để text trượt mượt */
+            animation: scroll-left 60s linear infinite;
+            white-space: nowrap;
         }
+
         @font-face {
             font-family: 'SPP';
             src: url('./SPP/SPP-Regular.woff2') format('woff2');
             font-weight: 400;
             font-style: normal;
         }
+
         @font-face {
             font-family: 'SPP';
             src: url('./SPP/SPP-Medium.woff2') format('woff2');
             font-weight: 500;
             font-style: normal;
         }
+
         @font-face {
             font-family: 'SPP';
             src: url('./SPP/SPP-SemiBold.woff2') format('woff2');
             font-weight: 600;
             font-style: normal;
         }
+
         @font-face {
             font-family: 'SPP';
             src: url('./SPP/SPP-Bold.woff2') format('woff2');
             font-weight: 700;
             font-style: normal;
         }
-        
+
         @import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap');
-        
-        body { 
-            font-family: 'SPP', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+
+        body {
+            font-family: 'SPP', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        
+
         .breaking-news {
             animation: blink 1.5s infinite;
         }
-        
+
         @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0.7; }
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0.7;
+            }
         }
-        
+
         .news-item:hover {
             background-color: #f8f9fa;
             transition: all 0.2s ease;
         }
-        
+
         .category-tab {
             border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
         }
-        
+
         .category-tab:hover,
         .category-tab.active {
             border-bottom-color: #dc2626;
             color: #dc2626;
         }
-        
+
         .sidebar-widget {
             border-left: 4px solid #dc2626;
         }
-        
+
         .news-meta {
             font-size: 13px;
             color: #666;
         }
-        
+
         .main-headline {
             line-height: 1.3;
         }
-        
+
         .sub-headline {
             line-height: 1.4;
         }
     </style>
 </head>
+
 <body class="bg-gray-100">
     <!-- Top Bar -->
     <div class="bg-red-600 text-white py-1">
@@ -121,7 +137,8 @@
                 <div class="flex items-center">
                     <div class="w-16 h-16 bg-red-600 rounded-lg flex items-center justify-center mr-4">
                         <svg viewBox="0 0 24 24" fill="white" class="w-10 h-10">
-                            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
+                            <path
+                                d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z" />
                         </svg>
                     </div>
                     <div>
@@ -159,7 +176,8 @@
                     <input type="text" placeholder="Tìm kiếm..." class="px-3 py-1 text-black rounded-l text-sm">
                     <button class="bg-red-600 px-3 py-1 rounded-r hover:bg-red-700">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                            <path
+                                d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                         </svg>
                     </button>
                 </div>
@@ -171,7 +189,8 @@
     <div class="bg-yellow-400 border-l-4 border-red-600">
         <div class="container mx-auto px-4 py-2">
             <div class="flex items-center">
-                <span class="breaking-news bg-red-600 text-white px-3 py-1 rounded font-bold text-sm mr-4">TIN NÓNG</span>
+                <span class="breaking-news bg-red-600 text-white px-3 py-1 rounded font-bold text-sm mr-4">TIN
+                    NÓNG</span>
                 <div class="flex-1 overflow-hidden relative">
                     <div id="news-ticker" class="animate-scroll"></div>
                 </div>
@@ -216,7 +235,8 @@
                         </div>
                         <div class="p-4" id="business-news">
                             <div class="text-center py-4">
-                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto">
+                                </div>
                                 <p class="mt-2 text-gray-600">Đang tải...</p>
                             </div>
                         </div>
@@ -253,7 +273,8 @@
                     </div>
                     <div class="p-4" id="weatherWidget">
                         <div class="text-center">
-                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600 mx-auto mb-2"></div>
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600 mx-auto mb-2">
+                            </div>
                             <p class="text-gray-600 text-sm">Đang tải thời tiết...</p>
                         </div>
                     </div>
@@ -298,15 +319,19 @@
                     </div>
                     <div class="p-4">
                         <div class="grid grid-cols-2 gap-3">
-                            <button class="bg-blue-600 text-white p-3 rounded hover:bg-blue-700 flex items-center justify-center">
+                            <button
+                                class="bg-blue-600 text-white p-3 rounded hover:bg-blue-700 flex items-center justify-center">
                                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                    <path
+                                        d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                                 </svg>
                                 Facebook
                             </button>
-                            <button class="bg-red-600 text-white p-3 rounded hover:bg-red-700 flex items-center justify-center">
+                            <button
+                                class="bg-red-600 text-white p-3 rounded hover:bg-red-700 flex items-center justify-center">
                                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                    <path
+                                        d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                                 </svg>
                                 YouTube
                             </button>
@@ -330,7 +355,8 @@
             <div class="grid md:grid-cols-4 gap-6">
                 <div>
                     <h3 class="font-bold text-lg mb-4">VietNam Today</h3>
-                    <p class="text-gray-400 text-sm mb-4">Báo điện tử hàng đầu Việt Nam về công nghệ và đổi mới sáng tạo.</p>
+                    <p class="text-gray-400 text-sm mb-4">Báo điện tử hàng đầu Việt Nam về công nghệ và đổi mới sáng
+                        tạo.</p>
                     <div class="text-sm text-gray-400">
                         <p>📧 Email: vietnamtoday@vtv.vn</p>
                         <p>📞 Hotline: +(84)24.6327.1999 | Fax: +(84)24.3771.8838 </p>
@@ -367,7 +393,8 @@
                 </div>
             </div>
             <div class="border-t border-gray-700 mt-6 pt-6 text-center text-sm text-gray-400">
-                <p>&copy; 2025 VietNam Today. Bản quyền thuộc về VietNam Today. Cấm sao chép dưới mọi hình thức nếu không có sự chấp thuận bằng văn bản.</p>
+                <p>&copy; 2025 VietNam Today. Bản quyền thuộc về VietNam Today. Cấm sao chép dưới mọi hình thức nếu
+                    không có sự chấp thuận bằng văn bản.</p>
             </div>
         </div>
     </footer>
@@ -386,7 +413,7 @@
             const diffTime = Math.abs(now - date);
             const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            
+
             if (diffHours < 1) return 'Vừa xong';
             if (diffHours < 24) return `${diffHours} giờ trước`;
             if (diffDays < 7) return `${diffDays} ngày trước`;
@@ -394,9 +421,9 @@
         }
 
         // Update current date in top bar
-        document.getElementById("date").textContent = "📅 " + (function() {
+        document.getElementById("date").textContent = "📅 " + (function () {
             const now = new Date();
-            const days = ["Chủ Nhật","Thứ Hai","Thứ Ba","Thứ Tư","Thứ Năm","Thứ Sáu","Thứ Bảy"];
+            const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
             const dayName = days[now.getDay()];
             const date = now.getDate().toString().padStart(2, '0');
             const month = (now.getMonth() + 1).toString().padStart(2, '0');
@@ -452,7 +479,7 @@
 
                 const response = await fetch(url);
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     return data.results || [];
                 }
@@ -475,19 +502,19 @@
 
                 const response = await fetch(`${WEATHER_BASE_URL}/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current_weather=true&hourly=temperature_2m&timezone=auto`);
                 const data = await response.json();
-                
+
                 if (data.current_weather) {
                     return {
                         main: {
                             temp: data.current_weather.temperature,
-                            feels_like: data.current_weather.temperature, // Open-Meteo doesn't provide feels_like
+                            feels_like: data.current_weather.temperature,
                             temp_min: Math.min(...data.hourly.temperature_2m.slice(0, 24)),
                             temp_max: Math.max(...data.hourly.temperature_2m.slice(0, 24)),
                             humidity: data.hourly.relativehumidity_2m ? data.hourly.relativehumidity_2m[0] : 0,
                             pressure: data.hourly.pressure_msl ? data.hourly.pressure_msl[0] : 0
                         },
-                        wind: { speed: data.current_weather.windspeed / 3.6 }, // Convert km/h to m/s
-                        visibility: 10000, // Open-Meteo doesn't provide visibility
+                        wind: { speed: data.current_weather.windspeed / 3.6 },
+                        visibility: 10000,
                         weather: [{ description: data.current_weather.weathercode.toString() }]
                     };
                 }
@@ -502,27 +529,10 @@
         // Get weather icon based on WMO weather code
         function getWeatherIcon(weatherCode) {
             const codeMap = {
-                '0': '☀️',  // Clear sky
-                '1': '⛅',  // Mainly clear
-                '2': '⛅',  // Partly cloudy
-                '3': '☁️',  // Overcast
-                '45': '🌫️', // Fog
-                '48': '🌫️', // Depositing rime fog
-                '51': '🌦️', // Light drizzle
-                '53': '🌦️', // Moderate drizzle
-                '55': '🌦️', // Dense drizzle
-                '61': '🌧️', // Light rain
-                '63': '🌧️', // Moderate rain
-                '65': '🌧️', // Heavy rain
-                '71': '❄️', // Light snow
-                '73': '❄️', // Moderate snow
-                '75': '❄️', // Heavy snow
-                '80': '🌧️', // Rain showers
-                '81': '🌧️', // Moderate rain showers
-                '82': '🌧️', // Violent rain showers
-                '95': '⛈️', // Thunderstorm
-                '96': '⛈️', // Thunderstorm with hail
-                '99': '⛈️'  // Thunderstorm with heavy hail
+                '0': '☀️', '1': '⛅', '2': '⛅', '3': '☁️', '45': '🌫️', '48': '🌫️',
+                '51': '🌦️', '53': '🌦️', '55': '🌦️', '61': '🌧️', '63': '🌧️', '65': '🌧️',
+                '71': '❄️', '73': '❄️', '75': '❄️', '80': '🌧️', '81': '🌧️', '82': '🌧️',
+                '95': '⛈️', '96': '⛈️', '99': '⛈️'
             };
             return codeMap[weatherCode] || '🌤️';
         }
@@ -530,26 +540,12 @@
         // Get Vietnamese weather description
         function getVietnameseWeatherDesc(weatherCode) {
             const descMap = {
-                '0': 'Trời quang',
-                '1': 'Ít mây',
-                '2': 'Mây rải rác',
-                '3': 'Nhiều mây',
-                '45': 'Sương mù',
-                '48': 'Sương mù dày đặc',
-                '51': 'Mưa phùn nhẹ',
-                '53': 'Mưa phùn vừa',
-                '55': 'Mưa phùn dày',
-                '61': 'Mưa nhẹ',
-                '63': 'Mưa vừa',
-                '65': 'Mưa to',
-                '71': 'Tuyết nhẹ',
-                '73': 'Tuyết vừa',
-                '75': 'Tuyết nặng',
-                '80': 'Mưa rào nhẹ',
-                '81': 'Mưa rào vừa',
-                '82': 'Mưa rào to',
-                '95': 'Dông bão',
-                '96': 'Dông bão kèm mưa đá',
+                '0': 'Trời quang', '1': 'Ít mây', '2': 'Mây rải rác', '3': 'Nhiều mây',
+                '45': 'Sương mù', '48': 'Sương mù dày đặc', '51': 'Mưa phùn nhẹ',
+                '53': 'Mưa phùn vừa', '55': 'Mưa phùn dày', '61': 'Mưa nhẹ',
+                '63': 'Mưa vừa', '65': 'Mưa to', '71': 'Tuyết nhẹ', '73': 'Tuyết vừa',
+                '75': 'Tuyết nặng', '80': 'Mưa rào nhẹ', '81': 'Mưa rào vừa',
+                '82': 'Mưa rào to', '95': 'Dông bão', '96': 'Dông bão kèm mưa đá',
                 '99': 'Dông bão kèm mưa đá lớn'
             };
             return descMap[weatherCode] || 'Thời tiết không xác định';
@@ -564,87 +560,87 @@
 
             if (isMain) {
                 return `
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <div class="relative mb-4">
-                                ${imageUrl ? 
-                                    `<img src="${imageUrl}" alt="${article.title}" class="w-full h-64 object-cover rounded" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : 
-                                    ''
-                                }
-                                <div class="h-64 ${categoryColor} rounded flex items-center justify-center ${imageUrl ? 'hidden' : ''}">
-                                    <div class="text-center text-white">
-                                        <div class="w-16 h-16 mx-auto mb-3">
-                                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-full h-full">
-                                                <path d="M12 2l3.09 6.26L22 9l-5.91.74L12 16l-4.09-6.26L2 9l6.91-.74L12 2z"/>
-                                            </svg>
-                                        </div>
-                                        <p class="text-lg font-semibold">${category}</p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="relative mb-4">
+                            ${imageUrl ?
+                        `<img src="${imageUrl}" alt="${article.title}" class="w-full h-64 object-cover rounded" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` :
+                        ''
+                    }
+                            <div class="h-64 ${categoryColor} rounded flex items-center justify-center ${imageUrl ? 'hidden' : ''}">
+                                <div class="text-center text-white">
+                                    <div class="w-16 h-16 mx-auto mb-3">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" class="w-full h-full">
+                                            <path d="M12 2l3.09 6.26L22 9l-5.91.74L12 16l-4.09-6.26L2 9l6.91-.74L12 2z"/>
+                                        </svg>
                                     </div>
+                                    <p class="text-lg font-semibold">${category}</p>
                                 </div>
-                                <span class="absolute top-3 left-3 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">HOT</span>
                             </div>
-                            <div class="mb-2">
-                                <span class="text-red-600 font-semibold text-sm uppercase">${category}</span>
-                                <span class="text-gray-500 text-sm ml-2">• ${timeAgo}</span>
-                            </div>
-                            <h2 class="main-headline text-xl font-bold text-gray-900 mb-3 hover:text-red-600 cursor-pointer">
-                                ${article.title}
-                            </h2>
-                            <p class="text-gray-600 text-sm leading-relaxed">
-                                ${article.description || article.content?.substring(0, 200) + '...' || 'Nội dung đang được cập nhật...'}
-                            </p>
-                            ${article.link ? `<a href="${article.link}" target="_blank" class="inline-block mt-3 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm">Đọc tiếp →</a>` : ''}
+                            <span class="absolute top-3 left-3 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">HOT</span>
                         </div>
-                        <div id="secondary-news" class="space-y-4">
-                            <!-- Secondary news will be loaded here -->
+                        <div class="mb-2">
+                            <span class="text-red-600 font-semibold text-sm uppercase">${category}</span>
+                            <span class="text-gray-500 text-sm ml-2">• ${timeAgo}</span>
                         </div>
+                        <h2 class="main-headline text-xl font-bold text-gray-900 mb-3 hover:text-red-600 cursor-pointer">
+                            ${article.title}
+                        </h2>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            ${article.description || article.content?.substring(0, 200) + '...' || 'Nội dung đang được cập nhật...'}
+                        </p>
+                        ${article.link ? `<a href="${article.link}" target="_blank" class="inline-block mt-3 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm">Đọc tiếp →</a>` : ''}
                     </div>
-                `;
+                    <div id="secondary-news" class="space-y-4">
+                        <!-- Secondary news will be loaded here -->
+                    </div>
+                </div>
+            `;
             } else {
                 return `
-                    <article class="news-item p-3 rounded cursor-pointer" onclick="window.open('${article.link}', '_blank')">
-                        <div class="flex space-x-3">
-                            <div class="w-20 h-16 ${categoryColor} rounded flex-shrink-0 flex items-center justify-center">
-                                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9l-5.91.74L12 16l-4.09-6.26L2 9l6.91-.74L12 2z"/>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <div class="news-meta mb-1">
-                                    <span class="text-red-600 font-medium">${category}</span> • ${timeAgo}
-                                </div>
-                                <h3 class="sub-headline font-semibold text-gray-900 hover:text-red-600">
-                                    ${article.title}
-                                </h3>
-                            </div>
+                <article class="news-item p-3 rounded cursor-pointer" onclick="window.open('${article.link}', '_blank')">
+                    <div class="flex space-x-3">
+                        <div class="w-20 h-16 ${categoryColor} rounded flex-shrink-0 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2l3.09 6.26L22 9l-5.91.74L12 16l-4.09-6.26L2 9l6.91-.74L12 2z"/>
+                            </svg>
                         </div>
-                    </article>
-                `;
+                        <div class="flex-1">
+                            <div class="news-meta mb-1">
+                                <span class="text-red-600 font-medium">${category}</span> • ${timeAgo}
+                            </div>
+                            <h3 class="sub-headline font-semibold text-gray-900 hover:text-red-600">
+                                ${article.title}
+                            </h3>
+                        </div>
+                    </div>
+                </article>
+            `;
             }
         }
 
         // Create category news section
         function createCategorySection(articles, categoryName, categoryColor) {
             if (!articles || articles.length === 0) return '';
-            
+
             return `
-                <div class="bg-white rounded shadow-sm">
-                    <div class="${categoryColor} text-white px-4 py-2 font-bold">
-                        ${categoryName.toUpperCase()}
-                    </div>
-                    <div class="p-4">
-                        ${articles.slice(0, 3).map(article => `
-                            <article class="mb-4 pb-4 border-b border-gray-200 last:border-b-0 last:mb-0 last:pb-0 cursor-pointer" onclick="window.open('${article.link}', '_blank')">
-                                <div class="news-meta mb-2">${formatDate(article.pubDate)}</div>
-                                <h3 class="font-semibold text-gray-900 hover:text-red-600 cursor-pointer mb-2">
-                                    ${article.title}
-                                </h3>
-                                ${article.description ? `<p class="text-sm text-gray-600">${article.description.substring(0, 100)}...</p>` : ''}
-                            </article>
-                        `).join('')}
-                    </div>
+            <div class="bg-white rounded shadow-sm">
+                <div class="${categoryColor} text-white px-4 py-2 font-bold">
+                    ${categoryName.toUpperCase()}
                 </div>
-            `;
+                <div class="p-4">
+                    ${articles.slice(0, 3).map(article => `
+                        <article class="mb-4 pb-4 border-b border-gray-200 last:border-b-0 last:mb-0 last:pb-0 cursor-pointer" onclick="window.open('${article.link}', '_blank')">
+                            <div class="news-meta mb-2">${formatDate(article.pubDate)}</div>
+                            <h3 class="font-semibold text-gray-900 hover:text-red-600 cursor-pointer mb-2">
+                                ${article.title}
+                            </h3>
+                            ${article.description ? `<p class="text-sm text-gray-600">${article.description.substring(0, 100)}...</p>` : ''}
+                        </article>
+                    `).join('')}
+                </div>
+            </div>
+        `;
         }
 
         // Load weather
@@ -652,20 +648,20 @@
             const weatherWidget = document.getElementById('weatherWidget');
             try {
                 weatherWidget.innerHTML = `
-                    <div class="text-center">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600 mx-auto mb-2"></div>
-                        <p class="text-gray-600 text-sm">Đang tải thời tiết...</p>
-                    </div>
-                `;
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600 mx-auto mb-2"></div>
+                    <p class="text-gray-600 text-sm">Đang tải thời tiết...</p>
+                </div>
+            `;
 
                 const weatherData = await fetchWeather(city);
                 if (!weatherData) {
                     weatherWidget.innerHTML = `
-                        <div class="text-center py-4">
-                            <p class="text-red-600 text-sm">Không thể tải thời tiết</p>
-                            <button onclick="loadWeather('${city}')" class="mt-2 text-cyan-600 text-sm hover:underline">Thử lại</button>
-                        </div>
-                    `;
+                    <div class="text-center py-4">
+                        <p class="text-red-600 text-sm">Không thể tải thời tiết</p>
+                        <button onclick="loadWeather('${city}')" class="mt-2 text-cyan-600 text-sm hover:underline">Thử lại</button>
+                    </div>
+                `;
                     return;
                 }
 
@@ -682,48 +678,71 @@
                 const maxTemp = Math.round(weatherData.main.temp_max);
 
                 weatherWidget.innerHTML = `
-                    <div class="text-center">
-                        <div class="text-4xl mb-3">${weatherIcon}</div>
-                        <div class="text-3xl font-bold text-gray-900 mb-1">${temp}°C</div>
-                        <div class="text-sm text-gray-600 mb-1">Cảm giác như ${feelsLike}°C</div>
-                        <div class="text-sm text-gray-600 mb-4 capitalize">${cityName} - ${weatherDesc}</div>
-                        <div class="flex justify-center space-x-4 text-xs text-gray-500 mb-4">
-                            <span>↑${maxTemp}°</span>
-                            <span>↓${minTemp}°</span>
+                <div class="text-center">
+                    <div class="text-4xl mb-3">${weatherIcon}</div>
+                    <div class="text-3xl font-bold text-gray-900 mb-1">${temp}°C</div>
+                    <div class="text-sm text-gray-600 mb-1">Cảm giác như ${feelsLike}°C</div>
+                    <div class="text-sm text-gray-600 mb-4 capitalize">${cityName} - ${weatherDesc}</div>
+                    <div class="flex justify-center space-x-4 text-xs text-gray-500 mb-4">
+                        <span>↑${maxTemp}°</span>
+                        <span>↓${minTemp}°</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div class="bg-gray-50 p-2 rounded">
+                            <div class="font-medium text-gray-700">💧 Độ ẩm</div>
+                            <div class="text-blue-600 font-semibold">${humidity}%</div>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 text-sm">
-                            <div class="bg-gray-50 p-2 rounded">
-                                <div class="font-medium text-gray-700">💧 Độ ẩm</div>
-                                <div class="text-blue-600 font-semibold">${humidity}%</div>
-                            </div>
-                            <div class="bg-gray-50 p-2 rounded">
-                                <div class="font-medium text-gray-700">💨 Gió</div>
-                                <div class="text-blue-600 font-semibold">${windSpeed} km/h</div>
-                            </div>
-                            <div class="bg-gray-50 p-2 rounded">
-                                <div class="font-medium text-gray-700">🌡️ Áp suất</div>
-                                <div class="text-blue-600 font-semibold">${pressure} mb</div>
-                            </div>
-                            <div class="bg-gray-50 p-2 rounded">
-                                <div class="font-medium text-gray-700">👁️ Tầm nhìn</div>
-                                <div class="text-blue-600 font-semibold">${visibility} km</div>
-                            </div>
+                        <div class="bg-gray-50 p-2 rounded">
+                            <div class="font-medium text-gray-700">💨 Gió</div>
+                            <div class="text-blue-600 font-semibold">${windSpeed} km/h</div>
                         </div>
-                        <div class="mt-3 text-xs text-gray-500">
-                            Cập nhật: ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                        <div class="bg-gray-50 p-2 rounded">
+                            <div class="font-medium text-gray-700">🌡️ Áp suất</div>
+                            <div class="text-blue-600 font-semibold">${pressure} mb</div>
+                        </div>
+                        <div class="bg-gray-50 p-2 rounded">
+                            <div class="font-medium text-gray-700">👁️ Tầm nhìn</div>
+                            <div class="text-blue-600 font-semibold">${visibility} km</div>
                         </div>
                     </div>
-                `;
+                    <div class="mt-3 text-xs text-gray-500">
+                        Cập nhật: ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                </div>
+            `;
 
                 document.getElementById('weather').textContent = `🌡️ ${cityName}: ${temp}°C`;
             } catch (error) {
                 console.error('Error loading weather:', error);
                 weatherWidget.innerHTML = `
-                    <div class="text-center py-4">
-                        <p class="text-red-600 text-sm">Lỗi khi tải thời tiết</p>
-                        <button onclick="loadWeather('${city}')" class="mt-2 text-cyan-600 text-sm hover:underline">Thử lại</button>
-                    </div>
-                `;
+                <div class="text-center py-4">
+                    <p class="text-red-600 text-sm">Lỗi khi tải thời tiết</p>
+                    <button onclick="loadWeather('${city}')" class="mt-2 text-cyan-600 text-sm hover:underline">Thử lại</button>
+                </div>
+            `;
+            }
+        }
+
+        // Load breaking news ticker
+        async function loadBreakingNews() {
+            const breakingNewsTicker = document.getElementById('news-ticker');
+            try {
+                breakingNewsTicker.innerHTML = `<span class="text-gray-600">Đang tải tin nóng...</span>`;
+                const allNews = await fetchNews(); // Fetch latest news
+                if (allNews.length > 0) {
+                    breakingNewsTicker.innerHTML = allNews.slice(0, 5).map(article => `
+                    <span class="whitespace-nowrap mr-8">
+                        🔥 <a href="${article.link}" target="_blank" class="hover:underline">
+                            ${article.title}
+                        </a>
+                    </span>
+                `).join('');
+                } else {
+                    breakingNewsTicker.innerHTML = `<span class="text-gray-600">Không có tin nóng mới.</span>`;
+                }
+            } catch (error) {
+                console.error('Error loading breaking news:', error);
+                breakingNewsTicker.innerHTML = `<span class="text-red-600">Lỗi khi tải tin nóng.</span>`;
             }
         }
 
@@ -738,34 +757,34 @@
 
                 // Show loading states
                 featuredSection.innerHTML = `
-                    <div class="text-center py-8">
-                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
-                        <p class="mt-4 text-gray-600">Đang tải tin tức...</p>
-                    </div>`;
+                <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+                    <p class="mt-4 text-gray-600">Đang tải tin tức...</p>
+                </div>`;
                 techNewsSection.innerHTML = businessNewsSection.innerHTML = `
-                    <div class="text-center py-4">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                        <p class="mt-2 text-gray-600">Đang tải...</p>
-                    </div>`;
+                <div class="text-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                    <p class="mt-2 text-gray-600">Đang tải...</p>
+                </div>`;
                 mostReadSection.innerHTML = `
-                    <div class="text-center py-4">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                        <p class="mt-2 text-gray-600">Đang tải...</p>
-                    </div>`;
+                <div class="text-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <p class="mt-2 text-gray-600">Đang tải...</p>
+                </div>`;
                 breakingNewsTicker.innerHTML = `
-                    <span class="text-gray-600">Đang tải tin nóng...</span>`;
+                <span class="text-gray-600">Đang tải tin nóng...</span>`;
 
                 // Fetch all news
                 const allNews = await fetchNews();
                 if (allNews.length === 0) {
                     featuredSection.innerHTML = `
-                        <div class="text-center py-8">
-                            <p class="text-red-600">Không thể tải tin tức. Vui lòng thử lại sau.</p>
-                        </div>`;
+                    <div class="text-center py-8">
+                        <p class="text-red-600">Không thể tải tin tức. Vui lòng thử lại sau.</p>
+                    </div>`;
                     return;
                 }
 
-                // Featured news (first article as main, next 3 as secondary)
+                // Featured news
                 if (allNews.length > 0) {
                     featuredSection.innerHTML = createNewsCard(allNews[0], true);
                     const secondaryContainer = document.getElementById('secondary-news');
@@ -779,55 +798,53 @@
                 const businessNews = allNews.filter(article => article.category?.includes('business'));
 
                 techNewsSection.innerHTML = techNews.length > 0 ? techNews.slice(0, 3).map(article => `
-                    <article class="mb-4 pb-4 border-b border-gray-200 last:border-b-0 last:mb-0 last:pb-0 cursor-pointer" onclick="window.open('${article.link}', '_blank')">
-                        <div class="news-meta mb-2">${formatDate(article.pubDate)}</div>
-                        <h3 class="font-semibold text-gray-900 hover:text-red-600 cursor-pointer mb-2">
-                            ${article.title}
-                        </h3>
-                        ${article.description ? `<p class="text-sm text-gray-600">${article.description.substring(0, 100)}...</p>` : ''}
-                    </article>
-                `).join('') : '<p class="text-gray-600">Không có tin tức công nghệ.</p>';
+                <article class="mb-4 pb-4 border-b border-gray-200 last:border-b-0 last:mb-0 last:pb-0 cursor-pointer" onclick="window.open('${article.link}', '_blank')">
+                    <div class="news-meta mb-2">${formatDate(article.pubDate)}</div>
+                    <h3 class="font-semibold text-gray-900 hover:text-red-600 cursor-pointer mb-2">
+                        ${article.title}
+                    </h3>
+                    ${article.description ? `<p class="text-sm text-gray-600">${article.description.substring(0, 100)}...</p>` : ''}
+                </article>
+            `).join('') : '<p class="text-gray-600">Không có tin tức công nghệ.</p>';
 
                 businessNewsSection.innerHTML = businessNews.length > 0 ? businessNews.slice(0, 3).map(article => `
-                    <article class="mb-4 pb-4 border-b border-gray-200 last:border-b-0 last:mb-0 last:pb-0 cursor-pointer" onclick="window.open('${article.link}', '_blank')">
-                        <div class="news-meta mb-2">${formatDate(article.pubDate)}</div>
-                        <h3 class="font-semibold text-gray-900 hover:text-red-600 cursor-pointer mb-2">
-                            ${article.title}
-                        </h3>
-                        ${article.description ? `<p class="text-sm text-gray-600">${article.description.substring(0, 100)}...</p>` : ''}
-                    </article>
-                `).join('') : '<p class="text-gray-600">Không có tin tức kinh tế.</p>';
+                <article class="mb-4 pb-4 border-b border-gray-200 last:border-b-0 last:mb-0 last:pb-0 cursor-pointer" onclick="window.open('${article.link}', '_blank')">
+                    <div class="news-meta mb-2">${formatDate(article.pubDate)}</div>
+                    <h3 class="font-semibold text-gray-900 hover:text-red-600 cursor-pointer mb-2">
+                        ${article.title}
+                    </h3>
+                    ${article.description ? `<p class="text-sm text-gray-600">${article.description.substring(0, 100)}...</p>` : ''}
+                </article>
+            `).join('') : '<p class="text-gray-600">Không có tin tức kinh tế.</p>';
 
-                // Most read news (random selection from remaining articles)
+                // Most read news
                 if (mostReadSection && allNews.length > 4) {
                     const randomArticles = allNews.slice(4, 8);
                     mostReadSection.innerHTML = randomArticles.map((article, index) => `
-                        <article class="flex items-start space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded" onclick="window.open('${article.link}', '_blank')">
-                            <span class="bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">${index + 1}</span>
-                            <div>
-                                <h4 class="font-semibold text-sm text-gray-900 hover:text-red-600">${article.title}</h4>
-                                <div class="news-meta mt-1">${formatDate(article.pubDate)} • ${Math.floor(Math.random() * 20) + 5}k lượt đọc</div>
-                            </div>
-                        </article>
-                    `).join('');
+                    <article class="flex items-start space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded" onclick="window.open('${article.link}', '_blank')">
+                        <span class="bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">${index + 1}</span>
+                        <div>
+                            <h4 class="font-semibold text-sm text-gray-900 hover:text-red-600">${article.title}</h4>
+                            <div class="news-meta mt-1">${formatDate(article.pubDate)} • ${Math.floor(Math.random() * 20) + 5}k lượt đọc</div>
+                        </div>
+                    </article>
+                `).join('');
                 }
 
                 // Breaking news ticker
-                if (allNews.length > 0) {
-                    breakingNewsTicker.innerHTML = allNews.slice(0, 5).map(article => `
-                        <span class="whitespace-nowrap mr-8">
-                            🔥 <a href="${article.link}" target="_blank" class="hover:underline">
-                                ${article.title}
-                            </a>
-                        </span>
-                    `).join('');
-                }
+                breakingNewsTicker.innerHTML = allNews.length > 0 ? allNews.slice(0, 5).map(article => `
+                <span class="whitespace-nowrap mr-8">
+                    🔥 <a href="${article.link}" target="_blank" class="hover:underline">
+                        ${article.title}
+                    </a>
+                </span>
+            `).join('') : `<span class="text-gray-600">Không có tin nóng mới.</span>`;
             } catch (error) {
                 console.error('Error loading news:', error);
                 document.getElementById('featured-news').innerHTML = `
-                    <div class="text-center py-8">
-                        <p class="text-red-600">Lỗi khi tải tin tức. Vui lòng thử lại sau.</p>
-                    </div>`;
+                <div class="text-center py-8">
+                    <p class="text-red-600">Lỗi khi tải tin tức. Vui lòng thử lại sau.</p>
+                </div>`;
             }
         }
 
@@ -841,36 +858,36 @@
             try {
                 const searchResults = await fetchNews('', query);
                 const featuredSection = document.getElementById('featured-news');
-                
+
                 if (searchResults.length === 0) {
                     featuredSection.innerHTML = `
-                        <div class="text-center py-8">
-                            <p class="text-gray-600">Không tìm thấy kết quả cho "${query}"</p>
-                            <button onclick="loadNews()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">← Quay lại trang chủ</button>
-                        </div>`;
+                    <div class="text-center py-8">
+                        <p class="text-gray-600">Không tìm thấy kết quả cho "${query}"</p>
+                        <button onclick="loadNews()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">← Quay lại trang chủ</button>
+                    </div>`;
                     return;
                 }
 
                 featuredSection.innerHTML = `
-                    <div class="mb-4">
-                        <h2 class="text-xl font-bold text-gray-900">Kết quả tìm kiếm cho: "${query}"</h2>
-                        <p class="text-gray-600">Tìm thấy ${searchResults.length} kết quả</p>
-                    </div>
-                    <div class="space-y-4">
-                        ${searchResults.slice(0, 5).map(article => `
-                            <article class="border-b border-gray-200 pb-4 cursor-pointer" onclick="window.open('${article.link}', '_blank')">
-                                <div class="news-meta mb-2">
-                                    <span class="text-red-600 font-medium">${vietnameseCategories[article.category?.[0] || 'general'] || 'Tổng hợp'}</span> • ${formatDate(article.pubDate)}
-                                </div>
-                                <h3 class="font-semibold text-gray-900 hover:text-red-600 mb-2">${article.title}</h3>
-                                ${article.description ? `<p class="text-sm text-gray-600">${article.description.substring(0, 200)}...</p>` : ''}
-                            </article>
-                        `).join('')}
-                    </div>
-                    <button onclick="loadNews()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                        ← Quay lại trang chủ
-                    </button>
-                `;
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">Kết quả tìm kiếm cho: "${query}"</h2>
+                    <p class="text-gray-600">Tìm thấy ${searchResults.length} kết quả</p>
+                </div>
+                <div class="space-y-4">
+                    ${searchResults.slice(0, 5).map(article => `
+                        <article class="border-b border-gray-200 pb-4 cursor-pointer" onclick="window.open('${article.link}', '_blank')">
+                            <div class="news-meta mb-2">
+                                <span class="text-red-600 font-medium">${vietnameseCategories[article.category?.[0] || 'general'] || 'Tổng hợp'}</span> • ${formatDate(article.pubDate)}
+                            </div>
+                            <h3 class="font-semibold text-gray-900 hover:text-red-600 mb-2">${article.title}</h3>
+                            ${article.description ? `<p class="text-sm text-gray-600">${article.description.substring(0, 200)}...</p>` : ''}
+                        </article>
+                    `).join('')}
+                </div>
+                <button onclick="loadNews()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                    ← Quay lại trang chủ
+                </button>
+            `;
             } catch (error) {
                 console.error('Search error:', error);
                 alert('Lỗi khi tìm kiếm. Vui lòng thử lại sau.');
@@ -878,12 +895,12 @@
         }
 
         // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadNews();
             loadWeather();
 
             // News item hover effects
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 if (e.target.closest('.news-item')) {
                     const item = e.target.closest('.news-item');
                     item.style.backgroundColor = '#fee2e2';
@@ -896,27 +913,27 @@
             // Category tab switching
             const categoryTabs = document.querySelectorAll('.category-tab');
             categoryTabs.forEach(tab => {
-                tab.addEventListener('click', async function(e) {
+                tab.addEventListener('click', async function (e) {
                     e.preventDefault();
                     categoryTabs.forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
-                    
+
                     const category = categoryMap[this.textContent.trim()];
                     if (category) {
                         const categoryNews = await fetchNews(category);
                         const featuredSection = document.getElementById('featured-news');
                         if (featuredSection && categoryNews.length > 0) {
                             featuredSection.innerHTML = `
-                                <div class="mb-4">
-                                    <h2 class="text-xl font-bold text-gray-900">${vietnameseCategories[category]}</h2>
-                                </div>
-                                <div class="space-y-4">
-                                    ${categoryNews.slice(0, 6).map(article => createNewsCard(article)).join('')}
-                                </div>
-                                <button onclick="loadNews()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                                    ← Quay lại trang chủ
-                                </button>
-                            `;
+                            <div class="mb-4">
+                                <h2 class="text-xl font-bold text-gray-900">${vietnameseCategories[category]}</h2>
+                            </div>
+                            <div class="space-y-4">
+                                ${categoryNews.slice(0, 6).map(article => createNewsCard(article)).join('')}
+                            </div>
+                            <button onclick="loadNews()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                                ← Quay lại trang chủ
+                            </button>
+                        `;
                         }
                     } else if (this.textContent.trim() === 'TRANG CHỦ') {
                         loadNews();
@@ -928,10 +945,10 @@
             const searchButton = document.querySelector('nav button');
             const searchInput = document.querySelector('nav input[type="text"]');
             if (searchButton && searchInput) {
-                searchButton.addEventListener('click', function() {
+                searchButton.addEventListener('click', function () {
                     searchNews(searchInput.value);
                 });
-                searchInput.addEventListener('keypress', function(e) {
+                searchInput.addEventListener('keypress', function (e) {
                     if (e.key === 'Enter') {
                         searchNews(this.value);
                     }
@@ -941,7 +958,7 @@
             // Newsletter subscription
             const subscribeButton = document.querySelector('button:contains("Đăng ký nhận tin")');
             if (subscribeButton) {
-                subscribeButton.addEventListener('click', function() {
+                subscribeButton.addEventListener('click', function () {
                     alert('Cảm ơn bạn đã đăng ký nhận tin từ Báo Điện Tử!');
                 });
             }
@@ -949,23 +966,26 @@
             // City selection for weather
             const citySelect = document.getElementById('citySelect');
             if (citySelect) {
-                citySelect.addEventListener('change', function() {
+                citySelect.addEventListener('change', function () {
                     loadWeather(this.value);
                 });
             }
 
             // Auto-refresh content
-            setInterval(loadNews, 5 * 60 * 1000);
+            setInterval(loadNews, 5 * 60 * 1000); // Refresh all news every 5 minutes
+            setInterval(loadBreakingNews, 60 * 1000); // Refresh breaking news every 60 seconds
             setInterval(() => {
                 const selectedCity = document.getElementById('citySelect')?.value || 'Hanoi';
                 loadWeather(selectedCity);
-            }, 10 * 60 * 1000);
+            }, 10 * 60 * 1000); // Refresh weather every 10 minutes
         });
 
         // Make functions globally available
         window.loadNews = loadNews;
         window.searchNews = searchNews;
         window.loadWeather = loadWeather;
+        window.loadBreakingNews = loadBreakingNews;
     </script>
 </body>
+
 </html>
