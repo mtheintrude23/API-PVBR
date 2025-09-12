@@ -972,8 +972,8 @@
             }
 
             // Auto-refresh content
-            setInterval(loadBreakingNews, 60 * 1000); // Refresh breaking news every 60 seconds
-            setInterval(() => window.location.reload(), 5 * 60 * 1000); // Full page refresh every 5 minutes
+            setInterval(loadBreakingNews, 10 * 1000); // Refresh breaking news every 60 seconds
+            setInterval(() => loadNew(), 5 * 60 * 1000); // Full page refresh every 5 minutes
             setInterval(() => {
                 const selectedCity = document.getElementById('citySelect')?.value || 'Hanoi';
                 loadWeather(selectedCity);
