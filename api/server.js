@@ -25,6 +25,8 @@ let latestData = {
   egg_stock: [],
   eventshop_stock: [],
   cosmetics_stock: [],
+  travelingmerchant_stock: [],
+  notification: [],
 };
 
 let newData = { weather: [] };
@@ -63,6 +65,10 @@ function updateStockData(data) {
   if (data.egg_stock) latestData.egg_stock = cleanItems(data.egg_stock);
   if (data.eventshop_stock) latestData.eventshop_stock = cleanItems(data.eventshop_stock);
   if (data.cosmetic_stock) latestData.cosmetics_stock = cleanItems(data.cosmetic_stock);
+  if (data.notification) latestData.notification = cleanItems(data.notification);
+}
+function updateMerchantData(data) {
+  if (data.travelingmerchant_stock) latestData.travelingmerchant_stock = cleanItems(data.travelingmerchant_stock);
 }
 const swaggerDefinition = {
   openapi: '3.1.0',
@@ -105,7 +111,9 @@ async function initializeData() {
     const stockData = await client.stocks.all();
     logger.success('✅ Kết nối Stock API Joshlei SDK thành công');
     updateStockData(stockData);
-
+    const merchantData = await client.stocks.travelingMerchant();
+    logger.success('✅ Kết nối Stock Merchant API Joshlei SDK thành công');
+    updateMerchantData(merchantData);
     const weatherData = await client.weather.all();
     logger.success('✅ Kết nối Weather API Joshlei SDK thành công');
     updateWeatherData(weatherData);
