@@ -974,19 +974,13 @@
 
             // Auto-refresh content
             cycleBreakingNews();
-            setInterval(cycleBreakingNews, 10 * 1000);// Refresh breaking news every 60 seconds
+            setInterval(cycleBreakingNews, 60 * 1000);// Refresh breaking news every 60 seconds
             setInterval(loadNews, 5 * 60 * 1000); // Full page refresh every 5 minutes
             setInterval(() => {
                 const selectedCity = document.getElementById("citySelect")?.value || "Hanoi";
                 loadWeather(selectedCity);
             }, 10 * 60 * 1000);
         });
-
-        // Make functions globally available
-        window.loadNews = loadNews;
-        window.searchNews = searchNews;
-        window.loadWeather = loadWeather;
-        window.cycleBreakingNews = cycleBreakingNews;
     </script>
 </body>
 
