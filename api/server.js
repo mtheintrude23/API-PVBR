@@ -65,7 +65,7 @@ function updateStockData(data) {
   if (data.egg_stock) latestData.egg_stock = cleanItems(data.egg_stock);
   if (data.eventshop_stock) latestData.eventshop_stock = cleanItems(data.eventshop_stock);
   if (data.cosmetic_stock) latestData.cosmetics_stock = cleanItems(data.cosmetic_stock);
-  if (data.notification) latestData.notification = cleanItems(data.notification);
+  if (data.notification) latestData.notification = data.notification;
 }
 function updateMerchantData(data) {
   if (data.travelingmerchant_stock) latestData.travelingmerchant_stock = cleanItems(data.travelingmerchant_stock);
