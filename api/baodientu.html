@@ -722,30 +722,31 @@
                 `;
             }
         }
-
+        let breakingNewsData = [];
+        let breakingIndex = 0;
         // Load breaking news ticker
-        async function loadBreakingNews() {
-            const breakingNewsTicker = document.getElementById('news-ticker');
-            try {
-                breakingNewsTicker.innerHTML = `<span class="text-gray-600">Đang tải tin nóng...</span>`;
-                const allNews = await fetchNews();
-                if (allNews.length > 0) {
-                    breakingNewsTicker.innerHTML = allNews.slice(0, 5).map(article => `
-                        <span class="whitespace-nowrap mr-8">
-                            🔥 <a href="${article.link}" target="_blank" class="hover:underline">
-                                ${article.title}
-                            </a>
-                        </span>
-                    `).join('');
-                } else {
-                    breakingNewsTicker.innerHTML = `<span class="text-gray-600">Không có tin nóng mới.</span>`;
-                }
-            } catch (error) {
-                console.error('Error loading breaking news:', error);
-                breakingNewsTicker.innerHTML = `<span class="text-red-600">Lỗi khi tải tin nóng.</span>`;
+        async function cycleBreakingNews() {  
+            if (breakingNewsData.length === 0 || breakingIndex >= breakingNewsData.length) {
+                const fresh = await fetchNews();
+                breakingNewsData = fresh.slice(0, 10); // lấy 5 tin đầu tiên
+                breakingIndex = 0;
+            }
+
+            const ticker = document.getElementById("news-ticker");
+            if (breakingNewsData.length > 0) {
+                const article = breakingNewsData[breakingIndex];
+                ticker.innerHTML = `
+                    <span class="whitespace-nowrap mr-8">
+                        🔥 <a href="${article.link}" target="_blank" class="hover:underline">
+                            ${article.title}
+                        </a>
+                    </span>
+                `;
+                breakingIndex++;
+            } else {
+                ticker.innerHTML = `<span class="text-gray-600">Không có tin nóng mới.</span>`;
             }
         }
-
         // Load all news content
         async function loadNews() {
             try {
@@ -972,19 +973,20 @@
             }
 
             // Auto-refresh content
-            setInterval(loadBreakingNews, 10 * 1000); // Refresh breaking news every 60 seconds
-            setInterval(() => loadNew(), 5 * 60 * 1000); // Full page refresh every 5 minutes
+            cycleBreakingNews();
+            setInterval(cycleBreakingNews, 10 * 1000);// Refresh breaking news every 60 seconds
+            setInterval(loadNews, 5 * 60 * 1000); // Full page refresh every 5 minutes
             setInterval(() => {
-                const selectedCity = document.getElementById('citySelect')?.value || 'Hanoi';
+                const selectedCity = document.getElementById("citySelect")?.value || "Hanoi";
                 loadWeather(selectedCity);
-            }, 10 * 60 * 1000); // Refresh weather every 10 minutes
+            }, 10 * 60 * 1000);
         });
 
         // Make functions globally available
         window.loadNews = loadNews;
         window.searchNews = searchNews;
         window.loadWeather = loadWeather;
-        window.loadBreakingNews = loadBreakingNews;
+        window.cycleBreakingNews = cycleBreakingNews;
     </script>
 </body>
 
