@@ -356,7 +356,9 @@ app.get("/vietnam-today", (req, res) => {
   res.sendFile(path.join(__dirname, "baodientu.html")); 
   // news.html là file HTML bạn đã có sẵn
 });
-
+app.get("/", (req, res) => {
+  res.redirect("https://api-tmyd.onrender.com/docs");
+});
 app.get('/api/health', limiter, async (req, res) => {
   const endpoints = [
     `https://api-tmyd.onrender.com/api/v3/growagarden/stock`,
