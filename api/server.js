@@ -69,7 +69,7 @@ function updateStockData(data) {
   if (data.notification) latestData.notification = data.notification;
 }
 function updateMerchantData(data) {
-  if (data.travelingmerchant_stock) latestData.travelingmerchant_stock = cleamItems(data.travelingmerchant_stock);
+  if (data.travelingmerchant_stock) latestData.travelingmerchant_stock = cleanItems(data.travelingmerchant_stock);
 }
 const swaggerDefinition = {
   openapi: '3.1.0',
