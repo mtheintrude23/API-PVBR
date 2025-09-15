@@ -39,7 +39,7 @@ function normalizeName(name) {
 }
 
 function cleanItems(items) {
-  return items.map(item => {
+  return (Array.isArray(items) ? items : []).map(item => {
     let iconUrl = item?.icon || '';
     const itemId = item?.item_id || normalizeName(item?.name ?? item?.display_name ?? 'unknown');
 
@@ -47,18 +47,16 @@ function cleanItems(items) {
       iconUrl = `https://api-tmyd.onrender.com/api/v3/growagarden/image/${itemId}`;
     }
 
-    const dateStart = item?.Date_Start;
-    const dateEnd = item?.Date_End;
-
     return {
       ...item,
       quantity: item?.quantity || 0,
       icon: iconUrl,
-      Date_Start: dateStart,
-      Date_End: dateEnd,
+      Date_Start: item?.Date_Start,
+      Date_End: item?.Date_End,
     };
   });
 }
+
 
 function updateStockData(data) {
   if (data.gear_stock) latestData.gear_stock = cleanItems(data.gear_stock);
