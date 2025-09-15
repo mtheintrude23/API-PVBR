@@ -6,6 +6,7 @@ import fs from "fs";
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import https from 'https';
 import axios from 'axios';
 import jstudio from 'jstudio';
 import { logger } from 'console-wizard';
@@ -578,6 +579,36 @@ app.get('/api/v3/growagarden/currentevent', limiter, async (req, res) => {
   } catch (error) {
     logger.error(`Error fetching current event: ${error.message}`);
     res.status(500).json({ error: 'Failed to get current event' });
+  }
+});
+app.get('/api/v3/growagarden/gameinfo', limiter, async (req, res) => {
+  const universeId = 7436755782;
+
+  try {
+    https.get(`https://games.roblox.com/v1/games?universeIds=${universeId}`, (response) => {
+      let data = "";
+
+      response.on("data", (chunk) => {
+        data += chunk;
+      });
+
+      response.on("end", () => {
+        try {
+          const jsonData = JSON.parse(data);
+          res.json(jsonData);
+        } catch (err) {
+          logger.error("❌ Lỗi parse JSON:", err.message);
+          res.status(500).json({ error: "Failed to parse Roblox API response" });
+        }
+      });
+
+    }).on("error", (err) => {
+      logger.error("❌ Lỗi gọi API Roblox:", err.message);
+      res.status(500).json({ error: "Failed to fetch Roblox API" });
+    });
+  } catch (error) {
+    logger.error("❌ Lỗi Roblox endpoint:", error.message);
+    res.status(500).json({ error: "Unexpected error" });
   }
 });
 
