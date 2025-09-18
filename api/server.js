@@ -76,7 +76,7 @@ const swaggerDefinition = {
 };
 const options = {
   swaggerDefinition,
-  apis: [__filename] // dùng JSDoc comment trong file này
+  apis: ["./server.js"] // dùng JSDoc comment trong file này
 };
 const swaggerSpec = swaggerJsdoc(options);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
