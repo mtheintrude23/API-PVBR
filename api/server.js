@@ -340,13 +340,10 @@ app.use(
     customSiteTitle: "Grow a Garden API Docs", // 👈 Đổi title tab ở đây
   })
 );
-const limiter = rateLimit({
-  windowMs: 60 * 1000,   // 1 phút
-  max: 0,                // 0 nghĩa là vô hạn (không giới hạn)
-  handler: (req, res, next) => {
-    next(); // luôn cho qua
-  }
-});
+const limiter = (req, res, next) => {
+  // Cho phép tất cả request đi qua, không giới hạn
+  next();
+};
 
 // Routes
 
