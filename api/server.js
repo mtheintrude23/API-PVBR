@@ -70,8 +70,6 @@ function updateMerchantData(data) {
   if (data.travelingmerchant_stock) latestData.travelingmerchant_stock = cleanItems(data.travelingmerchant_stock);
 }
 function updateWeatherData(data) {
-  let newData = { weather: [] };
-
   if (data?.weather) {
     for (const key in data.weather) {
       if (key === "timestamp") continue;
