@@ -69,10 +69,31 @@ function updateStockData(data) {
 function updateMerchantData(data) {
   if (data.travelingmerchant_stock) latestData.travelingmerchant_stock = cleanItems(data.travelingmerchant_stock);
 }
+function updateWeatherData(data) {
+  let newData = { weather: [] };
+
+  if (data?.weather) {
+    for (const key in data.weather) {
+      if (key === "timestamp") continue;
+      const item = data.weather[key];
+      if (!item) continue;
+      let iconUrl = item.icon || '';
+      if (iconUrl.startsWith('https://api.joshlei.com/v2/growagarden/image/')) {
+        iconUrl = `https://api-tmyd.onrender.com/api/v3/growagarden/image/${item.weather_id ?? key}`;
+      }
+      newData.weather.push({
+        ...item,
+        icon: iconUrl,
+        weather_id: item.weather_id ?? `unknown_${key}`
+      });
+    }
+    newData.timestamp = Date.now();
+  }
+  return newData;
+}
 const swaggerDefinition = {
   openapi: '3.1.0',
-  info: { title: 'Grow a Garden API', version: 'v3', description: 'API for Grow a Garden' },
-  servers: [{ url: 'https://api-tmyd.onrender.com/', description: 'URL' }]
+  info: { title: 'Grow a Garden API', version: 'v3', description: 'API for Grow a Garden' }
 };
 const options = {
   swaggerDefinition,
@@ -80,29 +101,6 @@ const options = {
 };
 const swaggerSpec = swaggerJsdoc(options);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-function updateWeatherData(data) {
-  if (data?.weather) {
-    const weatherObj = {};
-    for (const key in data.weather) {
-      if (key === "timestamp") continue;
-      const item = data.weather[key];
-      if (!item) continue;
-
-      // Rehost icon của weather nếu có
-      let iconUrl = item.icon || '';
-      if (iconUrl.startsWith('https://api.joshlei.com/v2/growagarden/image/')) {
-        iconUrl = `https://api-tmyd.onrender.com/api/v3/growagarden/image/${item.weather_id ?? key}`;
-      }
-
-      weatherObj[item.weather_id ?? `unknown_${key}`] = {
-        ...item,
-        icon: iconUrl
-      };
-    }
-    weatherObj.timestamp = Date.now();
-    newData.weather = weatherObj;
-  }
-}
 
 // Init data
 async function initializeData() {
@@ -343,9 +341,11 @@ app.use(
   })
 );
 const limiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 500,
-  message: { error: '429: Too many requests, please try again later.' },
+  windowMs: 60 * 1000,   // 1 phút
+  max: 0,                // 0 nghĩa là vô hạn (không giới hạn)
+  handler: (req, res, next) => {
+    next(); // luôn cho qua
+  }
 });
 
 // Routes
@@ -464,6 +464,7 @@ app.get('/api/v3/growagarden/calculate', limiter, async (req, res) => {
 app.get('/api/v3/growagarden/info/:item_id', limiter, async (req, res) => {
   try {
     const { item_id } = req.params;
+    if (!item_id) return res.status(400).json({ error: `Invalid request: "item_id" is required. Usage: ${req.protocol}://${req.get('host')}/api/v3/growagarden/info/YOUR_ITEM_ID` });
     const item = await client.items.get(item_id); // Gọi API jstudio
 
     if (item?.icon) {
@@ -489,6 +490,8 @@ app.get('/api/v3/growagarden/info', limiter, async (req, res) => {
       eggs: 'egg',
       cosmetics: 'cosmetic',
       events: 'event',
+      gear: 'gear',
+      weather: 'weather',
     };
     const allowed = new Set([
       'seed', 'seeds',
@@ -496,6 +499,7 @@ app.get('/api/v3/growagarden/info', limiter, async (req, res) => {
       'egg', 'eggs',
       'cosmetic', 'cosmetics',
       'event', 'events'
+      'weather',
     ]);
 
     let normalizedType;
@@ -535,7 +539,7 @@ app.get('/api/v3/growagarden/info', limiter, async (req, res) => {
 app.get('/api/v3/growagarden/image/:item_id', limiter, async (req, res) => {
   try {
     const { item_id } = req.params;
-    if (!item_id) return res.status(400).json({ error: 'Missing item_id' });
+    if (!item_id) return res.status(400).json({ error: `Invalid request: "item_id" is required. Usage: ${req.protocol}://${req.get('host')}/api/v3/growagarden/image/YOUR_ITEM_ID` });
 
     const imageUrl = client.images.getUrl(item_id);
 
