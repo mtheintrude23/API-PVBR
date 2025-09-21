@@ -498,8 +498,8 @@ app.get('/api/v3/growagarden/info', limiter, async (req, res) => {
       'gear',
       'egg', 'eggs',
       'cosmetic', 'cosmetics',
-      'event', 'events'
-      'weather',
+      'event', 'events',
+      'weather'
     ]);
 
     let normalizedType;
