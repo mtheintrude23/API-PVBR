@@ -1,606 +1,536 @@
-const stockTypes = ['seed', 'gear', 'egg', 'cosmetic'];
+const _0x35e8ae = _0x5c33;
+(function(_0x36cb3c, _0x536956) {
+    const _0x56ef0e = _0x5c33,
+        _0x54a22f = _0x36cb3c();
+    while (!![]) {
+        try {
+            const _0x10c612 = -parseInt(_0x56ef0e(0xbe)) / 0x1 * (-parseInt(_0x56ef0e(0x14c)) / 0x2) + parseInt(_0x56ef0e(0x99)) / 0x3 * (-parseInt(_0x56ef0e(0xd1)) / 0x4) + parseInt(_0x56ef0e(0xae)) / 0x5 * (-parseInt(_0x56ef0e(0x146)) / 0x6) + -parseInt(_0x56ef0e(0xa3)) / 0x7 + parseInt(_0x56ef0e(0xb6)) / 0x8 * (-parseInt(_0x56ef0e(0x121)) / 0x9) + parseInt(_0x56ef0e(0x131)) / 0xa * (parseInt(_0x56ef0e(0xdd)) / 0xb) + parseInt(_0x56ef0e(0x13b)) / 0xc * (parseInt(_0x56ef0e(0x11a)) / 0xd);
+            if (_0x10c612 === _0x536956) break;
+            else _0x54a22f['push'](_0x54a22f['shift']());
+        } catch (_0x5a5d8b) {
+            _0x54a22f['push'](_0x54a22f['shift']());
+        }
+    }
+}(_0x559a, 0xe172b), (function() {
+    let _0x147a9e = ![],
+        _0x51f1ea = null;
 
-const defaultDurations = {
-  seed: 300000, // 5 minutes
-  gear: 300000, // 5 minutes
-  egg: 1800000, // 30 minutes
-  cosmetic: 14400000 // 4 hours
-};
+    function _0x32a9a0() {
+        const _0x5c8f36 = _0x5c33;
+        _0x51f1ea = document[_0x5c8f36(0xa6)]('div'), _0x51f1ea['id'] = _0x5c8f36(0x161), _0x51f1ea[_0x5c8f36(0xa9)][_0x5c8f36(0xa0)] = _0x5c8f36(0xc0), _0x51f1ea[_0x5c8f36(0x12c)] = '\x0a\x20\x20\x20\x20\x20\x20<h1\x20style=\x22font-size:48px;\x20font-weight:bold;\x20margin-bottom:20px;\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20Vietnam:\x20Trang\x20này\x20hiện\x20tại\x20không\x20có\x20gì\x20cả\x0a\x20\x20\x20\x20\x20\x20</h1>\x0a\x20\x20\x20\x20\x20\x20<h2\x20style=\x22font-size:32px;\x20font-weight:bold;\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20English:\x20This\x20page\x20currently\x20has\x20nothing\x0a\x20\x20\x20\x20\x20\x20</h2>\x0a\x20\x20\x20\x20', document[_0x5c8f36(0x112)][_0x5c8f36(0xe3)](_0x51f1ea);
+    }
 
+    function _0x32a9fb() {
+        const _0xd29d70 = _0x5c33;
+        _0x51f1ea && (_0x51f1ea[_0xd29d70(0x156)](), _0x51f1ea = null);
+    }
+
+    function _0x11bd06() {
+        const _0x50879e = _0x5c33,
+            _0x3fe0a0 = 0xa0,
+            _0xa3daca = window[_0x50879e(0x130)] - window['innerWidth'] > _0x3fe0a0 || window[_0x50879e(0x163)] - window[_0x50879e(0x14e)] > _0x3fe0a0;
+        if (_0xa3daca && !_0x147a9e) {
+            _0x147a9e = !![];
+            if (!_0x51f1ea) _0x32a9a0();
+        } else !_0xa3daca && _0x147a9e && (_0x147a9e = ![], _0x32a9fb());
+    }
+    setInterval(_0x11bd06, 0x1f4);
+}()));
+const DARK_THEME = _0x35e8ae(0xf9),
+    LIGHT_THEME = 'light',
+    stockTypes = [_0x35e8ae(0x10b), 'gear', 'egg', _0x35e8ae(0xec)],
+    defaultDurations = {
+        'seed': 0x493e0,
+        'gear': 0x493e0,
+        'egg': 0x1b7740,
+        'cosmetic': 0xdbba00
+    };
 let nextRestockTimes = {
-  seed: null,
-  gear: null,
-  egg: null,
-  cosmetic: null
+    'seed': null,
+    'gear': null,
+    'egg': null,
+    'cosmetic': null
 };
-
 const timerFlags = {};
-let activeWeathers = [];
-let lastFetchTimestamp = 0;
-let lastTimerUpdate = 0;
-const DARK_THEME = 'dark';
-const LIGHT_THEME = 'light';
-
-// Khởi tạo nếu chưa có
-stockTypes.forEach(type => {
-  if (!nextRestockTimes[type]) {
-    nextRestockTimes[type] = new Date(Date.now() + defaultDurations[type]).toISOString();
-  }
-  timerFlags[type] = false;
+let activeWeathers = [],
+    lastFetchTimestamp = 0x0,
+    lastTimerUpdate = 0x0;
+const jstudio = _0x35e8ae(0x113);
+stockTypes[_0x35e8ae(0xa2)](_0x38880d => {
+    !nextRestockTimes[_0x38880d] && (nextRestockTimes[_0x38880d] = new Date(Date['now']() + defaultDurations[_0x38880d])['toISOString']()), timerFlags[_0x38880d] = ![];
 });
 
-// Mock data for testing when API fails
 function mockStockData() {
-  return {
-    seed_stock: [
-      { display_name: "Carrot", quantity: 16, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/carrot", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Strawberry", quantity: 6, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/strawberry", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Watermelon", quantity: 4, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/watermelon", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Tomato", quantity: 2, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/tomato", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Blueberry", quantity: 5, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/blueberry", Date_End: new Date(Date.now() + 300000).toISOString() }
-    ],
-    gear_stock: [
-      { display_name: "Trading Ticket", quantity: 2, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/trading_ticket", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Cleaning Spray", quantity: 2, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/cleaning_spray", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Favorite Tool", quantity: 3, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/favorite_tool", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Recall Wrench", quantity: 2, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/recall_wrench", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Watering Can", quantity: 2, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/watering_can", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Harvest Tool", quantity: 3, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/harvest_tool", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Trowel", quantity: 3, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/trowel", Date_End: new Date(Date.now() + 300000).toISOString() },
-      { display_name: "Godly Sprinkler", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/godly_sprinkler", Date_End: new Date(Date.now() + 300000).toISOString() }
-    ],
-    egg_stock: [
-      { display_name: "Common Egg", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/common_egg", Date_End: new Date(Date.now() + 1800000).toISOString() },
-      { display_name: "Common Egg", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/common_egg", Date_End: new Date(Date.now() + 1800000).toISOString() },
-      { display_name: "Rare Summer Egg", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/rare_summer_egg", Date_End: new Date(Date.now() + 1800000).toISOString() }
-    ],
-    cosmetic_stock: [
-      { display_name: "Lemonade Stand", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/lemonade_stand", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Wheelbarrow", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/wheelbarrow", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Small Circle Tile", quantity: 5, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/small_circle_tile", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Torch", quantity: 3, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/torch", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Small Wood Flooring", quantity: 5, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/small_wood_flooring", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Compost Bin", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/compost_bin", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Small Stone Table", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/small_stone_table", Date_End: new Date(Date.now() + 14400000).toISOString() },
-      { display_name: "Bookshelf", quantity: 1, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/bookshelf", Date_End: new Date(Date.now() + 14400000).toISOString() }
-    ]
-  };
+    const _0x412385 = _0x35e8ae;
+    return {
+        'seed_stock': [{
+            'display_name': _0x412385(0x14d),
+            'quantity': 0x10,
+            'icon': _0x412385(0xcd),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0x493e0)[_0x412385(0x127)]()
+        }, {
+            'display_name': _0x412385(0x144),
+            'quantity': 0x6,
+            'icon': _0x412385(0x15d),
+            'Date_End': new Date(Date['now']() + 0x493e0)[_0x412385(0x127)]()
+        }, {
+            'display_name': 'Watermelon',
+            'quantity': 0x4,
+            'icon': _0x412385(0xde),
+            'Date_End': new Date(Date['now']() + 0x493e0)[_0x412385(0x127)]()
+        }, {
+            'display_name': 'Tomato',
+            'quantity': 0x2,
+            'icon': _0x412385(0x15a),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0x493e0)[_0x412385(0x127)]()
+        }, {
+            'display_name': 'Blueberry',
+            'quantity': 0x5,
+            'icon': _0x412385(0xa5),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0x493e0)[_0x412385(0x127)]()
+        }],
+        'gear_stock': [{
+            'display_name': 'Trading\x20Ticket',
+            'quantity': 0x2,
+            'icon': _0x412385(0x164),
+            'Date_End': new Date(Date['now']() + 0x493e0)[_0x412385(0x127)]()
+        }, {
+            'display_name': _0x412385(0x157),
+            'quantity': 0x2,
+            'icon': _0x412385(0xf5),
+            'Date_End': new Date(Date['now']() + 0x493e0)[_0x412385(0x127)]()
+        }, {
+            'display_name': 'Favorite\x20Tool',
+            'quantity': 0x3,
+            'icon': _0x412385(0x107),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0x493e0)['toISOString']()
+        }, {
+            'display_name': _0x412385(0x148),
+            'quantity': 0x2,
+            'icon': _0x412385(0x140),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0x493e0)[_0x412385(0x127)]()
+        }, {
+            'display_name': _0x412385(0x133),
+            'quantity': 0x2,
+            'icon': _0x412385(0x152),
+            'Date_End': new Date(Date['now']() + 0x493e0)['toISOString']()
+        }, {
+            'display_name': 'Harvest\x20Tool',
+            'quantity': 0x3,
+            'icon': _0x412385(0xee),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0x493e0)['toISOString']()
+        }, {
+            'display_name': _0x412385(0xc5),
+            'quantity': 0x3,
+            'icon': _0x412385(0xb0),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0x493e0)[_0x412385(0x127)]()
+        }, {
+            'display_name': _0x412385(0xbb),
+            'quantity': 0x1,
+            'icon': _0x412385(0x11c),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0x493e0)['toISOString']()
+        }],
+        'egg_stock': [{
+            'display_name': 'Common\x20Egg',
+            'quantity': 0x1,
+            'icon': 'https://api.joshlei.com/v2/growagarden/image/common_egg',
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0x1b7740)['toISOString']()
+        }, {
+            'display_name': _0x412385(0xf1),
+            'quantity': 0x1,
+            'icon': _0x412385(0xc7),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0x1b7740)[_0x412385(0x127)]()
+        }, {
+            'display_name': _0x412385(0xbf),
+            'quantity': 0x1,
+            'icon': _0x412385(0xed),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0x1b7740)[_0x412385(0x127)]()
+        }],
+        'cosmetics_stock': [{
+            'display_name': _0x412385(0x104),
+            'quantity': 0x1,
+            'icon': _0x412385(0x116),
+            'Date_End': new Date(Date['now']() + 0xdbba00)[_0x412385(0x127)]()
+        }, {
+            'display_name': _0x412385(0xd5),
+            'quantity': 0x1,
+            'icon': _0x412385(0xca),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0xdbba00)[_0x412385(0x127)]()
+        }, {
+            'display_name': _0x412385(0xe1),
+            'quantity': 0x5,
+            'icon': _0x412385(0xfe),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0xdbba00)[_0x412385(0x127)]()
+        }, {
+            'display_name': _0x412385(0xa1),
+            'quantity': 0x3,
+            'icon': _0x412385(0x10e),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0xdbba00)[_0x412385(0x127)]()
+        }, {
+            'display_name': 'Small\x20Wood\x20Flooring',
+            'quantity': 0x5,
+            'icon': 'https://api.joshlei.com/v2/growagarden/image/small_wood_flooring',
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0xdbba00)[_0x412385(0x127)]()
+        }, {
+            'display_name': _0x412385(0xe8),
+            'quantity': 0x1,
+            'icon': _0x412385(0x126),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0xdbba00)[_0x412385(0x127)]()
+        }, {
+            'display_name': 'Small\x20Stone\x20Table',
+            'quantity': 0x1,
+            'icon': _0x412385(0xf8),
+            'Date_End': new Date(Date['now']() + 0xdbba00)[_0x412385(0x127)]()
+        }, {
+            'display_name': _0x412385(0xc1),
+            'quantity': 0x1,
+            'icon': _0x412385(0xb4),
+            'Date_End': new Date(Date[_0x412385(0x11b)]() + 0xdbba00)[_0x412385(0x127)]()
+        }]
+    };
 }
 
 function mockWeatherData() {
-  return {
-    weather: [
-      { item_id: "rainy", display_name: "Rainy", active: true, icon: "https://uxwing.com/wp-content/themes/uxwing/download/weather/rainy-icon.png", description: "Plants grow faster in the rain!", duration: "1800", last_seen: Math.floor(Date.now() / 1000).toString() },
-      { item_id: "sunny", display_name: "Sunny", active: true, icon: "https://uxwing.com/wp-content/themes/uxwing/download/weather/sun-icon.png", description: "Bright sun boosts your harvest!", duration: "3600", last_seen: Math.floor(Date.now() / 1000).toString() },
-      { item_id: "nightevent", display_name: "Night Event", active: true, icon: "https://api-yvj3.onrender.com/api/v3/growagarden/image/nightevent", description: "Your fruit can become MOONLIT!", duration: "600", last_seen: Math.floor(Date.now() / 1000).toString() }
-    ]
-  };
+    const _0x59914f = _0x35e8ae;
+    return {
+        'weather': [{
+            'item_id': _0x59914f(0xb3),
+            'display_name': _0x59914f(0xf3),
+            'active': !![],
+            'icon': _0x59914f(0xe7),
+            'description': _0x59914f(0x108),
+            'duration': _0x59914f(0x9c),
+            'last_seen': Math[_0x59914f(0x9b)](Date['now']() / 0x3e8)[_0x59914f(0xfa)]()
+        }, {
+            'item_id': _0x59914f(0x151),
+            'display_name': 'Sunny',
+            'active': !![],
+            'icon': _0x59914f(0x12e),
+            'description': _0x59914f(0x134),
+            'duration': _0x59914f(0x11e),
+            'last_seen': Math[_0x59914f(0x9b)](Date[_0x59914f(0x11b)]() / 0x3e8)['toString']()
+        }, {
+            'item_id': _0x59914f(0xd6),
+            'display_name': _0x59914f(0xd0),
+            'active': !![],
+            'icon': _0x59914f(0xd9),
+            'description': 'Your\x20fruit\x20can\x20become\x20MOONLIT!',
+            'duration': _0x59914f(0xcc),
+            'last_seen': Math['floor'](Date[_0x59914f(0x11b)]() / 0x3e8)['toString']()
+        }]
+    };
 }
-
-async function fetchWeatherEffects(weatherId) {
-  if (!weatherId) {
-    console.error('fetchWeatherEffects: weatherId is undefined or empty');
-    return '';
-  }
-  try {
-    const url = `https://api-yvj3.onrender.com/api/v3/growagarden/info/${weatherId}`;
-    const jstudio = 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272'; // Thay bằng key thực tế
-    const response = await fetch(url, {
-      headers: {
-        'jstudio-key': jstudio,
-        'Content-Type': 'application/json'
-      }
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    return data
-  } catch (err) {
-    console.error(`Error fetching description for weather ${weatherId}:`, err);
-    return '';
-  }
-}
-
-function renderWeatherCards(weathers) {
-  const container = document.getElementById('weather-card-container');
-  if (!container) {
-    console.error('Weather card container not found');
-    return;
-  }
-  container.innerHTML = '';
-
-  if (!Array.isArray(weathers) || weathers.length === 0) {
-    container.innerHTML = `
-      <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-        <div class="flex justify-between items-center mb-2">
-          <div class="flex items-center">
-            <h3 id="weather-name-0" class="text-lg font-medium text-gray-800 dark:text-white">Normal</h3>
-          </div>
-          <span id="weather-timer-0" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">No active event</span>
-        </div>
-        <div class="flex items-center">
-          <span id="weather-status-0" class="px-3 py-1 text-sm rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">Inactive</span>
-        </div>
-      </div>
-    `;
-    return;
-  }
-
-  weathers.forEach((weather, index) => {
-    if (!weather || !weather.display_name) return;
-
-    const card = document.createElement('div');
-    card.className = 'bg-white dark:bg-gray-800 rounded-lg p-4 shadow';
-
-    // Header
-    const header = document.createElement('div');
-    header.className = 'flex justify-between items-center mb-2';
-    header.innerHTML = `
-      <div class="flex items-center">
-        ${weather.icon ? `<img src="${weather.icon}" class="w-6 h-6 mr-2 rounded-full" alt="${weather.display_name} icon" onerror="this.style.display='none'">` : ''}
-        <h3 id="weather-name-${index}" class="text-lg font-medium text-gray-800 dark:text-white">${weather.display_name}</h3>
-      </div>
-      <span id="weather-timer-${index}" class="px-3 py-1 text-sm rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Ends in: Calculating...</span>
-    `;
-    card.appendChild(header);
-
-    // Status
-    const statusWrapper = document.createElement('div');
-    statusWrapper.className = 'flex items-center mb-2';
-    statusWrapper.innerHTML = `
-      <span id="weather-status-${index}" class="px-3 py-1 text-sm rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Active</span>
-    `;
-    card.appendChild(statusWrapper);
-
-    // Description
-    const descWrapper = document.createElement('div');
-    descWrapper.className = 'flex items-center';
-    const descP = document.createElement('p');
-    descP.className = 'text-gray-600 dark:text-gray-300 whitespace-pre-wrap';
-    descP.textContent = Array.isArray(weather.description)
-      ? weather.description.join("\n")
-      : (weather.description || 'No description available');
-    descWrapper.appendChild(descP);
-    card.appendChild(descWrapper);
-
-    container.appendChild(card);
-  });
-}
-
-async function fetchActiveWeather() {
-  try {
-    const response = await fetch('https://api-yvj3.onrender.com/api/v3/growagarden/weather');
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-
-    if (!data || typeof data !== 'object') throw new Error('Invalid weather data format');
-
-    // Bỏ timestamp, convert object → array
-    const weatherArray = Object.entries(data)
-      .filter(([key]) => key !== 'timestamp')
-      .map(([_, value]) => value);
-
-    // Lọc active = true
-    const activeList = weatherArray.filter(w => w.active === true);
-
-    activeWeathers = await Promise.all(
-      activeList.map(async (w) => {
-        let weather = {
-          item_id: w.weather_id || '',
-          display_name: w.weather_name || '',
-          icon: w.icon || '',
-          description: w.description || '', // thường rỗng
-          active: true,
-          start_time_unix: w.start_time_unix || Math.floor(Date.now() / 1000),
-          end_duration_unix: w.end_duration_unix || Math.floor(Date.now() / 1000) + (w.duration || 3600)
-        };
-        if (weather.item_id !== 'unknown') {
-          try {
-            const effect = await fetchWeatherEffects(weather.item_id);
-            if (effect && effect.description) {
-              weather.description = effect.description;
-            }
-          } catch (e) {
-            console.warn(`Could not fetch effect for ${weather.item_id}:`, e.message);
-          }
-        }
-
-        return weather;
-      })
-    );
-    localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
-    renderWeatherCards(activeWeathers);
-
-  } catch (err) {
-    console.error('Weather fetch error:', err.message);
-    let cached = JSON.parse(localStorage.getItem('activeWeathers') || '[]');
-    activeWeathers = cached.filter(w => w.active && w.end_duration_unix > Math.floor(Date.now() / 1000));
-    if (!activeWeathers.length) {
-      activeWeathers = mockWeatherData().weather.filter(w => w.active === true);
+async function fetchWeatherEffects(_0x9a06cb) {
+    const _0xc751d1 = _0x35e8ae;
+    if (!_0x9a06cb) return console['error'](_0xc751d1(0xc6)), '';
+    try {
+        const _0x2fe3db = _0xc751d1(0xaa) + _0x9a06cb,
+            _0x326681 = await fetch(_0x2fe3db, {
+                'headers': {
+                    'jstudio-key': jstudio,
+                    'Content-Type': _0xc751d1(0xc9)
+                }
+            });
+        if (!_0x326681['ok']) throw new Error(_0xc751d1(0x9f) + _0x326681[_0xc751d1(0x12a)]);
+        const _0x3fef59 = await _0x326681['json']();
+        return _0x3fef59;
+    } catch (_0x540592) {
+        return console['error'](_0xc751d1(0x114) + _0x9a06cb + ':', _0x540592), '';
     }
-
-    renderWeatherCards(activeWeathers);
-  }
 }
 
+function _0x5c33(_0x22859e, _0x5773d5) {
+    const _0x559aee = _0x559a();
+    return _0x5c33 = function(_0x5c33db, _0x31d16a) {
+        _0x5c33db = _0x5c33db - 0x98;
+        let _0x5ea2eb = _0x559aee[_0x5c33db];
+        return _0x5ea2eb;
+    }, _0x5c33(_0x22859e, _0x5773d5);
+}
+
+function renderWeatherCards(_0x33f176) {
+    const _0x5ccd53 = _0x35e8ae,
+        _0x4d1029 = document['getElementById']('weather-card-container');
+    if (!_0x4d1029) {
+        console[_0x5ccd53(0xd7)]('Weather\x20card\x20container\x20not\x20found');
+        return;
+    }
+    _0x4d1029[_0x5ccd53(0x12c)] = '';
+    if (!Array[_0x5ccd53(0x153)](_0x33f176) || _0x33f176[_0x5ccd53(0x98)] === 0x0) {
+        _0x4d1029['innerHTML'] = _0x5ccd53(0x120);
+        return;
+    }
+    _0x33f176[_0x5ccd53(0xa2)]((_0x25b49c, _0x20e0f0) => {
+        const _0x31829c = _0x5ccd53;
+        if (!_0x25b49c || !_0x25b49c[_0x31829c(0x12b)]) return;
+        const _0x1f066b = document[_0x31829c(0xa6)]('div');
+        _0x1f066b[_0x31829c(0x9d)] = _0x31829c(0x115);
+        const _0x13c857 = document[_0x31829c(0xa6)](_0x31829c(0x111));
+        _0x13c857[_0x31829c(0x9d)] = _0x31829c(0xac), _0x13c857[_0x31829c(0x12c)] = _0x31829c(0xd3) + (_0x25b49c['icon'] ? '<img\x20src=\x22' + _0x25b49c[_0x31829c(0x125)] + '\x22\x20class=\x22w-6\x20h-6\x20mr-2\x20rounded-full\x22\x20alt=\x22' + _0x25b49c[_0x31829c(0x12b)] + _0x31829c(0xb9) : '') + _0x31829c(0xe5) + _0x20e0f0 + _0x31829c(0x9a) + _0x25b49c[_0x31829c(0x12b)] + _0x31829c(0xf0) + _0x20e0f0 + _0x31829c(0xf7), _0x1f066b[_0x31829c(0xe3)](_0x13c857);
+        const _0x156c13 = document['createElement'](_0x31829c(0x111));
+        _0x156c13[_0x31829c(0x9d)] = _0x31829c(0xcb), _0x156c13[_0x31829c(0x12c)] = '\x0a\x20\x20\x20\x20\x20\x20<span\x20id=\x22weather-status-' + _0x20e0f0 + '\x22\x20class=\x22px-3\x20py-1\x20text-sm\x20rounded-full\x20bg-green-100\x20dark:bg-green-900\x20text-green-800\x20dark:text-green-200\x22>Active</span>\x0a\x20\x20\x20\x20', _0x1f066b[_0x31829c(0xe3)](_0x156c13);
+        const _0x4581df = document[_0x31829c(0xa6)](_0x31829c(0x111));
+        _0x4581df['className'] = _0x31829c(0xc4);
+        const _0x1981a0 = document[_0x31829c(0xa6)]('p');
+        _0x1981a0[_0x31829c(0x9d)] = 'text-gray-600\x20dark:text-gray-300\x20whitespace-pre-wrap', _0x1981a0[_0x31829c(0xb8)] = Array[_0x31829c(0x153)](_0x25b49c[_0x31829c(0x15b)]) ? _0x25b49c[_0x31829c(0x15b)]['join']('\x0a') : _0x25b49c[_0x31829c(0x15b)] || _0x31829c(0xdf), _0x4581df[_0x31829c(0xe3)](_0x1981a0), _0x1f066b['appendChild'](_0x4581df), _0x4d1029[_0x31829c(0xe3)](_0x1f066b);
+    });
+}
+async function fetchActiveWeather() {
+    const _0xf36843 = _0x35e8ae;
+    try {
+        const _0x461925 = await fetch(_0xf36843(0xf2), {
+            'headers': {
+                'jstudio-key': jstudio,
+                'Content-Type': _0xf36843(0xc9)
+            }
+        });
+        if (!_0x461925['ok']) throw new Error(_0xf36843(0x9f) + _0x461925[_0xf36843(0x12a)]);
+        const _0x2e041f = await _0x461925[_0xf36843(0x129)]();
+        if (!_0x2e041f || typeof _0x2e041f !== _0xf36843(0x149)) throw new Error(_0xf36843(0xcf));
+        const _0x5a2bf4 = Object['entries'](_0x2e041f)[_0xf36843(0x132)](([_0x372585]) => _0x372585 !== _0xf36843(0x10d))[_0xf36843(0x110)](([_0x3253cb, _0x456454]) => _0x456454),
+            _0xf71624 = _0x5a2bf4[_0xf36843(0x132)](_0x1041b6 => _0x1041b6['active'] === !![]);
+        activeWeathers = await Promise[_0xf36843(0x12f)](_0xf71624[_0xf36843(0x110)](async _0x1ac3d1 => {
+            const _0x521231 = _0xf36843;
+            let _0x583602 = {
+                'item_id': _0x1ac3d1['weather_id'] || '',
+                'display_name': _0x1ac3d1[_0x521231(0x139)] || '',
+                'icon': _0x1ac3d1['icon'] || '',
+                'description': _0x1ac3d1['description'] || '',
+                'active': !![],
+                'start_time_unix': _0x1ac3d1[_0x521231(0x100)] || Math['floor'](Date[_0x521231(0x11b)]() / 0x3e8),
+                'end_duration_unix': _0x1ac3d1[_0x521231(0x102)] || Math[_0x521231(0x9b)](Date['now']() / 0x3e8) + (_0x1ac3d1[_0x521231(0x141)] || 0xe10)
+            };
+            if (_0x583602[_0x521231(0x10f)] !== _0x521231(0x10c)) try {
+                const _0x811ed8 = await fetchWeatherEffects(_0x583602[_0x521231(0x10f)]);
+                _0x811ed8 && _0x811ed8['description'] && (_0x583602[_0x521231(0x15b)] = _0x811ed8[_0x521231(0x15b)]);
+            } catch (_0x45f6c2) {
+                console[_0x521231(0x142)](_0x521231(0xfb) + _0x583602[_0x521231(0x10f)] + ':', _0x45f6c2['message']);
+            }
+            return _0x583602;
+        })), localStorage['setItem'](_0xf36843(0x9e), JSON[_0xf36843(0xff)](activeWeathers)), renderWeatherCards(activeWeathers);
+    } catch (_0x2e1054) {
+        console[_0xf36843(0xd7)]('Weather\x20fetch\x20error:', _0x2e1054[_0xf36843(0x103)]);
+        let _0x340aca = JSON[_0xf36843(0xfd)](localStorage[_0xf36843(0xb5)](_0xf36843(0x9e)) || '[]');
+        activeWeathers = _0x340aca[_0xf36843(0x132)](_0x243c89 => _0x243c89[_0xf36843(0x154)] && _0x243c89[_0xf36843(0x102)] > Math[_0xf36843(0x9b)](Date[_0xf36843(0x11b)]() / 0x3e8)), !activeWeathers[_0xf36843(0x98)] && (activeWeathers = mockWeatherData()['weather'][_0xf36843(0x132)](_0x32a2c0 => _0x32a2c0[_0xf36843(0x154)] === !![])), renderWeatherCards(activeWeathers);
+    }
+}
 
 function updateWeatherTimer() {
-  if (!Array.isArray(activeWeathers) || !activeWeathers.length) {
-    return;
-  }
-
-  let hasChanges = false;
-  const now = Math.floor(Date.now() / 1000);
-  activeWeathers = activeWeathers.filter((weather, index) => {
-    const timerEl = document.getElementById(`weather-timer-${index}`);
-    if (!timerEl || !weather || !weather.end_duration_unix) {
-      return false;
-    }
-
-    const remaining = Math.max(0, weather.end_duration_unix - now);
-
-    if (remaining <= 0) {
-      hasChanges = true;
-      return false;
-    }
-
-    const hours = Math.floor(remaining / 3600);
-    const minutes = Math.floor((remaining % 3600) / 60);
-    const seconds = remaining % 60;
-    const formattedTime = hours > 0
-      ? `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-      : `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    timerEl.textContent = `Ends in: ${formattedTime}`;
-    return true;
-  });
-
-  if (hasChanges) {
-    renderWeatherCards(activeWeathers);
-    try {
-      localStorage.setItem('activeWeathers', JSON.stringify(activeWeathers));
-    } catch (e) {
-      console.error('updateWeatherTimer: Error saving activeWeathers to localStorage:', e);
-    }
-  }
-}
-
-function formatTime(ms) {
-  const totalSeconds = Math.floor(ms / 1000);
-  const seconds = totalSeconds % 60;
-  const minutes = Math.floor(totalSeconds / 60) % 60;
-  const hours = Math.floor(totalSeconds / 3600);
-  return hours > 0
-    ? `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-    : `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-function createOrUpdateTimer(type, remaining) {
-  const el = document.getElementById(`${type}-timer`);
-  if (!el) {
-    return;
-  }
-  el.textContent = remaining !== undefined 
-    ? `Restock in: ${formatTime(remaining)}`
-    : "Next update: 00:00";
-  el.className = remaining !== undefined && remaining <= 10000
-    ? "text-sm text-yellow-500 animate-pulse"
-    : "text-sm text-white";
-}
-async function fetchEggStock(isInitial = false) {
-  const now = Date.now();
-  if (!isInitial && now - lastFetchTimestamp < 5000) return;
-  lastFetchTimestamp = now;
-
-  try {
-    const url = `https://api-yvj3.onrender.com/api/v3/growagarden/stock`;
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
+    const _0x2c17ac = _0x35e8ae;
+    if (!Array[_0x2c17ac(0x153)](activeWeathers) || !activeWeathers[_0x2c17ac(0x98)]) return;
+    let _0x495b21 = ![];
+    const _0x1051ee = Math[_0x2c17ac(0x9b)](Date[_0x2c17ac(0x11b)]() / 0x3e8);
+    activeWeathers = activeWeathers[_0x2c17ac(0x132)]((_0x59bd13, _0x43f12f) => {
+        const _0x204ca8 = _0x2c17ac,
+            _0x98025c = document[_0x204ca8(0x122)](_0x204ca8(0x11d) + _0x43f12f);
+        if (!_0x98025c || !_0x59bd13 || !_0x59bd13['end_duration_unix']) return ![];
+        const _0x49d3df = Math[_0x204ca8(0x13e)](0x0, _0x59bd13[_0x204ca8(0x102)] - _0x1051ee);
+        if (_0x49d3df <= 0x0) return _0x495b21 = !![], ![];
+        const _0xf68bc1 = Math[_0x204ca8(0x9b)](_0x49d3df / 0xe10),
+            _0x771a23 = Math[_0x204ca8(0x9b)](_0x49d3df % 0xe10 / 0x3c),
+            _0x7f2454 = _0x49d3df % 0x3c,
+            _0x1a66b6 = _0xf68bc1 > 0x0 ? _0xf68bc1[_0x204ca8(0xfa)]()[_0x204ca8(0x13d)](0x2, '0') + ':' + _0x771a23[_0x204ca8(0xfa)]()['padStart'](0x2, '0') + ':' + _0x7f2454[_0x204ca8(0xfa)]()['padStart'](0x2, '0') : _0x771a23['toString']()[_0x204ca8(0x13d)](0x2, '0') + ':' + _0x7f2454[_0x204ca8(0xfa)]()[_0x204ca8(0x13d)](0x2, '0');
+        return _0x98025c[_0x204ca8(0xb8)] = _0x204ca8(0xe4) + _0x1a66b6, !![];
     });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    const items = Array.isArray(data.egg_stock) ? data.egg_stock : [];
-    updateTable('egg', items);
-
-    // ✅ restockTimes đã lo ở updateRestockTimesFromAPI, không gọi updateRestockTime nữa
-  } catch (e) {
-    console.error('fetchEggStock: Fetch egg stock failed:', e);
-    const mockData = mockStockData();
-    updateTable('egg', mockData.egg_stock);
-  }
-}
-
-async function fetchSeedGearStock(isInitial = false) {
-  const now = Date.now();
-  if (!isInitial && now - lastFetchTimestamp < 30000) return;
-  lastFetchTimestamp = now;
-
-  try {
-    const response = await fetch('https://api-yvj3.onrender.com/api/v3/growagarden/stock');
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    const seedItems = Array.isArray(data.seed_stock) ? data.seed_stock : [];
-    const gearItems = Array.isArray(data.gear_stock) ? data.gear_stock : [];
-    updateTable('seed', seedItems);
-    updateTable('gear', gearItems);
-
-    // ❌ Bỏ updateRestockTime → đã có updateRestockTimesFromAPI
-  } catch (e) {
-    console.error('fetchSeedGearStock: Fetch seed and gear stock failed:', e);
-    const mockData = mockStockData();
-    updateTable('seed', mockData.seed_stock);
-    updateTable('gear', mockData.gear_stock);
-  }
-}
-
-async function fetchCosmeticStock(isInitial = false) {
-  const now = Date.now();
-  if (!isInitial && now - lastFetchTimestamp < 30000) return;
-  lastFetchTimestamp = now;
-
-  try {
-    const response = await fetch('https://api-yvj3.onrender.com/api/v3/growagarden/stock');
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    const items = Array.isArray(data.cosmetics_stock) ? data.cosmetics_stock : [];
-    updateTable('cosmetic', items);
-
-  } catch (e) {
-    console.error('fetchCosmeticStock: Fetch cosmetic stock failed:', e);
-    const mockData = mockStockData();
-    updateTable('cosmetic', mockData.cosmetic_stock);
-  }
-}
-async function fetchStock(type) {
-  if (type === "seed" || type === "gear") return fetchSeedGearStock();
-  if (type === "egg") return fetchEggStock();
-  if (type === "cosmetic") return fetchCosmeticStock();
-}
-async function updateRestockTimesFromAPI() {
-  const { DateTime } = luxon;
-
-  try {
-    const res = await fetch("https://api-yvj3.onrender.com/api/v3/growagarden/stock");
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
-    const data = await res.json();
-    const now = DateTime.now(); // Current time in system timezone (or UTC if unspecified)
-    const nextRestockTimes = {};
-
-    const typeMap = {
-      seed: data.seed_stock,
-      gear: data.gear_stock,
-      egg: data.egg_stock,
-      cosmetic: data.cosmetics_stock
-    };
-
-    Object.entries(typeMap).forEach(([type, items]) => {
-      let earliest = null;
-
-      if (Array.isArray(items) && items.length > 0) {
-        const validTimes = items
-          .map(i => {
-            if (!i.Date_End) return null;
-            return DateTime.fromISO(i.Date_End); // Keep original timezone from Date_End
-          })
-          .filter(t => t && t.isValid && t > now);
-
-        if (validTimes.length) {
-          earliest = validTimes.reduce((min, curr) => (curr < min ? curr : min));
-          nextRestockTimes[type] = earliest.toISO({ includeOffset: true });
+    if (_0x495b21) {
+        renderWeatherCards(activeWeathers);
+        try {
+            localStorage['setItem'](_0x2c17ac(0x9e), JSON[_0x2c17ac(0xff)](activeWeathers));
+        } catch (_0x4e8ccd) {
+            console['error'](_0x2c17ac(0x147), _0x4e8ccd);
         }
-      }
+    }
+}
 
-      if (earliest) {
-        const remainingMs = earliest.diff(now).toMillis(); // Time remaining in milliseconds
-        createOrUpdateTimer(type, remainingMs);
-      }
-    });
+function formatTime(_0x2e0baf) {
+    const _0x43bf8c = _0x35e8ae,
+        _0x22592b = Math[_0x43bf8c(0x9b)](_0x2e0baf / 0x3e8),
+        _0x54f246 = _0x22592b % 0x3c,
+        _0x1ff6a0 = Math['floor'](_0x22592b / 0x3c) % 0x3c,
+        _0x288287 = Math[_0x43bf8c(0x9b)](_0x22592b / 0xe10);
+    return _0x288287 > 0x0 ? _0x288287[_0x43bf8c(0xfa)]()['padStart'](0x2, '0') + ':' + _0x1ff6a0[_0x43bf8c(0xfa)]()['padStart'](0x2, '0') + ':' + _0x54f246[_0x43bf8c(0xfa)]()[_0x43bf8c(0x13d)](0x2, '0') : _0x1ff6a0[_0x43bf8c(0xfa)]()[_0x43bf8c(0x13d)](0x2, '0') + ':' + _0x54f246[_0x43bf8c(0xfa)]()[_0x43bf8c(0x13d)](0x2, '0');
+}
 
+function createOrUpdateTimer(_0xaac780, _0x4d1139) {
+    const _0x4b6fba = _0x35e8ae,
+        _0x66710f = document[_0x4b6fba(0x122)](_0xaac780 + _0x4b6fba(0x109));
+    if (!_0x66710f) return;
+    _0x66710f['textContent'] = _0x4d1139 !== undefined ? _0x4b6fba(0x145) + formatTime(_0x4d1139) : _0x4b6fba(0x159), _0x66710f[_0x4b6fba(0x9d)] = _0x4d1139 !== undefined && _0x4d1139 <= 0x2710 ? _0x4b6fba(0x11f) : _0x4b6fba(0xdb);
+}
+async function fetchAllStock(_0x4937af = ![]) {
+    const _0x4884c1 = _0x35e8ae,
+        _0x1b3986 = Date[_0x4884c1(0x11b)]();
+    if (!_0x4937af && _0x1b3986 - lastFetchTimestamp < 0x1388) return;
+    lastFetchTimestamp = _0x1b3986;
     try {
-      localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-    } catch (e) {
-      console.error("updateRestockTimesFromAPI: Lỗi lưu restockEndTimes:", e);
-      window.restockEndTimes = { ...nextRestockTimes };
-    }
-
-    const lastUpdatedEl = document.getElementById('last-updated');
-    if (lastUpdatedEl) {
-      lastUpdatedEl.textContent = DateTime.now()
-        .toFormat('yyyy-MM-dd HH:mm:ss'); // System timezone or UTC
-    }
-  } catch (err) {
-    console.error("updateRestockTimesFromAPI: Fetch thất bại:", err);
-  }
-}
-function updateTimer(type) {
-  const now = Date.now();
-  const endTime = nextRestockTimes[type] ? new Date(nextRestockTimes[type]) : null;
-  const remaining = endTime && !isNaN(endTime.getTime()) ? Math.max(0, endTime - now) : 0;
-
-  // cập nhật UI
-  createOrUpdateTimer(type, remaining);
-
-  if (remaining <= 0 && !timerFlags[type]) {
-    timerFlags[type] = true;
-
-    setTimeout(() => {
-      const fetchTime = Date.now();
-      if (fetchTime - lastFetchTimestamp >= 5000) {
-        lastFetchTimestamp = fetchTime;
-
-        fetchStock(type).finally(() => {
-          try {
-            // Nếu API fetch không set sẵn nextRestockTimes thì set thủ công
-            if (!nextRestockTimes[type] || new Date(nextRestockTimes[type]) <= now) {
-              nextRestockTimes[type] = new Date(now + defaultDurations[type] - 5000).toISOString();
+        const _0x40cc6a = await fetch(_0x4884c1(0x14a), {
+            'headers': {
+                'jstudio-key': jstudio,
+                'Content-Type': _0x4884c1(0xc9)
             }
-
-            localStorage.setItem("restockEndTimes", JSON.stringify(nextRestockTimes));
-          } catch (e) {
-            console.error(`updateTimer: lỗi lưu restockEndTimes cho ${type}:`, e);
-            window.restockEndTimes = { ...nextRestockTimes }; // fallback in-memory
-          } finally {
-            timerFlags[type] = false;
-          }
         });
-      } else {
-        timerFlags[type] = false;
-      }
-    }, 5000);
-  }
-}
-function updateAllTimers() {
-  const now = Date.now();
-  if (now - lastTimerUpdate < 1000) {
-    requestAnimationFrame(updateAllTimers);
-    return;
-  }
-  lastTimerUpdate = now;
-
-  stockTypes.forEach(type => updateTimer(type));
-
-  requestAnimationFrame(updateAllTimers);
-}
-
-function updateTable(type, items) {
-  if (!stockTypes.includes(type)) {
-    console.error(`updateTable: Invalid stock type: ${type}`);
-    return;
-  }
-
-  if (!Array.isArray(items)) {
-    items = [];
-  }
-
-  const typeToIdMap = {
-    seed: 'seed-varieties',
-    gear: 'gear-categories',
-    egg: 'egg-types',
-    cosmetic: 'cosmetic-types'
-  };
-
-  const total = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
-  const countEl = document.getElementById(`${type}-count`);
-  const labelEl = document.getElementById(typeToIdMap[type]);
-  const body = document.getElementById(`${type}-table-body`);
-
-  if (!countEl || !labelEl || !body) {
-    return;
-  }
-
-  countEl.textContent = total;
-  labelEl.textContent = items.length;
-  body.innerHTML = '';
-  items.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || '')).forEach(item => {
-    if (!item.display_name) {
-      return;
+        if (!_0x40cc6a['ok']) throw new Error('HTTP\x20' + _0x40cc6a[_0x4884c1(0x12a)]);
+        const _0x8d247f = await _0x40cc6a[_0x4884c1(0x129)]();
+        updateTable(_0x4884c1(0x10b), Array[_0x4884c1(0x153)](_0x8d247f[_0x4884c1(0x117)]) ? _0x8d247f[_0x4884c1(0x117)] : []), updateTable(_0x4884c1(0xe9), Array[_0x4884c1(0x153)](_0x8d247f[_0x4884c1(0xb7)]) ? _0x8d247f[_0x4884c1(0xb7)] : []), updateTable('egg', Array['isArray'](_0x8d247f[_0x4884c1(0x128)]) ? _0x8d247f[_0x4884c1(0x128)] : []), updateTable('cosmetic', Array['isArray'](_0x8d247f[_0x4884c1(0x135)]) ? _0x8d247f[_0x4884c1(0x135)] : []), updateRestockTimesFromAPI(_0x8d247f);
+    } catch (_0x1a06cc) {
+        console['error'](_0x4884c1(0x13c), _0x1a06cc);
+        const _0x8a73f4 = mockStockData();
+        updateTable(_0x4884c1(0x10b), _0x8a73f4[_0x4884c1(0x117)]), updateTable(_0x4884c1(0xe9), _0x8a73f4[_0x4884c1(0xb7)]), updateTable('egg', _0x8a73f4['egg_stock']), updateTable('cosmetic', _0x8a73f4['cosmetic_stock']), updateRestockTimesFromAPI(_0x8a73f4);
     }
-    const icon = item.icon ? `<img src="${item.icon}" class="w-8 h-8 rounded-full mr-2" alt="${item.display_name}" onerror="this.style.display='none'">` : '';
-    const tr = document.createElement('tr');
-    tr.className = "border-b border-gray-200 dark:border-gray-700";
-    tr.innerHTML = `
-      <td class="px-4 py-3 whitespace-nowrap">
-        <div class="flex items-center">${icon}<span class="text-gray-800 dark:text-white">${item.display_name}</span></div>
-      </td>
-      <td class="px-4 py-3 text-gray-800 dark:text-white">${item.quantity || 0}</td>
-    `;
-    body.appendChild(tr);
-  });
+}
+async function updateRestockTimesFromAPI(_0x337316) {
+    const _0x36f1a3 = _0x35e8ae,
+        _0x4a03e1 = Date[_0x36f1a3(0x11b)](),
+        _0x33efc1 = {
+            'seed': _0x337316[_0x36f1a3(0x117)],
+            'gear': _0x337316[_0x36f1a3(0xb7)],
+            'egg': _0x337316[_0x36f1a3(0x128)],
+            'cosmetic': _0x337316[_0x36f1a3(0x135)]
+        };
+    stockTypes[_0x36f1a3(0xa2)](_0x42e59e => {
+        const _0x2ba7c2 = _0x36f1a3;
+        let _0x5b912d = null;
+        const _0x475aa5 = Array[_0x2ba7c2(0x153)](_0x33efc1[_0x42e59e]) ? _0x33efc1[_0x42e59e] : [];
+        if (_0x475aa5[_0x2ba7c2(0x98)] > 0x0) {
+            const _0x321d3c = _0x475aa5['map'](_0x507885 => {
+                const _0x3a0e5e = _0x2ba7c2;
+                if (!_0x507885[_0x3a0e5e(0x106)]) return null;
+                const _0x47604e = new Date(_0x507885[_0x3a0e5e(0x106)])[_0x3a0e5e(0xbc)]();
+                return _0x47604e > _0x4a03e1 ? _0x47604e : null;
+            })[_0x2ba7c2(0x132)](_0x366711 => _0x366711 !== null);
+            _0x321d3c[_0x2ba7c2(0x98)] && (_0x5b912d = Math[_0x2ba7c2(0xaf)](..._0x321d3c), nextRestockTimes[_0x42e59e] = new Date(_0x5b912d)[_0x2ba7c2(0x127)]());
+        }!_0x5b912d && (nextRestockTimes[_0x42e59e] = new Date(_0x4a03e1 + defaultDurations[_0x42e59e])['toISOString']());
+        const _0x59b26d = new Date(nextRestockTimes[_0x42e59e])['getTime']() - _0x4a03e1;
+        createOrUpdateTimer(_0x42e59e, _0x59b26d);
+    });
+    try {
+        localStorage[_0x36f1a3(0x105)](_0x36f1a3(0x150), JSON[_0x36f1a3(0xff)](nextRestockTimes));
+        const _0x56fa1c = document['getElementById'](_0x36f1a3(0x15f));
+        _0x56fa1c && (_0x56fa1c[_0x36f1a3(0xb8)] = new Date(_0x4a03e1)['toLocaleString']());
+    } catch (_0x1dcfa5) {
+        console['error'](_0x36f1a3(0xa4), _0x1dcfa5);
+    }
 }
 
-function toggleDarkLightMode(isDark) {
-  const toggleIcon = document.getElementById('toggle-icon');
-  if (toggleIcon) {
-    toggleIcon.textContent = isDark ? 'Dark Mode' : 'Light Mode';
-  }
+function updateTimer(_0x40b01d) {
+    const _0x30d647 = _0x35e8ae,
+        _0x549e5a = Date['now'](),
+        _0x1e5e68 = nextRestockTimes[_0x40b01d] ? new Date(nextRestockTimes[_0x40b01d]) : null,
+        _0x488dea = _0x1e5e68 && !isNaN(_0x1e5e68[_0x30d647(0xbc)]()) ? Math[_0x30d647(0x13e)](0x0, _0x1e5e68 - _0x549e5a) : 0x0;
+    createOrUpdateTimer(_0x40b01d, _0x488dea), _0x488dea <= 0x0 && !timerFlags[_0x40b01d] && (timerFlags[_0x40b01d] = !![], setTimeout(() => {
+        const _0x24dc59 = _0x30d647;
+        fetchAllStock()[_0x24dc59(0xab)](() => {
+            timerFlags[_0x40b01d] = ![];
+        });
+    }, 0x3e8));
 }
 
-function switchTheme(event) {
-  const isDark = event.target.checked;
-  document.documentElement.setAttribute('data-theme', isDark ? DARK_THEME : LIGHT_THEME);
-  document.documentElement.classList.toggle('dark', isDark);
-  localStorage.setItem('theme', isDark ? DARK_THEME : LIGHT_THEME);
-  toggleDarkLightMode(isDark);
+function updateAllTimers() {
+    const _0x41e249 = _0x35e8ae,
+        _0x2c92f9 = Date['now']();
+    if (_0x2c92f9 - lastTimerUpdate < 0x3e8) {
+        requestAnimationFrame(updateAllTimers);
+        return;
+    }
+    lastTimerUpdate = _0x2c92f9, stockTypes[_0x41e249(0xa2)](_0x98ad36 => updateTimer(_0x98ad36)), updateWeatherTimer(), requestAnimationFrame(updateAllTimers);
+}
+
+function updateTable(_0x559f2e, _0x451de4) {
+    const _0x1cd457 = _0x35e8ae;
+    if (!stockTypes[_0x1cd457(0xa8)](_0x559f2e)) {
+        console['error'](_0x1cd457(0x14b) + _0x559f2e);
+        return;
+    }!Array[_0x1cd457(0x153)](_0x451de4) && (_0x451de4 = []);
+    const _0x2f350a = {
+            'seed': _0x1cd457(0xe0),
+            'gear': _0x1cd457(0x158),
+            'egg': _0x1cd457(0x137),
+            'cosmetic': _0x1cd457(0xea)
+        },
+        _0x565fe8 = _0x451de4[_0x1cd457(0xf6)]((_0x228119, _0x27faa6) => _0x228119 + (_0x27faa6[_0x1cd457(0x124)] || 0x0), 0x0),
+        _0x2763ef = document[_0x1cd457(0x122)](_0x559f2e + _0x1cd457(0x13f)),
+        _0x951381 = document[_0x1cd457(0x122)](_0x2f350a[_0x559f2e]),
+        _0x5a6a67 = document[_0x1cd457(0x122)](_0x559f2e + _0x1cd457(0xeb));
+    if (!_0x2763ef || !_0x951381 || !_0x5a6a67) return;
+    _0x2763ef[_0x1cd457(0xb8)] = _0x565fe8, _0x951381[_0x1cd457(0xb8)] = _0x451de4['length'], _0x5a6a67[_0x1cd457(0x12c)] = '', _0x451de4[_0x1cd457(0xdc)]((_0x34f1b3, _0x4a37a5) => (_0x34f1b3[_0x1cd457(0x12b)] || '')[_0x1cd457(0x155)](_0x4a37a5[_0x1cd457(0x12b)] || ''))[_0x1cd457(0xa2)](_0x105355 => {
+        const _0x30aeb2 = _0x1cd457;
+        if (!_0x105355[_0x30aeb2(0x12b)]) return;
+        const _0x4a3395 = _0x105355[_0x30aeb2(0x125)] ? '<img\x20src=\x22' + _0x105355[_0x30aeb2(0x125)] + _0x30aeb2(0xb1) + _0x105355[_0x30aeb2(0x12b)] + _0x30aeb2(0x13a) : '',
+            _0x5e7cdb = document[_0x30aeb2(0xa6)]('tr');
+        _0x5e7cdb[_0x30aeb2(0x9d)] = _0x30aeb2(0xb2), _0x5e7cdb[_0x30aeb2(0x12c)] = '\x0a\x20\x20\x20\x20\x20\x20<td\x20class=\x22px-4\x20py-3\x20whitespace-nowrap\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex\x20items-center\x22>' + _0x4a3395 + _0x30aeb2(0x14f) + _0x105355[_0x30aeb2(0x12b)] + _0x30aeb2(0xc2) + (_0x105355['quantity'] || 0x0) + _0x30aeb2(0x15c), _0x5a6a67[_0x30aeb2(0xe3)](_0x5e7cdb);
+    });
+}
+
+function _0x559a() {
+    const _0x3d868d = ['fetchActiveWeather:', 'https://api.joshlei.com/v2/growagarden/image/nightevent', 'Unknown\x20Weather', 'text-sm\x20text-white', 'sort', '11ABkYJe', 'https://api.joshlei.com/v2/growagarden/image/watermelon', 'No\x20description\x20available', 'seed-varieties', 'Small\x20Circle\x20Tile', 'DOMContentLoaded', 'appendChild', 'Ends\x20in:\x20', '\x0a\x20\x20\x20\x20\x20\x20\x20\x20<h3\x20id=\x22weather-name-', 'slice', 'https://uxwing.com/wp-content/themes/uxwing/download/weather/rainy-icon.png', 'Compost\x20Bin', 'gear', 'cosmetic-types', '-table-body', 'cosmetic', 'https://api.joshlei.com/v2/growagarden/image/rare_summer_egg', 'https://api.joshlei.com/v2/growagarden/image/harvest_tool', 'weather_id', '</h3>\x0a\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20<span\x20id=\x22weather-timer-', 'Common\x20Egg', 'https://api.joshlei.com/v2/growagarden/weather', 'Rainy', 'data-theme', 'https://api.joshlei.com/v2/growagarden/image/cleaning_spray', 'reduce', '\x22\x20class=\x22px-3\x20py-1\x20text-sm\x20rounded-full\x20bg-gray-200\x20dark:bg-gray-700\x20text-gray-800\x20dark:text-gray-200\x22>Ends\x20in:\x20Calculating...</span>\x0a\x20\x20\x20\x20', 'https://api.joshlei.com/v2/growagarden/image/small_stone_table', 'dark', 'toString', 'Could\x20not\x20fetch\x20effect\x20for\x20', 'getAttribute', 'parse', 'https://api.joshlei.com/v2/growagarden/image/small_circle_tile', 'stringify', 'start_time_unix', 'toUpperCase', 'end_duration_unix', 'message', 'Lemonade\x20Stand', 'setItem', 'Date_End', 'https://api.joshlei.com/v2/growagarden/image/favorite_tool', 'Plants\x20grow\x20faster\x20in\x20the\x20rain!', '-timer', 'toggle', 'seed', 'unknown', 'timestamp', 'https://api.joshlei.com/v2/growagarden/image/torch', 'item_id', 'map', 'div', 'body', 'js_69f33a60196198e91a0aa35c425c8018d20a37778a6835543cba6fe2f9df6272', 'Error\x20fetching\x20description\x20for\x20weather\x20', 'bg-white\x20dark:bg-gray-800\x20rounded-lg\x20p-4\x20shadow', 'https://api.joshlei.com/v2/growagarden/image/lemonade_stand', 'seed_stock', 'title', 'setAttribute', '2860741ZPicNZ', 'now', 'https://api.joshlei.com/v2/growagarden/image/godly_sprinkler', 'weather-timer-', '3600', 'text-sm\x20text-yellow-500\x20animate-pulse', '\x0a\x20\x20\x20\x20\x20\x20<div\x20class=\x22bg-white\x20dark:bg-gray-800\x20rounded-lg\x20p-4\x20shadow\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex\x20justify-between\x20items-center\x20mb-2\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex\x20items-center\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h3\x20id=\x22weather-name-0\x22\x20class=\x22text-lg\x20font-medium\x20text-gray-800\x20dark:text-white\x22>Normal</h3>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20id=\x22weather-timer-0\x22\x20class=\x22px-3\x20py-1\x20text-sm\x20rounded-full\x20bg-gray-200\x20dark:bg-gray-700\x20text-gray-800\x20dark:text-gray-200\x22>No\x20active\x20event</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex\x20items-center\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20id=\x22weather-status-0\x22\x20class=\x22px-3\x20py-1\x20text-sm\x20rounded-full\x20bg-red-100\x20dark:bg-red-900\x20text-red-800\x20dark:text-red-200\x22>Inactive</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20', '2781sPEIGH', 'getElementById', 'target', 'quantity', 'icon', 'https://api.joshlei.com/v2/growagarden/image/compost_bin', 'toISOString', 'egg_stock', 'json', 'status', 'display_name', 'innerHTML', 'restoreFromLocalStorage:\x20Error\x20restoring\x20from\x20localStorage:', 'https://uxwing.com/wp-content/themes/uxwing/download/weather/sun-icon.png', 'all', 'outerWidth', '4425370kEYFsL', 'filter', 'Watering\x20Can', 'Bright\x20sun\x20boosts\x20your\x20harvest!', 'cosmetic_stock', 'name', 'egg-types', 'lastTheme', 'weather_name', '\x22\x20onerror=\x22this.style.display=\x27none\x27\x22>', '216JtukIE', 'fetchAllStock:\x20Fetch\x20failed:', 'padStart', 'max', '-count', 'https://api.joshlei.com/v2/growagarden/image/recall_wrench', 'duration', 'warn', 'change', 'Strawberry', 'Restock\x20in:\x20', '245928bogfFT', 'updateWeatherTimer:\x20Error\x20saving\x20activeWeathers\x20to\x20localStorage:', 'Recall\x20Wrench', 'object', 'https://api.joshlei.com/v2/growagarden/stock', 'updateTable:\x20Invalid\x20stock\x20type:\x20', '30956HtqtQo', 'Carrot', 'innerHeight', '<span\x20class=\x22text-gray-800\x20dark:text-white\x22>', 'restockEndTimes', 'sunny', 'https://api.joshlei.com/v2/growagarden/image/watering_can', 'isArray', 'active', 'localeCompare', 'remove', 'Cleaning\x20Spray', 'gear-categories', 'Next\x20update:\x2000:00', 'https://api.joshlei.com/v2/growagarden/image/tomato', 'description', '</td>\x0a\x20\x20\x20\x20', 'https://api.joshlei.com/v2/growagarden/image/strawberry', 'Hash', 'last-updated', 'theme-toggle', 'devtools-overlay', 'startCountdown:\x20Error\x20saving\x20restockEndTimes\x20to\x20localStorage:', 'outerHeight', 'https://api.joshlei.com/v2/growagarden/image/trading_ticket', 'length', '8826rtEqtW', '\x22\x20class=\x22text-lg\x20font-medium\x20text-gray-800\x20dark:text-white\x22>', 'floor', '1800', 'className', 'activeWeathers', 'HTTP\x20', 'cssText', 'Torch', 'forEach', '4463361vrrHng', 'updateRestockTimesFromAPI:\x20Error\x20saving\x20to\x20localStorage:', 'https://api.joshlei.com/v2/growagarden/image/blueberry', 'createElement', 'last', 'includes', 'style', 'https://api.joshlei.com/v2/growagarden/info/', 'finally', 'flex\x20justify-between\x20items-center\x20mb-2', 'checked', '170nBqKfV', 'min', 'https://api.joshlei.com/v2/growagarden/image/trowel', '\x22\x20class=\x22w-8\x20h-8\x20rounded-full\x20mr-2\x22\x20alt=\x22', 'border-b\x20border-gray-200\x20dark:border-gray-700', 'rainy', 'https://api.joshlei.com/v2/growagarden/image/bookshelf', 'getItem', '16808HotDMo', 'gear_stock', 'textContent', '\x20icon\x22\x20onerror=\x22this.style.display=\x27none\x27\x22>', 'addEventListener', 'Godly\x20Sprinkler', 'getTime', 'Light\x20Mode', '16sIYNXz', 'Rare\x20Summer\x20Egg', '\x0a\x20\x20\x20\x20\x20\x20position:\x20fixed;\x0a\x20\x20\x20\x20\x20\x20top:\x200;\x20left:\x200;\x0a\x20\x20\x20\x20\x20\x20width:\x20100%;\x20height:\x20100%;\x0a\x20\x20\x20\x20\x20\x20background:\x20white;\x0a\x20\x20\x20\x20\x20\x20color:\x20black;\x0a\x20\x20\x20\x20\x20\x20display:\x20flex;\x0a\x20\x20\x20\x20\x20\x20flex-direction:\x20column;\x0a\x20\x20\x20\x20\x20\x20align-items:\x20center;\x0a\x20\x20\x20\x20\x20\x20justify-content:\x20center;\x0a\x20\x20\x20\x20\x20\x20font-family:\x20sans-serif;\x0a\x20\x20\x20\x20\x20\x20z-index:\x20999999;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x0a\x20\x20\x20\x20', 'Bookshelf', '</span></div>\x0a\x20\x20\x20\x20\x20\x20</td>\x0a\x20\x20\x20\x20\x20\x20<td\x20class=\x22px-4\x20py-3\x20text-gray-800\x20dark:text-white\x22>', 'Error\x20saving\x20lastTheme\x20to\x20localStorage:', 'flex\x20items-center', 'Trowel', 'fetchWeatherEffects:\x20weatherId\x20is\x20undefined\x20or\x20empty', 'https://api.joshlei.com/v2/growagarden/image/common_egg', 'theme', 'application/json', 'https://api.joshlei.com/v2/growagarden/image/wheelbarrow', 'flex\x20items-center\x20mb-2', '600', 'https://api.joshlei.com/v2/growagarden/image/carrot', 'documentElement', 'Invalid\x20weather\x20data\x20format', 'Night\x20Event', '1424RYLiGj', 'beforeunload', '\x0a\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex\x20items-center\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20', 'classList', 'Wheelbarrow', 'nightevent', 'error'];
+    _0x559a = function() {
+        return _0x3d868d;
+    };
+    return _0x559a();
+}
+
+function toggleDarkLightMode(_0x39dfd9) {
+    const _0x1e169d = _0x35e8ae,
+        _0x17214e = document[_0x1e169d(0x122)]('toggle-icon');
+    _0x17214e && (_0x17214e['textContent'] = _0x39dfd9 ? 'Dark\x20Mode' : _0x1e169d(0xbd));
+}
+
+function switchTheme(_0x1007da) {
+    const _0x39a135 = _0x35e8ae,
+        _0x39f404 = _0x1007da[_0x39a135(0x123)][_0x39a135(0xad)];
+    document[_0x39a135(0xce)]['setAttribute'](_0x39a135(0xf4), _0x39f404 ? DARK_THEME : LIGHT_THEME), document[_0x39a135(0xce)][_0x39a135(0xd4)][_0x39a135(0x10a)](_0x39a135(0xf9), _0x39f404), localStorage[_0x39a135(0x105)](_0x39a135(0xc8), _0x39f404 ? DARK_THEME : LIGHT_THEME), toggleDarkLightMode(_0x39f404);
 }
 
 function restoreFromLocalStorage() {
-  try {
-    stockTypes.forEach(type => {
-      const storedData = localStorage.getItem(`last${type.charAt(0).toUpperCase() + type.slice(1)}Hash`);
-      if (storedData) {
-        updateTable(type, JSON.parse(storedData));
-      }
-    });
-
-    const storedWeathers = localStorage.getItem('activeWeathers');
-    if (storedWeathers) {
-      activeWeathers = JSON.parse(storedWeathers);
-      const now = Math.floor(Date.now() / 1000);
-      activeWeathers = activeWeathers.map(w => ({
-        ...w,
-        display_name: w.display_name || w.name || w.title || 'Unknown Weather',
-        item_id: w.weather_id || w.item_id || 'unknown'
-      })).filter(weather => weather && weather.active === true && weather.end_duration_unix > now);
-      renderWeatherCards(activeWeathers);
+    const _0x488ad9 = _0x35e8ae;
+    try {
+        stockTypes[_0x488ad9(0xa2)](_0x3e9280 => {
+            const _0xbfaf1b = _0x488ad9,
+                _0x1d411d = localStorage[_0xbfaf1b(0xb5)](_0xbfaf1b(0xa7) + (_0x3e9280['charAt'](0x0)[_0xbfaf1b(0x101)]() + _0x3e9280[_0xbfaf1b(0xe6)](0x1)) + _0xbfaf1b(0x15e));
+            _0x1d411d && updateTable(_0x3e9280, JSON[_0xbfaf1b(0xfd)](_0x1d411d));
+        });
+        const _0x292023 = localStorage[_0x488ad9(0xb5)]('activeWeathers');
+        if (_0x292023) {
+            activeWeathers = JSON[_0x488ad9(0xfd)](_0x292023);
+            const _0x4769b7 = Math[_0x488ad9(0x9b)](Date[_0x488ad9(0x11b)]() / 0x3e8);
+            activeWeathers = activeWeathers[_0x488ad9(0x110)](_0x3510a5 => ({
+                ..._0x3510a5,
+                'display_name': _0x3510a5[_0x488ad9(0x12b)] || _0x3510a5[_0x488ad9(0x136)] || _0x3510a5[_0x488ad9(0x118)] || _0x488ad9(0xda),
+                'item_id': _0x3510a5[_0x488ad9(0xef)] || _0x3510a5['item_id'] || _0x488ad9(0x10c)
+            }))[_0x488ad9(0x132)](_0x356805 => _0x356805 && _0x356805[_0x488ad9(0x154)] === !![] && _0x356805[_0x488ad9(0x102)] > _0x4769b7), renderWeatherCards(activeWeathers);
+        }
+    } catch (_0x366653) {
+        console['error'](_0x488ad9(0x12d), _0x366653);
     }
-  } catch (e) {
-    console.error('restoreFromLocalStorage: Error restoring from localStorage:', e);
-  }
 }
 
 function startCountdown() {
-  const stored = JSON.parse(localStorage.getItem('restockEndTimes') || '{}');
-  const now = new Date();
-
-  stockTypes.forEach(type => {
-    const savedTime = stored[type] && new Date(stored[type]);
-    if (savedTime && !isNaN(savedTime.getTime()) && savedTime > now) {
-      nextRestockTimes[type] = savedTime.toISOString();
-    } else {
-      nextRestockTimes[type] = new Date(now.getTime() + defaultDurations[type]).toISOString();
+    const _0x1776b1 = _0x35e8ae,
+        _0x19ff32 = JSON[_0x1776b1(0xfd)](localStorage[_0x1776b1(0xb5)](_0x1776b1(0x150)) || '{}'),
+        _0x166067 = Date['now']();
+    stockTypes[_0x1776b1(0xa2)](_0x359cc8 => {
+        const _0x2139b9 = _0x1776b1,
+            _0x2eb280 = _0x19ff32[_0x359cc8] && new Date(_0x19ff32[_0x359cc8]);
+        _0x2eb280 && !isNaN(_0x2eb280[_0x2139b9(0xbc)]()) && _0x2eb280 > _0x166067 ? nextRestockTimes[_0x359cc8] = _0x2eb280[_0x2139b9(0x127)]() : nextRestockTimes[_0x359cc8] = new Date(_0x166067 + defaultDurations[_0x359cc8])['toISOString']();
+    });
+    try {
+        localStorage[_0x1776b1(0x105)](_0x1776b1(0x150), JSON['stringify'](nextRestockTimes));
+    } catch (_0x54a795) {
+        console['error'](_0x1776b1(0x162), _0x54a795);
     }
-  });
-
-  try {
-    localStorage.setItem('restockEndTimes', JSON.stringify(nextRestockTimes));
-  } catch (e) {
-    console.error('startCountdown: Error saving restockEndTimes to localStorage:', e);
-  }
-
-  updateAllTimers();
+    updateAllTimers();
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  const toggleSwitch = document.getElementById('theme-toggle');
-  const currentTheme = localStorage.getItem('theme') || LIGHT_THEME;
-  document.documentElement.setAttribute('data-theme', currentTheme);
-  document.documentElement.classList.toggle('dark', currentTheme === DARK_THEME);
-  if (toggleSwitch) {
-    toggleSwitch.checked = currentTheme === DARK_THEME;
-    toggleSwitch.addEventListener('change', switchTheme);
-  }
-  toggleDarkLightMode(currentTheme === DARK_THEME);
-
-  restoreFromLocalStorage();
-  fetchActiveWeather();
-  setInterval(fetchActiveWeather, 60000);
-  setInterval(updateWeatherTimer, 1000);
-  startCountdown();
-  fetchSeedGearStock(true);
-  fetchEggStock(true);
-  fetchCosmeticStock(true);
-
-  setInterval(() => {
-    fetchSeedGearStock();
-    fetchEggStock();
-    fetchCosmeticStock();
-  }, 300000);
-});
-
-window.addEventListener('beforeunload', () => {
-  try {
-    localStorage.setItem('lastTheme', document.documentElement.getAttribute('data-theme'));
-  } catch (e) {
-    console.error('Error saving lastTheme to localStorage:', e);
-  }
+document['addEventListener'](_0x35e8ae(0xe2), () => {
+    const _0x11cd26 = _0x35e8ae;
+    console['log']('renderWeatherCards:', typeof renderWeatherCards, renderWeatherCards), console['log'](_0x11cd26(0xd8), typeof fetchActiveWeather, fetchActiveWeather);
+    const _0x371ab3 = document[_0x11cd26(0x122)](_0x11cd26(0x160)),
+        _0x3c7202 = localStorage[_0x11cd26(0xb5)](_0x11cd26(0xc8)) || LIGHT_THEME;
+    document['documentElement'][_0x11cd26(0x119)]('data-theme', _0x3c7202), document[_0x11cd26(0xce)][_0x11cd26(0xd4)][_0x11cd26(0x10a)](_0x11cd26(0xf9), _0x3c7202 === DARK_THEME), _0x371ab3 && (_0x371ab3[_0x11cd26(0xad)] = _0x3c7202 === DARK_THEME, _0x371ab3['addEventListener'](_0x11cd26(0x143), switchTheme)), toggleDarkLightMode(_0x3c7202 === DARK_THEME), restoreFromLocalStorage(), fetchActiveWeather(), setInterval(fetchActiveWeather, 0xea60), setInterval(updateWeatherTimer, 0x3e8), startCountdown(), fetchAllStock(!![]), setInterval(() => fetchAllStock(), 0x7530);
+}), window[_0x35e8ae(0xba)](_0x35e8ae(0xd2), () => {
+    const _0x3e5b3f = _0x35e8ae;
+    try {
+        localStorage[_0x3e5b3f(0x105)](_0x3e5b3f(0x138), document['documentElement'][_0x3e5b3f(0xfc)]('data-theme'));
+    } catch (_0x334452) {
+        console[_0x3e5b3f(0xd7)](_0x3e5b3f(0xc3), _0x334452);
+    }
 });
