@@ -68,8 +68,8 @@ function updateStockData(data) {
   if (data.seed_stock) latestData.seed_stock = cleanItems(data.seed_stock)
 }
 /* function updateMerchantData(data) {
-  if (data.travelingmerchant_stock) latestData.travelingmerchant_stock = cleanItems(data.travelingmerchant_stock);*/
-}
+  if (data.travelingmerchant_stock) latestData.travelingmerchant_stock = cleanItems(data.travelingmerchant_stock);
+}*/
 /* function updateWeatherData(data) {
   if (data?.weather) {
     for (const key in data.weather) {
