@@ -56,8 +56,8 @@ function cleanItems(items) {
 const endUnix = Math.floor(endUtc.toSeconds());
 
     return {
-      id: itemId,
-      name: item?.name || item?.display_name || "Unknown",
+      item_id: itemId,
+      display_name: item?.name || item?.display_name || "Unknown",
       quantity: item?.stock || 0,
       /* icon: iconUrl,*/
       Date_Start: startUtc.toISO(),
