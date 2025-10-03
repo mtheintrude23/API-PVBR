@@ -22,54 +22,55 @@ const client = jstudio.connect('js_4ece47b66df9cf728ed9a0508e82c9b66af86e5a988e5
 // In-memory data
 let latestData = {
   gear_stock: [],
-  seed_stock: [],
-  egg_stock: [],
-  eventshop_stock: [],
-  cosmetics_stock: [],
-  travelingmerchant_stock: [],
-  notification: [],
+  seed_stock: []
 };
 
-let newData = { weather: [] };
+/* let newData = { weather: [] };*/
 
 // Helpers
 function normalizeName(name) {
-  if (!name) return 'unknown'; // fallback nếu name undefined/null
-  return name.trim().toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, '_');
+  if (!name) return 'unknown';
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\s]/g, '')
+    .replace(/\s+/g, '_')
+    .replace(/_seed$/, '');
 }
 
 function cleanItems(items) {
   return (Array.isArray(items) ? items : []).map(item => {
-    let iconUrl = item?.icon || '';
     const itemId = item?.item_id || normalizeName(item?.name ?? item?.display_name ?? 'unknown');
-
+    let iconUrl = item?.icon || '';
     if (iconUrl.startsWith('https://api.joshlei.com/v2/growagarden/image/')) {
       iconUrl = `https://api-tmyd.onrender.com/api/v3/growagarden/image/${itemId}`;
     }
 
+    const startUtc = DateTime.utc().startOf('day');
+    const startUnix = Math.floor(startUtc.toSeconds());
+    const endUnix = Math.floor(startUtc.plus({ minutes: 5 }).toSeconds());
+
     return {
-      ...item,
-      quantity: item?.quantity || 0,
-      icon: iconUrl,
-      Date_Start: item?.Date_Start,
-      Date_End: item?.Date_End,
+      id: itemId,
+      name: item?.name || item?.display_name || "Unknown",
+      quantity: item?.stock || 0,
+      /* icon: iconUrl,*/
+      Date_Start: startUtc.toISO(),
+      Date_End: startUtc.plus({ minutes: 5 }).toISO(),
+      start_time_unix: startUnix,
+      end_time_unix: endUnix
     };
   });
 }
 
-
 function updateStockData(data) {
   if (data.gear_stock) latestData.gear_stock = cleanItems(data.gear_stock);
-  if (data.seed_stock) latestData.seed_stock = cleanItems(data.seed_stock);
-  if (data.egg_stock) latestData.egg_stock = cleanItems(data.egg_stock);
-  if (data.eventshop_stock) latestData.eventshop_stock = cleanItems(data.eventshop_stock);
-  if (data.cosmetic_stock) latestData.cosmetics_stock = cleanItems(data.cosmetic_stock);
-  if (data.notification) latestData.notification = data.notification;
+  if (data.seed_stock) latestData.seed_stock = cleanItems(data.seed_stock)
 }
-function updateMerchantData(data) {
-  if (data.travelingmerchant_stock) latestData.travelingmerchant_stock = cleanItems(data.travelingmerchant_stock);
+/* function updateMerchantData(data) {
+  if (data.travelingmerchant_stock) latestData.travelingmerchant_stock = cleanItems(data.travelingmerchant_stock);*/
 }
-function updateWeatherData(data) {
+/* function updateWeatherData(data) {
   if (data?.weather) {
     for (const key in data.weather) {
       if (key === "timestamp") continue;
@@ -88,7 +89,7 @@ function updateWeatherData(data) {
     newData.timestamp = Date.now();
   }
   return newData;
-}
+}*/
 const swaggerDefinition = {
   openapi: '3.1.0',
   info: { title: 'Grow a Garden API', version: 'v3', description: 'API for Grow a Garden' }
@@ -101,19 +102,18 @@ const swaggerSpec = swaggerJsdoc(options);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Init data
+import fetch from "node-fetch";
+
 async function initializeData() {
   try {
-    const stockData = await client.stocks.all();
-    logger.success('✅ Kết nối Stock API Joshlei SDK thành công');
+    const res = await fetch("https://stock-apis.vercel.app/api/plantsvsbrainrots/stocks");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const stockData = await res.json();
+
+    logger.success("✅ Kết nối Stock API thành công");
     updateStockData(stockData);
-    const merchantData = await client.stocks.all();
-    logger.success('✅ Kết nối Stock Merchant API Joshlei SDK thành công');
-    updateMerchantData(merchantData);
-    const weatherData = await client.weather.all();
-    logger.success('✅ Kết nối Weather API Joshlei SDK thành công');
-    updateWeatherData(weatherData);
   } catch (err) {
-    logger.error(`❌ Lỗi khi khởi tạo: ${err}`);
+    logger.error(`❌ Lỗi khi khởi tạo Stock Data: ${err.message}`);
   }
 }
 
@@ -121,13 +121,14 @@ async function initializeData() {
 function startPolling() {
   setInterval(async () => {
     try {
-      const stockData = await client.stocks.all();
-      updateStockData(stockData);
+      const res = await fetch("https://stock-apis.vercel.app/api/plantsvsbrainrots/stocks");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const stockData = await res.json();
 
-      const weatherData = await client.weather.all();
-      updateWeatherData(weatherData);
+      updateStockData(stockData);
+      logger.success("✅ Cập nhật Stock Data thành công");
     } catch (err) {
-      logger.error('❌ Lỗi polling:', err);
+      logger.error("❌ Lỗi polling Stock API:", err.message);
     }
   }, 60000);
 }
@@ -137,17 +138,7 @@ function startPolling() {
  *   - name: Health
  *     description: Kiểm tra tình trạng API
  *   - name: Stock
- *     description: Các API liên quan tới stock
- *   - name: Weather
- *     description: Các API liên quan tới thời tiết
- *   - name: Calculation
- *     description: Tính toán giá trị fruit
- *   - name: Info
- *     description: Thông tin item
- *   - name: Image
- *     description: Ảnh item
- *   - name: Event
- *     description: Sự kiện trong game
+ *     description: Stock API
  */
 
 /**
@@ -172,7 +163,7 @@ function startPolling() {
 
 /**
  * @swagger
- * /api/v3/growagarden/stock:
+ * /api/v3/plantsvsbrainrots/stock:
  *   get:
  *     summary: Lấy stock hiện tại
  *     tags: [Stock]
@@ -186,145 +177,6 @@ function startPolling() {
  *               type: object
  */
 
-/**
- * @swagger
- * /api/v3/growagarden/weather:
- *   get:
- *     summary: Lấy thời tiết hiện tại
- *     tags: [Weather]
- *     description: Trả về dữ liệu thời tiết đang diễn ra trong game
- *     responses:
- *       200:
- *         description: Dữ liệu weather
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- */
-
-/**
- * @swagger
- * /api/v3/growagarden/calculate:
- *   get:
- *     summary: Tính toán giá trị ước lượng hoặc thông tin fruit
- *     tags: [Calculation]
- *     description: Cung cấp Name, Weight, Variant, Mutation để tính toán
- *     parameters:
- *       - in: query
- *         name: Name
- *         required: true
- *         schema:
- *           type: string
- *       - in: query
- *         name: Weight
- *         required: true
- *         schema:
- *           type: number
- *       - in: query
- *         name: Variant
- *         required: false
- *         schema:
- *           type: string
- *       - in: query
- *         name: Mutation
- *         required: false
- *         schema:
- *           type: string
- *           description: Danh sách Mutation, phân tách bằng dấu phẩy
- *     responses:
- *       200:
- *         description: Kết quả tính toán
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- */
-
-/**
- * @swagger
- * /api/v3/growagarden/info/{item_id}:
- *   get:
- *     summary: Lấy thông tin chi tiết 1 item
- *     tags: [Info]
- *     parameters:
- *       - in: path
- *         name: item_id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID của item cần lấy
- *     responses:
- *       200:
- *         description: Thông tin chi tiết của item
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- */
-
-/**
- * @swagger
- * /api/v3/growagarden/info:
- *   get:
- *     summary: Lấy danh sách item theo type
- *     tags: [Info]
- *     parameters:
- *       - in: query
- *         name: type
- *         required: false
- *         schema:
- *           type: string
- *           description: "Loại item: seed, gear, egg, cosmetic, event, weather"
- *           enum: ["seed", "gear", "egg", "cosmetic", "event", "weather"]
- *     responses:
- *       200:
- *         description: Danh sách item
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- */
-
-/**
- * @swagger
- * /api/v3/growagarden/image/{item_id}:
- *   get:
- *     summary: Lấy ảnh item
- *     tags: [Image]
- *     parameters:
- *       - in: path
- *         name: item_id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID của item cần lấy ảnh
- *     responses:
- *       200:
- *         description: Trả về ảnh item
- *         content:
- *           image/png:
- *             schema:
- *               type: string
- *               format: binary
- */
-
-/**
- * @swagger
- * /api/v3/growagarden/currentevent:
- *   get:
- *     summary: Lấy sự kiện hiện tại
- *     tags: [Event]
- *     description: Trả về dữ liệu sự kiện đang diễn ra, bao gồm icon đã rehost
- *     responses:
- *       200:
- *         description: Dữ liệu event hiện tại
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- */
 
 app.set('trust proxy', 1);
 // Middleware
@@ -335,7 +187,7 @@ app.use(
   "/docs",
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec, {
-    customSiteTitle: "Grow a Garden API Docs", // 👈 Đổi title tab ở đây
+    customSiteTitle: "Plants Vs Brainrots API Docs", // 👈 Đổi title tab ở đây
   })
 );
 const limiter = (req, res, next) => {
@@ -346,29 +198,30 @@ const limiter = (req, res, next) => {
 // Routes
 
 // API
-app.get("/vietnam-today", (req, res) => {
+/* app.get("/vietnam-today", (req, res) => {
   res.sendFile(path.join(__dirname, "baodientu.html")); 
   // news.html là file HTML bạn đã có sẵn
-});
+});*/ 
 app.get("/", (req, res) => {
-  res.redirect("https://api-tmyd.onrender.com/docs");
+  res.redirect(`${req.protocol}://${req.get("host")}/docs`);
 });
-app.get('/api/health', limiter, async (req, res) => {
+
+app.get("/api/health", limiter, async (req, res) => {
+  const baseUrl = `${req.protocol}://${req.get("host")}`;
   const endpoints = [
-    `https://api-tmyd.onrender.com/api/v3/growagarden/stock`,
-    `https://api-tmyd.onrender.com/api/v3/growagarden/image/cactus`,
-    `https://api-tmyd.onrender.com/api/v3/growagarden/weather`
+    `${baseUrl}/api/plantsvsbrainrots/stock`,
+    /*`${baseUrl}/api/plantsvsbrainrots/image/cactus`,*/
+    // `${baseUrl}/api/plantsvsbrainrots/weather`  /* Bỏ weather */
+    // `${baseUrl}/api/plantsvsbrainrots/info`     /* Bỏ info */
   ];
 
   try {
-    // Test tất cả endpoint song song
     const results = await Promise.allSettled(endpoints.map(url => axios.get(url)));
     const hasFailure = results.some(r => r.status === "rejected");
 
     const imgFile = hasFailure ? "500.png" : "200.png";
     const imgPath = path.join(__dirname, "assets", imgFile);
 
-    // Nếu client muốn HTML (browser) → trả trang full screen
     if (req.headers.accept && req.headers.accept.includes("text/html")) {
       return res.send(`
         <!DOCTYPE html>
@@ -377,18 +230,8 @@ app.get('/api/health', limiter, async (req, res) => {
           <meta charset="UTF-8">
           <title>Health Check</title>
           <style>
-            html, body {
-              margin: 0;
-              padding: 0;
-              width: 100%;
-              height: 100%;
-              background: black;
-            }
-            img {
-              width: 100%;
-              height: 100%;
-              object-fit: contain; /* hoặc cover */
-            }
+            html, body {margin:0;padding:0;width:100%;height:100%;background:black;}
+            img {width:100%;height:100%;object-fit:contain;}
           </style>
         </head>
         <body>
@@ -398,7 +241,6 @@ app.get('/api/health', limiter, async (req, res) => {
       `);
     }
 
-    // Còn lại (API/tool) → trả ảnh raw stream
     if (fs.existsSync(imgPath)) {
       res.setHeader("Content-Type", "image/png");
       return fs.createReadStream(imgPath).pipe(res);
@@ -425,10 +267,13 @@ app.get('/api/health', limiter, async (req, res) => {
     res.status(500).json({ status: "failed", error: err.message });
   }
 });
-app.get('/api/v3/growagarden/stock', limiter, (req, res) => {
+
+app.get("/api/plantsvsbrainrots/stock", limiter, (req, res) => {
   res.json(latestData);
 });
-app.get('/api/v3/growagarden/weather', limiter, (req, res) => {
+});
+
+/* app.get('/api/v3/growagarden/weather', limiter, (req, res) => {
   res.json(newData.weather);
 });
 app.get('/api/v3/growagarden/calculate', limiter, async (req, res) => {
@@ -577,9 +422,9 @@ app.get('/api/v3/growagarden/currentevent', limiter, async (req, res) => {
     logger.error(`Error fetching current event: ${error.message}`);
     res.status(500).json({ error: 'Failed to get current event' });
   }
-});
-app.get('/api/v3/growagarden/gameinfo', limiter, async (req, res) => {
-  const universeId = 7436755782;
+});*/
+app.get('/api/v3/plantsvsbrainrots/gameinfo', limiter, async (req, res) => {
+  const universeId = 8316902627;
 
   try {
     https.get(`https://games.roblox.com/v1/games?universeIds=${universeId}`, (response) => {
@@ -610,7 +455,7 @@ app.get('/api/v3/growagarden/gameinfo', limiter, async (req, res) => {
 });
 
 // Proxy ảnh (duplicate route giữ nguyên)
-app.get('/api/v3/growagarden/image/:item_id', async (req, res) => {
+/* app.get('/api/v3/growagarden/image/:item_id', async (req, res) => {
   const { item_id } = req.params;
   try {
     const response = await axios.get(
@@ -624,7 +469,7 @@ app.get('/api/v3/growagarden/image/:item_id', async (req, res) => {
     logger.error(`❌ Lỗi tải ảnh cho ${item_id}:`, err.message);
     res.status(500).send('Không tải được ảnh');
   }
-});
+});*/
 // ======= XỬ LÝ 404 =======
 app.use((req, res, next) => {
   res.status(404).send(`
