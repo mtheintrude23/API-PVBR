@@ -46,9 +46,14 @@ function cleanItems(items) {
       iconUrl = `https://api-tmyd.onrender.com/api/v3/growagarden/image/${itemId}`;
     }
 
-    const startUtc = DateTime.utc().startOf('day');
+    const nowUtc = DateTime.utc();
+    const roundedUtc = nowUtc.set({ second: 0, millisecond: 0 }).minus({ minutes: nowUtc.minute % 5 }); // làm tròn xuống bội số của 5 phút
+
+    const startUtc = roundedUtc;
+    const endUtc = startUtc.plus({ minutes: 5 });
+
     const startUnix = Math.floor(startUtc.toSeconds());
-    const endUnix = Math.floor(startUtc.plus({ minutes: 5 }).toSeconds());
+const endUnix = Math.floor(endUtc.toSeconds());
 
     return {
       id: itemId,
@@ -268,7 +273,7 @@ app.get("/api/health", limiter, async (req, res) => {
   }
 });
 
-app.get("/api/plantsvsbrainrots/stock", limiter, (req, res) => {
+app.get("/api/v3/plantsvsbrainrots/stock", limiter, (req, res) => {
   res.json(latestData);
 });
 
