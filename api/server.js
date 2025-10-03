@@ -271,7 +271,6 @@ app.get("/api/health", limiter, async (req, res) => {
 app.get("/api/plantsvsbrainrots/stock", limiter, (req, res) => {
   res.json(latestData);
 });
-});
 
 /* app.get('/api/v3/growagarden/weather', limiter, (req, res) => {
   res.json(newData.weather);
